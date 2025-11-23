@@ -3,6 +3,7 @@ import { CategoryCard } from '@/components/category-card';
 import { DeliveryTimeButton } from '@/components/delivery-time-button';
 import { ProductCard } from '@/components/product-card';
 import { SectionHeader } from '@/components/section-header';
+import { useGetAllQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
 import React from 'react';
@@ -25,19 +26,22 @@ const banners = [
 		title: 'Welcome to bazarey!',
 		subtitle: 'Extra for you: 25 € benefit',
 		couponCode: 'NEUKUNDE',
-		image: 'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=800&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=800&h=400&fit=crop',
 	},
 	{
 		id: 'banner2',
 		title: 'Fresh Daily Deals',
 		subtitle: 'Save up to 30% on fresh produce',
-		image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&h=400&fit=crop',
 	},
 	{
 		id: 'banner3',
 		title: 'Free Delivery',
 		subtitle: 'On orders over 50 €',
-		image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=400&fit=crop',
 	},
 ];
 
@@ -46,25 +50,29 @@ const recipeCombos = [
 	{
 		id: 'recipe1',
 		name: 'Khichuri Recipe',
-		image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
 		description: 'Traditional Bengali comfort food',
 	},
 	{
 		id: 'recipe2',
 		name: 'Teheri Recipe',
-		image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop',
 		description: 'Flavorful rice dish with spices',
 	},
 	{
 		id: 'recipe3',
 		name: 'Biryani Recipe',
-		image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop',
 		description: 'Aromatic rice with meat and spices',
 	},
 	{
 		id: 'recipe4',
 		name: 'Polao Recipe',
-		image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
 		description: 'Fragrant basmati rice dish',
 	},
 ];
@@ -74,49 +82,57 @@ const categories = [
 		id: 'cat1',
 		name: 'Fruits & Vegetables',
 		icon: 'leaf.fill',
-		image: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=200&h=200&fit=crop',
 	},
 	{
 		id: 'cat2',
 		name: 'Dairy & Eggs',
 		icon: 'cup.and.saucer.fill',
-		image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
 	},
 	{
 		id: 'cat3',
 		name: 'Bakery',
 		icon: 'birthday.cake.fill',
-		image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop',
 	},
 	{
 		id: 'cat4',
 		name: 'Meat & Fish',
 		icon: 'fish.fill',
-		image: 'https://images.unsplash.com/photo-1588347818036-8f9af5d47c1a?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1588347818036-8f9af5d47c1a?w=200&h=200&fit=crop',
 	},
 	{
 		id: 'cat5',
 		name: 'Beverages',
 		icon: 'cup.and.saucer',
-		image: 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=200&h=200&fit=crop',
 	},
 	{
 		id: 'cat6',
 		name: 'Snacks',
 		icon: 'bag.fill',
-		image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=200&h=200&fit=crop',
 	},
 	{
 		id: 'cat7',
 		name: 'Frozen',
 		icon: 'snowflake',
-		image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200&h=200&fit=crop',
 	},
 	{
 		id: 'cat8',
 		name: 'Household',
 		icon: 'house.fill',
-		image: 'https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=200&h=200&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=200&h=200&fit=crop',
 	},
 ];
 
@@ -130,7 +146,8 @@ const newInAppProducts = [
 		unitPrice: '৳137/L',
 		badge: 'New',
 		badgeIcon: 'sparkles',
-		image: 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
 	},
 	{
 		id: '2',
@@ -140,7 +157,8 @@ const newInAppProducts = [
 		unitPrice: '৳605/kg',
 		badge: 'New · Own juice',
 		badgeIcon: 'sparkles',
-		image: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400&h=400&fit=crop',
 	},
 	{
 		id: '3',
@@ -150,7 +168,8 @@ const newInAppProducts = [
 		unitPrice: '৳401/L',
 		badge: 'New',
 		badgeIcon: 'sparkles',
-		image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
 	},
 	{
 		id: '4',
@@ -158,7 +177,8 @@ const newInAppProducts = [
 		price: '263',
 		unit: '1kg',
 		unitPrice: '৳263/kg',
-		image: 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400&h=400&fit=crop',
 	},
 ];
 
@@ -169,7 +189,8 @@ const popularProducts = [
 		price: '171',
 		unit: '1L',
 		unitPrice: '৳171/L',
-		image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=400&fit=crop',
 	},
 	{
 		id: '6',
@@ -177,7 +198,8 @@ const popularProducts = [
 		price: '344',
 		unit: '500g',
 		unitPrice: '৳688/kg',
-		image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
 	},
 	{
 		id: '7',
@@ -185,7 +207,8 @@ const popularProducts = [
 		price: '436',
 		unit: '10 pieces',
 		unitPrice: '৳44/piece',
-		image: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=400&fit=crop',
 	},
 	{
 		id: '8',
@@ -193,7 +216,8 @@ const popularProducts = [
 		price: '229',
 		unit: '500g',
 		unitPrice: '৳458/kg',
-		image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop',
 	},
 ];
 
@@ -204,7 +228,8 @@ const freshProduceProducts = [
 		price: '286',
 		unit: '500g',
 		unitPrice: '৳573/kg',
-		image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&h=400&fit=crop',
 	},
 	{
 		id: '10',
@@ -212,7 +237,8 @@ const freshProduceProducts = [
 		price: '148',
 		unit: '1 piece',
 		unitPrice: '৳148/piece',
-		image: 'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400&h=400&fit=crop',
 	},
 	{
 		id: '11',
@@ -220,7 +246,8 @@ const freshProduceProducts = [
 		price: '401',
 		unit: '1kg',
 		unitPrice: '৳401/kg',
-		image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop',
 	},
 	{
 		id: '12',
@@ -228,7 +255,8 @@ const freshProduceProducts = [
 		price: '217',
 		unit: '500g',
 		unitPrice: '৳435/kg',
-		image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&h=400&fit=crop',
 	},
 ];
 
@@ -239,7 +267,8 @@ const beverageProducts = [
 		price: '919',
 		unit: '6 × 1,5L',
 		unitPrice: '৳102/L',
-		image: 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
 	},
 	{
 		id: '14',
@@ -247,7 +276,8 @@ const beverageProducts = [
 		price: '286',
 		unit: '6 × 1,5L',
 		unitPrice: '৳32/L',
-		image: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop',
 	},
 	{
 		id: '15',
@@ -255,7 +285,8 @@ const beverageProducts = [
 		price: '344',
 		unit: '1L',
 		unitPrice: '৳344/L',
-		image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
 	},
 	{
 		id: '16',
@@ -263,7 +294,8 @@ const beverageProducts = [
 		price: '401',
 		unit: '20 bags',
 		unitPrice: '৳20/bag',
-		image: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=400&h=400&fit=crop',
 	},
 ];
 
@@ -276,7 +308,8 @@ const specialOffersProducts = [
 		unitPrice: '৳297/kg',
 		badge: 'Sale',
 		badgeIcon: 'tag.fill',
-		image: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop',
 	},
 	{
 		id: '18',
@@ -286,7 +319,8 @@ const specialOffersProducts = [
 		unitPrice: '৳1,608/L',
 		badge: 'Sale',
 		badgeIcon: 'tag.fill',
-		image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
 	},
 	{
 		id: '19',
@@ -296,7 +330,8 @@ const specialOffersProducts = [
 		unitPrice: '৳2,864/kg',
 		badge: 'Sale',
 		badgeIcon: 'tag.fill',
-		image: 'https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&h=400&fit=crop',
 	},
 	{
 		id: '20',
@@ -306,7 +341,8 @@ const specialOffersProducts = [
 		unitPrice: '৳2,068/kg',
 		badge: 'Sale',
 		badgeIcon: 'tag.fill',
-		image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=400&fit=crop',
 	},
 ];
 
@@ -319,6 +355,11 @@ const sections = [
 ];
 
 export default function DiscoverScreen() {
+	// data fetching
+	const { data: categoryData, isLoading } = useGetAllQuery({
+		path: '/categorys',
+	});
+	console.log('cat dat:', categoryData);
 	const dispatch = useDispatch();
 
 	const handleProductPress = (productId: string) => {
@@ -370,9 +411,7 @@ export default function DiscoverScreen() {
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
-			<ScrollView
-				style={styles.container}
-				showsVerticalScrollIndicator={false}>
+			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 				{/* Delivery Time Selector */}
 				<DeliveryTimeButton
 					text='Choose your delivery time'
@@ -380,16 +419,13 @@ export default function DiscoverScreen() {
 				/>
 
 				{/* Banner Carousel */}
-				<BannerCarousel
-					banners={banners}
-					onBannerPress={handleBannerPress}
-				/>
+				<BannerCarousel banners={banners} onBannerPress={handleBannerPress} />
 
 				{/* Categories Section */}
 				<View style={styles.categoriesSection}>
 					<SectionHeader title='Categories' />
 					<View style={styles.categoriesGrid}>
-						{categories.map(category => (
+						{categories?.map(category => (
 							<CategoryCard
 								key={category.id}
 								{...category}
@@ -400,7 +436,8 @@ export default function DiscoverScreen() {
 					<TouchableOpacity
 						style={styles.showMoreButton}
 						onPress={handleShowMoreCategories}
-						activeOpacity={0.7}>
+						activeOpacity={0.7}
+					>
 						<Text style={styles.showMoreText}>Show more categories</Text>
 					</TouchableOpacity>
 				</View>
@@ -415,14 +452,17 @@ export default function DiscoverScreen() {
 							<TouchableOpacity
 								style={styles.recipeCard}
 								onPress={() => handleRecipePress(item.id)}
-								activeOpacity={0.8}>
+								activeOpacity={0.8}
+							>
 								<Image
 									source={{ uri: item.image }}
 									style={styles.recipeImage}
 								/>
 								<View style={styles.recipeInfo}>
 									<Text style={styles.recipeName}>{item.name}</Text>
-									<Text style={styles.recipeDescription}>{item.description}</Text>
+									<Text style={styles.recipeDescription}>
+										{item.description}
+									</Text>
 								</View>
 							</TouchableOpacity>
 						)}
@@ -434,9 +474,7 @@ export default function DiscoverScreen() {
 
 				{/* Product Sections */}
 				{sections.map((section, index) => (
-					<View
-						key={section.id}
-						style={styles.section}>
+					<View key={section.id} style={styles.section}>
 						<SectionHeader
 							title={section.title}
 							onSeeAllPress={() => handleSeeAllPress(section.title)}
