@@ -359,7 +359,7 @@ export default function DiscoverScreen() {
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
 	});
-	console.log('cat dat:', categoryData);
+	// console.log('cat dat:', categoryData);
 	const dispatch = useDispatch();
 
 	const handleProductPress = (productId: string) => {
