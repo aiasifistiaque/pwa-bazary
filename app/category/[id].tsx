@@ -33,7 +33,6 @@ export default function CategoryScreen() {
 		filters: { parentCategory: id },
 	});
 	const hasSubcategories = childCategories?.doc?.length > 0;
-	// get product of any cat id (parent / sub)
 	const { data: productsData, isLoading: productsDataLoading } = useGetAllQuery(
 		{
 			path: 'products',
@@ -44,6 +43,7 @@ export default function CategoryScreen() {
 			},
 		}
 	);
+
 	// const categoryData = getCategoryData(id || 'fruit');
 
 	const handleBack = () => {
@@ -55,6 +55,9 @@ export default function CategoryScreen() {
 	};
 
 	const handleProductPress = (productId: string) => {
+		// console.log('dffs', router);
+		// console.log('Pressed productId:', productId);
+		// router.push('/product/123');
 		router.push(`/product/${productId}`);
 	};
 

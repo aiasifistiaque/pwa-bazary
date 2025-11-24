@@ -1,7 +1,9 @@
+import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { addToCart } from '@/store/slices/cartSlice';
+import { useGetByIdQuery } from '@/store/services/commonApi';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
+
 import {
 	Image,
 	Platform,
@@ -13,7 +15,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
-
+const fallback = require('../../assets/images/fallback-fruit.png');
 // Mock product data - in real app, fetch based on ID
 const getProductById = (id: string) => {
 	const products: Record<string, any> = {
@@ -27,7 +29,8 @@ const getProductById = (id: string) => {
 			unitPrice: '৳137/L',
 			badge: 'New',
 			discount: '15% Off',
-			image: 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=800&h=800&fit=crop',
+			image:
+				'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=800&h=800&fit=crop',
 			description:
 				'Refreshing Pepsi with a twist of lemon. Zero sugar, zero calories. Perfect for those who want the taste without the guilt. Enjoy the crisp, citrus flavor combined with the classic Pepsi taste.',
 			ingredients:
@@ -52,7 +55,8 @@ const getProductById = (id: string) => {
 			unit: 'XL 340g',
 			unitPrice: '৳605/kg',
 			badge: 'New · Own juice',
-			image: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800&h=800&fit=crop',
+			image:
+				'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800&h=800&fit=crop',
 			description:
 				'Premium pineapple slices preserved in their own natural juice. No added sugar, just pure tropical sweetness. Perfect for breakfast, desserts, or as a healthy snack.',
 			ingredients: 'Pineapple, Pineapple Juice',
@@ -86,7 +90,14 @@ const getProductById = (id: string) => {
 export default function ProductDetailScreen() {
 	const dispatch = useDispatch();
 	const { id } = useLocalSearchParams<{ id: string }>();
-	const product = getProductById(id || '1');
+
+	// const product = getProductById(id || '1');
+	const { data: productD, isLoading } = useGetByIdQuery({
+		path: 'products',
+		id,
+	});
+	const product:any = productD ? productD : {};
+
 	const [quantity, setQuantity] = useState(1);
 
 	const handleBack = () => {
@@ -101,25 +112,34 @@ export default function ProductDetailScreen() {
 		setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 	};
 
-	const handleAddToCart = () => {
-		dispatch(
-			addToCart({
-				item: {
-					id: product.id,
-					_id: product.id,
-					name: product.name,
-					price: parseFloat(product.price.replace(',', '')),
-					image: product.image,
-					vat: 0,
-				},
-				qty: quantity,
-			})
+	// const handleAddToCart = () => {
+	// 	dispatch(
+	// 		addToCart({
+	// 			item: {
+	// 				id: product?.id,
+	// 				_id: product?.id,
+	// 				name: product?.name,
+	// 				price: parseFloat(product?.price?.replace(',', '')),
+	// 				image: product?.image,
+	// 				vat: 0,
+	// 			},
+	// 			qty: quantity,
+	// 		})
+	// 	);
+	// 	router.back();
+	// };
+
+	// Ensure product.price is parsed safely (handles numbers or strings with commas)
+	const priceNumber =
+		parseFloat(String(product?.price ?? '0').replace(/,/g, '')) || 0;
+	const totalPrice = (priceNumber * quantity).toLocaleString();
+	if (isLoading) {
+		return (
+			<View>
+				<Loader />
+			</View>
 		);
-		router.back();
-	};
-
-	const totalPrice = (parseFloat(product.price.replace(',', '')) * quantity).toLocaleString();
-
+	}
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			<View style={styles.container}>
@@ -127,15 +147,24 @@ export default function ProductDetailScreen() {
 				<ScrollView
 					style={styles.scrollView}
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}>
+					contentContainerStyle={styles.scrollContent}
+				>
 					{/* Product Image */}
 					<View style={styles.imageContainer}>
-						<Image
-							source={{ uri: product.image }}
-							style={styles.image}
-							resizeMode='contain'
-						/>
-						{product.discount && (
+						{product.images[0] ? (
+							<Image
+								source={{ uri: product.images[0] }}
+								style={styles.image}
+								resizeMode='contain'
+							/>
+						) : (
+							<Image
+								source={fallback}
+								style={styles.image}
+								resizeMode='contain'
+							/>
+						)}
+						{product.discount > 0 && (
 							<View style={styles.discountBadge}>
 								<Text style={styles.discountText}>{product.discount}</Text>
 							</View>
@@ -144,27 +173,20 @@ export default function ProductDetailScreen() {
 						<TouchableOpacity
 							style={styles.backButton}
 							onPress={handleBack}
-							activeOpacity={0.7}>
-							<IconSymbol
-								name='chevron.left'
-								size={24}
-								color='#000'
-							/>
+							activeOpacity={0.7}
+						>
+							<IconSymbol name='chevron.left' size={24} color='#000' />
 						</TouchableOpacity>
-						<TouchableOpacity
-							style={styles.favoriteButton}
-							activeOpacity={0.7}>
-							<IconSymbol
-								name='heart'
-								size={24}
-								color='#000'
-							/>
+						<TouchableOpacity style={styles.favoriteButton} activeOpacity={0.7}>
+							<IconSymbol name='heart' size={24} color='#000' />
 						</TouchableOpacity>
 					</View>
 
 					{/* Product Info */}
 					<View style={styles.infoSection}>
-						{product.category && <Text style={styles.category}>{product.category}</Text>}
+						{product.category && (
+							<Text style={styles.category}>{product.category.name}</Text>
+						)}
 						<Text style={styles.productName}>{product.name}</Text>
 
 						{product.unit && (
@@ -175,18 +197,14 @@ export default function ProductDetailScreen() {
 
 						<View style={styles.priceContainer}>
 							<Text style={styles.price}>৳{product.price}</Text>
-							{product.originalPrice && (
-								<Text style={styles.originalPrice}>৳{product.originalPrice}</Text>
+							{product.price && (
+								<Text style={styles.originalPrice}>৳{product.price}</Text>
 							)}
 						</View>
 
-						{product.badge && (
+						{product.badge !== undefined && (
 							<View style={styles.badgeContainer}>
-								<IconSymbol
-									name='sparkles'
-									size={14}
-									color='#E63946'
-								/>
+								<IconSymbol name='sparkles' size={14} color='#E63946' />
 								<Text style={styles.badgeText}>{product.badge}</Text>
 							</View>
 						)}
@@ -209,36 +227,44 @@ export default function ProductDetailScreen() {
 					{/* Nutrition Information */}
 					{product.nutritionPer100ml && (
 						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>Nutrition Information (per 100ml)</Text>
+							<Text style={styles.sectionTitle}>
+								Nutrition Information (per 100ml)
+							</Text>
 							<View style={styles.nutritionTable}>
-								{Object.entries(product.nutritionPer100ml).map(([key, value]) => (
-									<View
-										key={key}
-										style={styles.nutritionRow}>
-										<Text style={styles.nutritionKey}>
-											{key.charAt(0).toUpperCase() + key.slice(1)}
-										</Text>
-										<Text style={styles.nutritionValue}>{value as string}</Text>
-									</View>
-								))}
+								{Object.entries(product.nutritionPer100ml).map(
+									([key, value]) => (
+										<View key={key} style={styles.nutritionRow}>
+											<Text style={styles.nutritionKey}>
+												{key.charAt(0).toUpperCase() + key.slice(1)}
+											</Text>
+											<Text style={styles.nutritionValue}>
+												{value as string}
+											</Text>
+										</View>
+									)
+								)}
 							</View>
 						</View>
 					)}
 
 					{product.nutritionPer100g && (
 						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>Nutrition Information (per 100g)</Text>
+							<Text style={styles.sectionTitle}>
+								Nutrition Information (per 100g)
+							</Text>
 							<View style={styles.nutritionTable}>
-								{Object.entries(product.nutritionPer100g).map(([key, value]) => (
-									<View
-										key={key}
-										style={styles.nutritionRow}>
-										<Text style={styles.nutritionKey}>
-											{key.charAt(0).toUpperCase() + key.slice(1)}
-										</Text>
-										<Text style={styles.nutritionValue}>{value as string}</Text>
-									</View>
-								))}
+								{Object.entries(product.nutritionPer100g).map(
+									([key, value]) => (
+										<View key={key} style={styles.nutritionRow}>
+											<Text style={styles.nutritionKey}>
+												{key.charAt(0).toUpperCase() + key.slice(1)}
+											</Text>
+											<Text style={styles.nutritionValue}>
+												{value as string}
+											</Text>
+										</View>
+									)
+								)}
 							</View>
 						</View>
 					)}
@@ -261,35 +287,26 @@ export default function ProductDetailScreen() {
 						<TouchableOpacity
 							style={styles.quantityButton}
 							onPress={handleDecrement}
-							activeOpacity={0.7}>
-							<IconSymbol
-								name='minus'
-								size={20}
-								color='#E63946'
-							/>
+							activeOpacity={0.7}
+						>
+							<IconSymbol name='minus' size={20} color='#E63946' />
 						</TouchableOpacity>
 						<Text style={styles.quantityText}>{quantity}</Text>
 						<TouchableOpacity
 							style={styles.quantityButton}
 							onPress={handleIncrement}
-							activeOpacity={0.7}>
-							<IconSymbol
-								name='plus'
-								size={20}
-								color='#E63946'
-							/>
+							activeOpacity={0.7}
+						>
+							<IconSymbol name='plus' size={20} color='#E63946' />
 						</TouchableOpacity>
 					</View>
 
 					<TouchableOpacity
 						style={styles.addToCartButton}
-						onPress={handleAddToCart}
-						activeOpacity={0.8}>
-						<IconSymbol
-							name='cart.fill'
-							size={20}
-							color='#FFF'
-						/>
+						// onPress={handleAddToCart}
+						activeOpacity={0.8}
+					>
+						<IconSymbol name='cart.fill' size={20} color='#FFF' />
 						<Text style={styles.addToCartText}>Add ৳{totalPrice}</Text>
 					</TouchableOpacity>
 				</View>
