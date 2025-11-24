@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { IconSymbol } from './ui/icon-symbol';
-
+const fallbackImg = require('../assets/images/fallback-fruit.png');
 type CategoryCardProps = {
 	id: string;
 	name: string;
@@ -10,30 +9,34 @@ type CategoryCardProps = {
 	onPress?: () => void;
 };
 
-export function CategoryCard({ name, icon, image, onPress }: CategoryCardProps) {
+export function CategoryCard({
+	name,
+	icon,
+	image,
+	onPress,
+}: CategoryCardProps) {
+	const [imgErr, setImgErr] = useState(false);
+	const hasImg = image && !imgErr;
 	return (
-		<TouchableOpacity
-			style={styles.card}
-			onPress={onPress}
-			activeOpacity={0.7}>
+		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
 			<View style={styles.iconContainer}>
-				{image ? (
+				{hasImg ? (
 					<Image
 						source={{ uri: image }}
 						style={styles.image}
 						resizeMode='cover'
+						onError={() => setImgErr(true)}
 					/>
 				) : (
-					<IconSymbol
-						name={(icon as any) || 'square.grid.2x2'}
-						size={32}
-						color='#E63946'
+					<Image
+						source={fallbackImg}
+						style={styles.image}
+						resizeMode='cover'
+						onError={() => setImgErr(true)}
 					/>
 				)}
 			</View>
-			<Text
-				style={styles.name}
-				numberOfLines={2}>
+			<Text style={styles.name} numberOfLines={2}>
 				{name}
 			</Text>
 		</TouchableOpacity>
