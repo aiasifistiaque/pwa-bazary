@@ -1,4 +1,5 @@
 import { CategoryCard } from '@/components/category-card';
+import CategorySkeleton from '@/components/category-skeleton/CategorySkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
@@ -15,6 +16,7 @@ export default function AllCategoriesScreen() {
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
 	});
+	// console.log('categoryData', categoryData)
 	const handleBack = () => {
 		router.back();
 	};
@@ -24,33 +26,43 @@ export default function AllCategoriesScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
-			<SafeAreaView style={styles.safeArea}>
-				{/* Header */}
-				<View style={styles.header}>
-					<Pressable onPress={handleBack} style={styles.backButton}>
-						<IconSymbol name='chevron.left' size={24} color='#000000' />
-					</Pressable>
-					<Text style={styles.headerTitle}>All Categories</Text>
-					<View style={{ width: 40 }} />
-				</View>
-			</SafeAreaView>
-
-			<ScrollView
-				style={styles.scrollView}
-				showsVerticalScrollIndicator={false}
-			>
+		<>
+			{isLoading ? (
 				<View style={styles.categoriesGrid}>
-					{categoryData?.doc?.map((category: any) => (
-						<CategoryCard
-							key={category.id}
-							{...category}
-							onPress={() => handleCategoryPress(category.id)}
-						/>
+					{Array.from({ length: 4 }).map((_, index) => (
+						<CategorySkeleton key={index} />
 					))}
 				</View>
-			</ScrollView>
-		</View>
+			) : (
+				<View style={styles.container}>
+					<SafeAreaView style={styles.safeArea}>
+						{/* Header */}
+						<View style={styles.header}>
+							<Pressable onPress={handleBack} style={styles.backButton}>
+								<IconSymbol name='chevron.left' size={24} color='#000000' />
+							</Pressable>
+							<Text style={styles.headerTitle}>All Categories</Text>
+							<View style={{ width: 40 }} />
+						</View>
+					</SafeAreaView>
+
+					<ScrollView
+						style={styles.scrollView}
+						showsVerticalScrollIndicator={false}
+					>
+						<View style={styles.categoriesGrid}>
+							{categoryData?.doc?.map((category: any) => (
+								<CategoryCard
+									key={category.id}
+									{...category}
+									onPress={() => handleCategoryPress(category.id)}
+								/>
+							))}
+						</View>
+					</ScrollView>
+				</View>
+			)}
+		</>
 	);
 }
 

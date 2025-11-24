@@ -5,17 +5,19 @@ import { IconSymbol } from './ui/icon-symbol';
 type FavoriteProductCardProps = {
 	id: string;
 	name: string;
-	category?: string;
+	category?: any;
 	price: string;
 	originalPrice?: string;
 	unit?: string;
 	unitPrice?: string;
 	badge?: string;
-	discount?: string;
+	discount?: number;
+	// discount?: string | number;
 	image: string | number;
 	onPress?: () => void;
 	onAddPress?: () => void;
 };
+const fallback = require('../assets/images/fallback-fruit.png');
 
 export function FavoriteProductCard({
 	name,
@@ -25,63 +27,56 @@ export function FavoriteProductCard({
 	unit,
 	unitPrice,
 	badge,
-	discount,
+	discount = 0,
 	image,
 	onPress,
 	onAddPress,
 }: FavoriteProductCardProps) {
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
-
+	console.log('discount', badge);
 	return (
-		<TouchableOpacity
-			style={styles.card}
-			onPress={onPress}
-			activeOpacity={0.7}>
+		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
 			<View style={styles.imageContainer}>
 				<Image
-					source={imageSource}
+					source={imageSource || fallback}
 					style={styles.image}
 					resizeMode='cover'
 				/>
-				{discount && (
+				{discount > 0 && (
 					<View style={styles.discountBadge}>
 						<Text style={styles.discountText}>{discount}</Text>
 					</View>
 				)}
-				{badge && (
+
+				{badge !== undefined && (
 					<View style={styles.priceBadge}>
-						<Text style={styles.priceBadgeText}>{badge}</Text>
+						<Text style={styles.priceBadgeText}>{'badge'}</Text>
 					</View>
 				)}
 				<TouchableOpacity
 					style={styles.addButton}
 					onPress={onAddPress}
-					activeOpacity={0.8}>
-					<IconSymbol
-						name='plus'
-						size={20}
-						color='#E63946'
-					/>
+					activeOpacity={0.8}
+				>
+					<IconSymbol name='plus' size={20} color='#E63946' />
 				</TouchableOpacity>
 			</View>
 
 			<View style={styles.info}>
-				{category && <Text style={styles.category}>{category}</Text>}
+				{category?.name && (
+					<Text style={styles.category}>{category?.name}</Text>
+				)}
 				<View style={styles.nameContainer}>
-					<Text
-						style={styles.name}
-						numberOfLines={1}>
-						{name}
+					<Text style={styles.name} numberOfLines={1}>
+						{category?.name}
 					</Text>
-					<IconSymbol
-						name='chevron.right'
-						size={14}
-						color='#333'
-					/>
+					<IconSymbol name='chevron.right' size={14} color='#333' />
 				</View>
 				<View style={styles.priceContainer}>
 					<Text style={styles.price}>৳{price}</Text>
-					{originalPrice && <Text style={styles.originalPrice}>৳{originalPrice}</Text>}
+					{originalPrice && (
+						<Text style={styles.originalPrice}>৳{originalPrice}</Text>
+					)}
 				</View>
 				{unit && unitPrice && (
 					<Text style={styles.unitInfo}>

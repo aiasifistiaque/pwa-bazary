@@ -1,7 +1,10 @@
 import { FavoriteProductCard } from '@/components/favorite-product-card';
+import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useGetAllQuery, useGetByIdQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router, useLocalSearchParams } from 'expo-router';
+
 import React from 'react';
 import {
 	Image,
@@ -14,206 +17,34 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 
-// Mock data for categories and their products
-const getCategoryData = (id: string) => {
-	const categories: Record<string, any> = {
-		cat1: {
-			id: 'cat1',
-			name: 'Fruits & Vegetables',
-			hasSubcategories: true,
-			subcategories: [
-				{
-					id: 'fruits',
-					name: 'Fruits',
-					image:
-						'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'vegetables',
-					name: 'Vegetables',
-					image:
-						'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'organic',
-					name: 'Organic Produce',
-					image:
-						'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=200&h=200&fit=crop',
-				},
-			],
-		},
-		fruits: {
-			id: 'fruits',
-			name: 'Fruits',
-			hasSubcategories: true,
-			subcategories: [
-				{
-					id: 'apples',
-					name: 'Apples',
-					image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'bananas',
-					name: 'Bananas',
-					image:
-						'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'berries',
-					name: 'Berries',
-					image:
-						'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'citrus',
-					name: 'Citrus Fruits',
-					image:
-						'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop',
-				},
-			],
-		},
-		vegetables: {
-			id: 'vegetables',
-			name: 'Vegetables',
-			hasSubcategories: false,
-			products: [
-				{
-					id: 'v1',
-					name: 'Fresh Tomatoes',
-					category: 'Vegetables',
-					price: '148',
-					unit: '500g',
-					unitPrice: '৳297/kg',
-					image: 'https://images.unsplash.com/photo-1546470427-227c3f7f6984?w=400&h=400&fit=crop',
-				},
-				{
-					id: 'v2',
-					name: 'Carrots',
-					category: 'Vegetables',
-					price: '115',
-					unit: '500g',
-					unitPrice: '৳229/kg',
-					image:
-						'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&h=400&fit=crop',
-				},
-				{
-					id: 'v3',
-					name: 'Broccoli',
-					category: 'Vegetables',
-					price: '172',
-					unit: '500g',
-					unitPrice: '৳344/kg',
-					image:
-						'https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?w=400&h=400&fit=crop',
-				},
-				{
-					id: 'v4',
-					name: 'Spinach',
-					category: 'Vegetables',
-					price: '148',
-					unit: '250g',
-					unitPrice: '৳594/kg',
-					image:
-						'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=400&h=400&fit=crop',
-				},
-			],
-		},
-		fruit: {
-			id: 'fruit',
-			name: 'Fruit',
-			hasSubcategories: true,
-			subcategories: [
-				{
-					id: 'apples',
-					name: 'Apples',
-					image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'bananas',
-					name: 'Bananas',
-					image:
-						'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'berries',
-					name: 'Berries',
-					image:
-						'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=200&h=200&fit=crop',
-				},
-				{
-					id: 'citrus',
-					name: 'Citrus Fruits',
-					image:
-						'https://images.unsplash.com/photo-1582979512210-99b6a53386f9?w=200&h=200&fit=crop',
-				},
-			],
-		},
-		apples: {
-			id: 'apples',
-			name: 'Apples',
-			hasSubcategories: false,
-			products: [
-				{
-					id: '1',
-					name: 'Bio Apfel Pink Lady',
-					category: 'Sweet-sour',
-					price: '367',
-					originalPrice: '459',
-					unit: '550g',
-					unitPrice: '৳667/kg',
-					discount: '20% Off',
-					image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop',
-				},
-				{
-					id: '2',
-					name: 'Bio Apfel Elstar',
-					category: 'Sweet-sour',
-					price: '344',
-					unit: '1kg',
-					unitPrice: '৳344/kg',
-					image:
-						'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=400&fit=crop',
-				},
-				{
-					id: '3',
-					name: 'Green Apples',
-					category: 'Sour',
-					price: '286',
-					originalPrice: '344',
-					unit: '1kg',
-					unitPrice: '৳286/kg',
-					discount: '15% Off',
-					image:
-						'https://images.unsplash.com/photo-1619546952812-adaa0e78e449?w=400&h=400&fit=crop',
-				},
-				{
-					id: '4',
-					name: 'Red Delicious',
-					category: 'Sweet',
-					price: '401',
-					unit: '1kg',
-					unitPrice: '৳401/kg',
-					image:
-						'https://images.unsplash.com/photo-1589217157232-464b505b197f?w=400&h=400&fit=crop',
-				},
-			],
-		},
-	};
-
-	return (
-		categories[id] || {
-			id,
-			name: 'Category',
-			hasSubcategories: false,
-			products: [],
-		}
-	);
-};
+const fallback = require('../../assets/images/splash-icon.png');
 
 export default function CategoryScreen() {
 	const dispatch = useDispatch();
 	const { id } = useLocalSearchParams<{ id: string }>();
-	const categoryData = getCategoryData(id || 'fruit');
+
+	const { data: catName, isLoading: isCatNameLoading } = useGetByIdQuery({
+		path: 'categorys',
+		id,
+	});
+	// get the categories based on if id
+	const { data: childCategories, isLoading: childCatLoading } = useGetAllQuery({
+		path: 'categorys',
+		filters: { parentCategory: id },
+	});
+	const hasSubcategories = childCategories?.doc?.length > 0;
+	// get product of any cat id (parent / sub)
+	const { data: productsData, isLoading: productsDataLoading } = useGetAllQuery(
+		{
+			path: 'products',
+			filters: {
+				category_in: id,
+				// isActive: true,
+				// status: 'published',
+			},
+		}
+	);
+	// const categoryData = getCategoryData(id || 'fruit');
 
 	const handleBack = () => {
 		router.back();
@@ -242,7 +73,10 @@ export default function CategoryScreen() {
 			})
 		);
 	};
-
+	// childCatLoading
+	if (childCatLoading || productsDataLoading) {
+		return <Loader />;
+	}
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			<View style={styles.container}>
@@ -251,58 +85,70 @@ export default function CategoryScreen() {
 					<TouchableOpacity
 						style={styles.backButton}
 						onPress={handleBack}
-						activeOpacity={0.7}>
-						<IconSymbol
-							name='chevron.left'
-							size={24}
-							color='#000'
-						/>
+						activeOpacity={0.7}
+					>
+						<IconSymbol name='chevron.left' size={24} color='#000' />
 					</TouchableOpacity>
-					<Text style={styles.headerTitle}>{categoryData.name}</Text>
+					{/* {isCatNameLoading ? (
+						<View style={styles.container}>
+							<ActivityIndicator />
+						</View>
+					) : (
+						<Text style={styles.headerTitle}>{catName?.name}</Text>
+					)} */}
+					<Text style={styles.headerTitle}>{catName?.name}</Text>
 					<View style={styles.headerSpacer} />
 				</View>
 
 				<ScrollView
 					style={styles.scrollView}
-					showsVerticalScrollIndicator={false}>
+					showsVerticalScrollIndicator={false}
+				>
 					{/* Subcategories */}
-					{categoryData.hasSubcategories && (
+					{hasSubcategories ? (
 						<View style={styles.section}>
 							<View style={styles.categoriesGrid}>
-								{categoryData.subcategories?.map((subcategory: any) => (
+								{childCategories?.doc?.map((subcategory: any) => (
 									<TouchableOpacity
 										key={subcategory.id}
 										style={styles.subcategoryCard}
 										onPress={() => handleSubcategoryPress(subcategory.id)}
-										activeOpacity={0.7}>
-										<Image
-											source={{ uri: subcategory.image }}
-											style={styles.subcategoryImage}
-										/>
-										<Text style={styles.subcategoryName}>{subcategory.name}</Text>
-										<IconSymbol
-											name='chevron.right'
-											size={20}
-											color='#333'
-										/>
+										activeOpacity={0.7}
+									>
+										{subcategory.image ? (
+											<Image
+												source={{ uri: subcategory.image }}
+												style={styles.subcategoryImage}
+											/>
+										) : (
+											<Image
+												source={fallback}
+												style={styles.subcategoryImage}
+											/>
+										)}
+										<Text style={styles.subcategoryName}>
+											{subcategory.name}
+										</Text>
+										<IconSymbol name='chevron.right' size={20} color='#333' />
 									</TouchableOpacity>
 								))}
 							</View>
 						</View>
-					)}
-
-					{/* Products */}
-					{!categoryData.hasSubcategories && categoryData.products && (
+					) : (
 						<View style={styles.section}>
 							<View style={styles.productsGrid}>
-								{categoryData.products.map((product: any) => (
-									<FavoriteProductCard
-										key={product.id}
-										{...product}
-										onPress={() => handleProductPress(product.id)}
-										onAddPress={() => handleAddPress(product)}
-									/>
-								))}
+								{productsData?.doc?.length > 0 ? (
+									productsData?.doc?.map((product: any) => (
+										<FavoriteProductCard
+											key={product.id}
+											{...product}
+											onPress={() => handleProductPress(product.id)}
+											onAddPress={() => handleAddPress(product)}
+										/>
+									))
+								) : (
+									<Text>No products found</Text>
+								)}
 							</View>
 						</View>
 					)}
@@ -378,3 +224,21 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 	},
 });
+
+{
+	/* Products */
+}
+// {!categoryData.hasSubcategories && categoryData.products && (
+// 	<View style={styles.section}>
+// 		<View style={styles.productsGrid}>
+// 			{categoryData.products.map((product: any) => (
+// 				<FavoriteProductCard
+// 					key={product.id}
+// 					{...product}
+// 					onPress={() => handleProductPress(product.id)}
+// 					onAddPress={() => handleAddPress(product)}
+// 				/>
+// 			))}
+// 		</View>
+// 	</View>
+// )}
