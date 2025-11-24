@@ -358,8 +358,9 @@ export default function DiscoverScreen() {
 	// data fetching
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
+		filters: { displayInHomePage: true },
 	});
-	// console.log('cat dat:', categoryData);
+
 	const dispatch = useDispatch();
 
 	const handleProductPress = (productId: string) => {
@@ -425,7 +426,7 @@ export default function DiscoverScreen() {
 				<View style={styles.categoriesSection}>
 					<SectionHeader title='Categories' />
 					<View style={styles.categoriesGrid}>
-						{categories?.map(category => (
+						{categoryData?.doc?.map((category: any) => (
 							<CategoryCard
 								key={category.id}
 								{...category}
