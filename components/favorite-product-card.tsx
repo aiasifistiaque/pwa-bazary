@@ -33,7 +33,7 @@ export function FavoriteProductCard({
 	onAddPress,
 }: FavoriteProductCardProps) {
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
-	console.log('discount', badge);
+	
 	return (
 		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
 			<View style={styles.imageContainer}>
@@ -63,8 +63,8 @@ export function FavoriteProductCard({
 			</View>
 
 			<View style={styles.info}>
-				{category?.name && (
-					<Text style={styles.category}>{category?.name}</Text>
+				{name && (
+					<Text style={styles.category}>{name}</Text>
 				)}
 				<View style={styles.nameContainer}>
 					<Text style={styles.name} numberOfLines={1}>
