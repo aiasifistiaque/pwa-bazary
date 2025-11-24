@@ -16,6 +16,7 @@ export default function AllCategoriesScreen() {
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
 	});
+	// console.log('categoryData', categoryData)
 	const handleBack = () => {
 		router.back();
 	};
