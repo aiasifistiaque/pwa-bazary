@@ -1,5 +1,6 @@
 import { BannerCarousel } from '@/components/banner-carousel';
 import { CategoryCard } from '@/components/category-card';
+import CategorySkeleton from '@/components/category-skeleton/CategorySkeleton';
 import { DeliveryTimeButton } from '@/components/delivery-time-button';
 import { ProductCard } from '@/components/product-card';
 import { SectionHeader } from '@/components/section-header';
@@ -74,65 +75,6 @@ const recipeCombos = [
 		image:
 			'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
 		description: 'Fragrant basmati rice dish',
-	},
-];
-
-const categories = [
-	{
-		id: 'cat1',
-		name: 'Fruits & Vegetables',
-		icon: 'leaf.fill',
-		image:
-			'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=200&h=200&fit=crop',
-	},
-	{
-		id: 'cat2',
-		name: 'Dairy & Eggs',
-		icon: 'cup.and.saucer.fill',
-		image:
-			'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-	},
-	{
-		id: 'cat3',
-		name: 'Bakery',
-		icon: 'birthday.cake.fill',
-		image:
-			'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop',
-	},
-	{
-		id: 'cat4',
-		name: 'Meat & Fish',
-		icon: 'fish.fill',
-		image:
-			'https://images.unsplash.com/photo-1588347818036-8f9af5d47c1a?w=200&h=200&fit=crop',
-	},
-	{
-		id: 'cat5',
-		name: 'Beverages',
-		icon: 'cup.and.saucer',
-		image:
-			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=200&h=200&fit=crop',
-	},
-	{
-		id: 'cat6',
-		name: 'Snacks',
-		icon: 'bag.fill',
-		image:
-			'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=200&h=200&fit=crop',
-	},
-	{
-		id: 'cat7',
-		name: 'Frozen',
-		icon: 'snowflake',
-		image:
-			'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=200&h=200&fit=crop',
-	},
-	{
-		id: 'cat8',
-		name: 'Household',
-		icon: 'house.fill',
-		image:
-			'https://images.unsplash.com/photo-1584308972272-9e4e7685e80f?w=200&h=200&fit=crop',
 	},
 ];
 
@@ -425,15 +367,24 @@ export default function DiscoverScreen() {
 				{/* Categories Section */}
 				<View style={styles.categoriesSection}>
 					<SectionHeader title='Categories' />
-					<View style={styles.categoriesGrid}>
-						{categoryData?.doc?.map((category: any) => (
-							<CategoryCard
-								key={category.id}
-								{...category}
-								onPress={() => handleCategoryPress(category.id)}
-							/>
-						))}
-					</View>
+					{isLoading ? (
+						<View style={styles.categoriesGrid}>
+							{Array.from({ length: 4 }).map((_, i) => (
+								<CategorySkeleton key={i} />
+							))}
+						</View>
+					) : (
+						<View style={styles.categoriesGrid}>
+							{categoryData?.doc?.map((category: any) => (
+								<CategoryCard
+									key={category.id}
+									{...category}
+									onPress={() => handleCategoryPress(category.id)}
+								/>
+							))}
+						</View>
+					)}
+
 					<TouchableOpacity
 						style={styles.showMoreButton}
 						onPress={handleShowMoreCategories}
