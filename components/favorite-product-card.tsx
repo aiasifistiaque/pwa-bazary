@@ -18,7 +18,7 @@ type FavoriteProductCardProps = {
 	onAddPress?: () => void;
 };
 const fallback = require('../assets/images/fallback-fruit.png');
-
+// latset
 export function FavoriteProductCard({
 	name,
 	category,
