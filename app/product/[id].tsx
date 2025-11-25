@@ -1,6 +1,7 @@
 import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetByIdQuery } from '@/store/services/commonApi';
+import { addToCart } from '@/store/slices/cartSlice';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 
@@ -96,8 +97,8 @@ export default function ProductDetailScreen() {
 		path: 'products',
 		id,
 	});
-	const product:any = productD ? productD : {};
-
+	const product: any = productD ? productD : {};
+	console.log('product ::', product);
 	const [quantity, setQuantity] = useState(1);
 
 	const handleBack = () => {
@@ -112,22 +113,33 @@ export default function ProductDetailScreen() {
 		setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 	};
 
-	// const handleAddToCart = () => {
-	// 	dispatch(
-	// 		addToCart({
-	// 			item: {
-	// 				id: product?.id,
-	// 				_id: product?.id,
-	// 				name: product?.name,
-	// 				price: parseFloat(product?.price?.replace(',', '')),
-	// 				image: product?.image,
-	// 				vat: 0,
-	// 			},
-	// 			qty: quantity,
-	// 		})
-	// 	);
-	// 	router.back();
-	// };
+	const handleAddToCart = () => {
+		console.log('addded"::', {
+			item: {
+				id: product?.id,
+				_id: product?.id,
+				name: product?.name,
+				price: product?.price,
+				image: product?.image || null,
+				vat: 0,
+			},
+			qty: quantity,
+		});
+		dispatch(
+			addToCart({
+				item: {
+					id: product?.id,
+					_id: product?.id,
+					name: product?.name,
+					price: product?.price,
+					image: product?.image || null,
+					vat: 0,
+				},
+				qty: quantity,
+			})
+		);
+		// router.back();
+	};
 
 	// Ensure product.price is parsed safely (handles numbers or strings with commas)
 	const priceNumber =
@@ -303,7 +315,7 @@ export default function ProductDetailScreen() {
 
 					<TouchableOpacity
 						style={styles.addToCartButton}
-						// onPress={handleAddToCart}
+						onPress={handleAddToCart}
 						activeOpacity={0.8}
 					>
 						<IconSymbol name='cart.fill' size={20} color='#FFF' />
