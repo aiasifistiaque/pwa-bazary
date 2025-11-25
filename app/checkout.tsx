@@ -134,7 +134,7 @@ export default function CheckoutScreen() {
 			// Alert.alert('Missing Information', 'Please select a payment method');
 			return;
 		}
-		// ✅ LOG EVERYTHING NECESSARY BEFORE PLACING ORDER
+		// ✅ LOG EVERYTHING NECESSARY BEFORE PLACING ORDER/
 		console.log('✅ Placing order payload:', {
 			selectedTimeSlot,
 			selectedPayment,
