@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RootState } from '@/store';
+import { usePlaceOrderMutation } from '@/store/services/authApi';
 import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -43,6 +44,7 @@ const paymentMethods: PaymentMethod[] = [
 
 export default function CheckoutScreen() {
 	const dispatch = useDispatch();
+	const [trigger, { isLoading }] = usePlaceOrderMutation()
 	const [errorMsg, setErrorMsg] = useState<string>('');
 	const { total, subTotal, shipping, vat, discount } = useSelector(
 		(state: RootState) => state.cart
@@ -105,7 +107,7 @@ export default function CheckoutScreen() {
 		console.warn('Checkout validation error:', msg);
 	};
 
-	const handlePlaceOrder = () => {
+	const handlePlaceOrder = async () => {
 		// clear previous error first
 		setErrorMsg('');
 		if (!selectedTimeSlot) {
@@ -135,6 +137,14 @@ export default function CheckoutScreen() {
 			return;
 		}
 		// ✅ LOG EVERYTHING NECESSARY BEFORE PLACING ORDER/
+		const res = await trigger({
+			selectedTimeSlot,
+			selectedPayment,
+			couponCode,
+			totals: { total, subTotal, shipping, vat, discount },
+			address,
+		})
+		console.log(res)
 		console.log('✅ Placing order payload:', {
 			selectedTimeSlot,
 			selectedPayment,
@@ -232,7 +242,7 @@ export default function CheckoutScreen() {
 									style={[
 										styles.savedAddressCard,
 										selectedCheckoutAddr?.id === addr.id &&
-											styles.selectedSavedAddress,
+										styles.selectedSavedAddress,
 									]}
 									onPress={() => handleSelectSavedAddress(addr)}
 								>
@@ -355,7 +365,7 @@ export default function CheckoutScreen() {
 									<View style={styles.radioSelected} />
 								)}
 							</View>
-							<IconSymbol name={method.icon} size={24} color='#666666' />
+							<IconSymbol name={method?.icon} size={24} color='#666666' />
 							<Text style={styles.paymentMethodName}>{method.name}</Text>
 						</Pressable>
 					))}

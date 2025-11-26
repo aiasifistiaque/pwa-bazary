@@ -177,7 +177,7 @@ export const authApi = createApi({
 		}),
 		getMyOrders: builder.query<any, any>({
 			query: () => ({
-				url: `/user-api/orders`,
+				url: `/api/orders`,
 			}),
 			providesTags: ['self'],
 		}),
@@ -189,7 +189,7 @@ export const authApi = createApi({
 		}),
 		updateSelf: builder.mutation<any, any>({
 			query: body => ({
-				url: `/user-api/auth/self`,
+				url: `/api/auth/self`,
 				method: 'PUT',
 				body,
 			}),
@@ -197,7 +197,7 @@ export const authApi = createApi({
 		}),
 		placeOrder: builder.mutation<any, any>({
 			query: body => ({
-				url: `auth/order`,
+				url: `api/orders`,
 				method: 'POST',
 				body,
 			}),
