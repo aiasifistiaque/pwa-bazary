@@ -15,7 +15,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
-const fallback = require('../../assets/images/fallback-fruit.png');
+const fallback = require('../../../assets/images/fallback-fruit.png');
 // Mock product data - in real app, fetch based on ID
 const getProductById = (id: string) => {
 	const products: Record<string, any> = {

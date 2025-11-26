@@ -12,7 +12,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-const fallbackImage = require('../../assets/images/fallback-fruit.png')
+const fallbackImage = require('../../../assets/images/fallback-fruit.png')
 // Featured categories for "This Week"
 const thisWeekCategories = [
 	{

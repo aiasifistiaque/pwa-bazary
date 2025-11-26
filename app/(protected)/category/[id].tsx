@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 
-const fallback = require('../../assets/images/splash-icon.png');
+const fallback = require('../../../assets/images/splash-icon.png');
 
 export default function CategoryScreen() {
 	const dispatch = useDispatch();

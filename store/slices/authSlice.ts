@@ -31,10 +31,10 @@ export const authSlice = createSlice({
 			const { token }: LoginPayloadType = action.payload;
 			state.token = token;
 			state.loggedIn = true;
-			// localStorage.setItem(TOKEN_NAME, token);
+			localStorage.setItem("TOKEN_NAME", token);
 			// localStorage.setItem(REFRESH_TOKEN, refreshToken);
 			// window.location.reload();
-			void (document.location.href = '/user-profile');
+			void (document.location.href = '/');
 		},
 		refresh: (state, action: PayloadAction<string>): void => {
 			// localStorage.setItem(TOKEN_NAME, action.payload);
