@@ -144,7 +144,7 @@ export const authApi = createApi({
 		// ✅ login matches old file (auth/login)
 		login: builder.mutation<LoginPayloadType, LoginBodyType>({
 			query: ({ email, password }) => ({
-				url: `api/auth/login`,
+				url: `api/auth/applogin`,
 				method: 'POST',
 				body: { email, password },
 			}),
@@ -154,7 +154,7 @@ export const authApi = createApi({
 		// ✅ register matches old file (auth/register)
 		register: builder.mutation<any, any>({
 			query: body => ({
-				url: `api/auth/register`,
+				url: `api/auth/appregister`,
 				method: 'POST',
 				body,
 			}),
@@ -171,7 +171,7 @@ export const authApi = createApi({
 		}),
 		getSelf: builder.query<any, any>({
 			query: () => ({
-				url: `api/auth/self`,
+				url: `api/auth/appself`,
 			}),
 			providesTags: ['self'],
 		}),
@@ -248,7 +248,7 @@ export const authApi = createApi({
 		}),
 		updateUserSelf: builder.mutation<any, any>({
 			query: body => ({
-				url: `api/auth/self`,
+				url: `api/auth/appself`,
 				method: 'PUT',
 				body,
 			}),
