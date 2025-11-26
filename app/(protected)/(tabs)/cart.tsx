@@ -1,8 +1,20 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RootState } from '@/store';
-import { addToCart, deleteOneFromCart, deleteSingleItemFromCart } from '@/store/slices/cartSlice';
+import {
+	addToCart,
+	deleteOneFromCart,
+	deleteSingleItemFromCart,
+} from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
-import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+	Image,
+	Pressable,
+	SafeAreaView,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Mock data for popular items
@@ -10,29 +22,34 @@ const popularItems = [
 	{
 		id: 'p1',
 		name: 'Classic Burger',
-		image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
 		price: 450,
 	},
 	{
 		id: 'p2',
 		name: 'Cheese Burger',
-		image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop',
 		price: 550,
 	},
 	{
 		id: 'p3',
 		name: 'Chicken Burger',
-		image: 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=300&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=300&fit=crop',
 		price: 500,
 	},
 ];
-
+const fallback = require('../../assets/images/fallback-fruit.png');
 export default function CartScreen() {
 	const dispatch = useDispatch();
-	const { cartItems, total, subTotal } = useSelector((state: RootState) => state.cart);
+	const { cartItems, total, subTotal } = useSelector(
+		(state: RootState) => state.cart
+	);
 
 	const handleIncrement = (uniqueId: string) => {
-		const item = cartItems.find(item => item.uniqueId === uniqueId);
+		const item = cartItems.find((item: any) => item.uniqueId === uniqueId);
 		if (item) {
 			dispatch(
 				addToCart({
@@ -43,8 +60,8 @@ export default function CartScreen() {
 						price: item.unitPrice,
 						image: item.image,
 						vat: item.vat,
-						selectedSize: item.selectedSize,
-						selectedColor: item.selectedColor,
+						// selectedSize: item.selectedSize,
+						// selectedColor: item.selectedColor,
 						variationId: item.variationId,
 						variantStock: item.variantStock,
 					},
@@ -75,14 +92,8 @@ export default function CartScreen() {
 			{/* Header with Progress */}
 			<SafeAreaView style={styles.headerSafeArea}>
 				<View style={styles.header}>
-					<Pressable
-						onPress={handleBack}
-						style={styles.closeButton}>
-						<IconSymbol
-							name='xmark'
-							size={24}
-							color='#000000'
-						/>
+					<Pressable onPress={handleBack} style={styles.closeButton}>
+						<IconSymbol name='xmark' size={24} color='#000000' />
 					</Pressable>
 					<View style={styles.headerTitleContainer}>
 						<Text style={styles.headerTitle}>Cart</Text>
@@ -117,7 +128,8 @@ export default function CartScreen() {
 			<ScrollView
 				style={styles.container}
 				contentContainerStyle={styles.scrollContent}
-				showsVerticalScrollIndicator={false}>
+				showsVerticalScrollIndicator={false}
+			>
 				{/* Delivery Time Section */}
 				<View style={styles.deliverySection}>
 					<Image
@@ -140,56 +152,53 @@ export default function CartScreen() {
 							<Text style={styles.emptyCartText}>Your cart is empty</Text>
 						</View>
 					) : (
-						cartItems.map(item => (
-							<View
-								key={item.uniqueId}
-								style={styles.cartItem}>
-								<Image
-									source={{ uri: item.image || 'https://via.placeholder.com/80x80' }}
-									style={styles.itemImage}
-								/>
+						cartItems?.map((item: any) => (
+							<View key={item.uniqueId} style={styles.cartItem}>
+								{item.image ? (
+									<Image
+										source={{
+											uri: item.image,
+										}}
+										style={styles.itemImage}
+									/>
+								) : (
+									<Image source={fallback} style={styles.itemImage} />
+								)}
 								<View style={styles.itemInfo}>
-									<Text
-										style={styles.itemName}
-										numberOfLines={2}>
+									<Text style={styles.itemName} numberOfLines={2}>
 										{item.name}
 									</Text>
-									{item.variantName && <Text style={styles.itemVariant}>{item.variantName}</Text>}
+									{item.variantName && (
+										<Text style={styles.itemVariant}>{item.variantName}</Text>
+									)}
 									<View style={styles.itemFooter}>
 										<View style={styles.quantityControls}>
 											{item.qty === 1 ? (
 												<Pressable
 													onPress={() => handleRemove(item.uniqueId)}
-													style={styles.quantityButton}>
-													<IconSymbol
-														name='trash'
-														size={18}
-														color='#666666'
-													/>
+													style={styles.quantityButton}
+												>
+													<IconSymbol name='minus' size={18} color='#666666' />
 												</Pressable>
 											) : (
 												<Pressable
 													onPress={() => handleDecrement(item.uniqueId)}
-													style={styles.quantityButton}>
-													<IconSymbol
-														name='minus'
-														size={18}
-														color='#000000'
-													/>
+													style={styles.quantityButton}
+												>
+													<IconSymbol name='minus' size={18} color='#000000' />
 												</Pressable>
 											)}
 											<Text style={styles.quantityText}>{item.qty}</Text>
 											<Pressable
 												onPress={() => handleIncrement(item.uniqueId)}
-												style={styles.quantityButton}>
-												<IconSymbol
-													name='plus'
-													size={18}
-													color='#000000'
-												/>
+												style={styles.quantityButton}
+											>
+												<IconSymbol name='plus' size={18} color='#000000' />
 											</Pressable>
 										</View>
-										<Text style={styles.itemPrice}>Tk {item.price.toLocaleString()}</Text>
+										<Text style={styles.itemPrice}>
+											Tk {item.price.toLocaleString()}
+										</Text>
 									</View>
 								</View>
 							</View>
@@ -200,38 +209,32 @@ export default function CartScreen() {
 				{/* Add More Items */}
 				<Pressable
 					style={styles.addMoreButton}
-					onPress={() => router.push('/(tabs)')}>
-					<IconSymbol
-						name='plus'
-						size={20}
-						color='#000000'
-					/>
+					onPress={() => router.push('/(tabs)')}
+				>
+					<IconSymbol name='plus' size={20} color='#000000' />
 					<Text style={styles.addMoreText}>Add more items</Text>
 				</Pressable>
 
 				{/* Popular with your order */}
 				<View style={styles.popularSection}>
 					<Text style={styles.popularTitle}>Popular with your order</Text>
-					<Text style={styles.popularSubtitle}>Other customers also bought these</Text>
+					<Text style={styles.popularSubtitle}>
+						Other customers also bought these
+					</Text>
 					<ScrollView
 						horizontal
 						showsHorizontalScrollIndicator={false}
-						contentContainerStyle={styles.popularScroll}>
+						contentContainerStyle={styles.popularScroll}
+					>
 						{popularItems.map(item => (
-							<View
-								key={item.id}
-								style={styles.popularCard}>
+							<View key={item.id} style={styles.popularCard}>
 								<Image
 									source={{ uri: item.image }}
 									style={styles.popularImage}
 									resizeMode='cover'
 								/>
 								<Pressable style={styles.popularAddButton}>
-									<IconSymbol
-										name='plus'
-										size={20}
-										color='#000000'
-									/>
+									<IconSymbol name='plus' size={20} color='#000000' />
 								</Pressable>
 							</View>
 						))}
@@ -244,9 +247,13 @@ export default function CartScreen() {
 						<View style={styles.totalRow}>
 							<Text style={styles.totalLabel}>Total (incl. fees and tax)</Text>
 							<View style={styles.totalPriceContainer}>
-								<Text style={styles.totalPrice}>Tk {total.toLocaleString()}</Text>
+								<Text style={styles.totalPrice}>
+									Tk {total.toLocaleString()}
+								</Text>
 								{subTotal !== total && (
-									<Text style={styles.originalPrice}>Tk {subTotal.toLocaleString()}</Text>
+									<Text style={styles.originalPrice}>
+										Tk {subTotal.toLocaleString()}
+									</Text>
 								)}
 							</View>
 						</View>
@@ -263,10 +270,10 @@ export default function CartScreen() {
 			{/* Review Button */}
 			{cartItems.length > 0 && (
 				<View style={styles.checkoutContainer}>
-					<Pressable
-						style={styles.checkoutButton}
-						onPress={handleCheckout}>
-						<Text style={styles.checkoutButtonText}>Review payment and address</Text>
+					<Pressable style={styles.checkoutButton} onPress={handleCheckout}>
+						<Text style={styles.checkoutButtonText}>
+							Review payment and address
+						</Text>
 					</Pressable>
 				</View>
 			)}
