@@ -171,7 +171,7 @@ export const authApi = createApi({
 		}),
 		getSelf: builder.query<any, any>({
 			query: () => ({
-				url: `user-api/auth/self`,
+				url: `api/auth/self`,
 			}),
 			providesTags: ['self'],
 		}),
