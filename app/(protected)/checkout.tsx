@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RootState } from '@/store';
+import { usePlaceOrderMutation } from '@/store/services/authApi';
 import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -43,10 +44,12 @@ const paymentMethods: PaymentMethod[] = [
 
 export default function CheckoutScreen() {
 	const dispatch = useDispatch();
+	const [trigger, { isLoading }] = usePlaceOrderMutation()
 	const [errorMsg, setErrorMsg] = useState<string>('');
 	const { total, subTotal, shipping, vat, discount } = useSelector(
 		(state: RootState) => state.cart
 	);
+
 	const savedAddresses = useSelector(
 		(state: RootState) => state.address.addresses
 	);
@@ -58,6 +61,10 @@ export default function CheckoutScreen() {
 	const [selectedPayment, setSelectedPayment] = useState<string>('');
 	const [couponCode, setCouponCode] = useState<string>('');
 	const [showSavedAddresses, setShowSavedAddresses] = useState<boolean>(false);
+	// Get cart items and user from Redux store
+	const state = useSelector((state: RootState) => state);
+	const cartItems = state.cart.cartItems;
+	const userId = state.auth.user?._id;
 	const [address, setAddress] = useState({
 		name: '',
 		phone: '',
@@ -105,7 +112,7 @@ export default function CheckoutScreen() {
 		console.warn('Checkout validation error:', msg);
 	};
 
-	const handlePlaceOrder = () => {
+	const handlePlaceOrder = async () => {
 		// clear previous error first
 		setErrorMsg('');
 		if (!selectedTimeSlot) {
@@ -135,16 +142,81 @@ export default function CheckoutScreen() {
 			return;
 		}
 		// ✅ LOG EVERYTHING NECESSARY BEFORE PLACING ORDER/
-		console.log('✅ Placing order payload:', {
-			selectedTimeSlot,
-			selectedPayment,
-			couponCode,
-			totals: { total, subTotal, shipping, vat, discount },
-			address,
-			// If you want cart items too, uncomment:
-			// cartItems: useSelector((state: RootState) => state.cart.cartItems),
-			timestamp: new Date().toISOString(),
-		});
+		// const res = await trigger({
+		// 	selectedTimeSlot,
+		// 	selectedPayment,
+		// 	couponCode,
+		// 	totals: { total, subTotal, shipping, vat, discount },
+		// 	address,
+		// })
+		// console.log(res)
+		try {
+			// Format items according to backend schema
+			const formattedItems = cartItems.map((item: any) => ({
+				name: item.name,
+				_id: item.productId || item._id, // Product ID reference
+				qty: item.quantity || item.qty,
+				unitPrice: item.price || item.unitPrice,
+				totalPrice: (item.price || item.unitPrice) * (item.quantity || item.qty),
+				image: item.image,
+				unitVat: item.vat || 0,
+			}));
+
+			// Get selected time slot details
+			const selectedSlot = deliverySlots.find(s => s.id === selectedTimeSlot);
+			const deliveryNote = selectedSlot
+				? `Delivery: ${selectedSlot.day} ${selectedSlot.time}`
+				: '';
+
+			// Prepare order payload matching backend schema
+			const orderPayload = {
+				items: formattedItems,
+				subTotal: subTotal,
+				shippingCharge: shipping,
+				discount: discount,
+				total: total,
+				customer: userId || null, // null for guest orders
+				address: {
+					name: address.name,
+					phone: address.phone,
+					street: address.street,
+					area: address.area,
+					city: address.city,
+					postalCode: address.postalCode,
+				},
+				paymentMethod: selectedPayment,
+				isPaid: selectedPayment !== 'cod',
+				paidAmount: selectedPayment !== 'cod' ? total : 0,
+				dueAmount: selectedPayment === 'cod' ? total : 0,
+				paymentAmount: total,
+				couponCode: couponCode || undefined,
+				status: 'pending',
+				origin: 'mint-app',
+				note: deliveryNote,
+				orderDate: new Date().toISOString(),
+			};
+
+			console.log('📦 Order Payload:', JSON.stringify(orderPayload, null, 2));
+
+			const res = await trigger(orderPayload).unwrap();
+
+			console.log('✅ Order Response:', res);
+
+			Alert.alert('Success', 'Your order has been placed successfully!', [
+				{
+					text: 'OK',
+					onPress: () => {
+						router.push('/(protected)/(tabs)');
+					},
+				},
+			]);
+		} catch (error: any) {
+			console.error('❌ Order Error:', error);
+			const errorMessage = error?.data?.message ||
+				error?.message ||
+				'Failed to place order. Please try again.';
+			setError(errorMessage);
+		}
 		Alert.alert('Success', 'Your order has been placed successfully!', [
 			{
 				text: 'OK',
@@ -232,7 +304,7 @@ export default function CheckoutScreen() {
 									style={[
 										styles.savedAddressCard,
 										selectedCheckoutAddr?.id === addr.id &&
-											styles.selectedSavedAddress,
+										styles.selectedSavedAddress,
 									]}
 									onPress={() => handleSelectSavedAddress(addr)}
 								>
@@ -355,7 +427,7 @@ export default function CheckoutScreen() {
 									<View style={styles.radioSelected} />
 								)}
 							</View>
-							<IconSymbol name={method.icon} size={24} color='#666666' />
+							<IconSymbol name={method?.icon} size={24} color='#666666' />
 							<Text style={styles.paymentMethodName}>{method.name}</Text>
 						</Pressable>
 					))}
