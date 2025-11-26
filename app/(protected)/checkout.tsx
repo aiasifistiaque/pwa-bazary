@@ -148,7 +148,7 @@ export default function CheckoutScreen() {
 		Alert.alert('Success', 'Your order has been placed successfully!', [
 			{
 				text: 'OK',
-				onPress: () => router.push('/(tabs)'),
+				onPress: () => router.push('/(protected)/(tabs)'),
 			},
 		]);
 	};

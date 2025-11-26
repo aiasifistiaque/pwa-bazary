@@ -41,7 +41,7 @@ const popularItems = [
 		price: 500,
 	},
 ];
-const fallback = require('../../assets/images/fallback-fruit.png');
+const fallback = require('../../../assets/images/fallback-fruit.png');
 export default function CartScreen() {
 	const dispatch = useDispatch();
 	const { cartItems, total, subTotal } = useSelector(
@@ -209,7 +209,7 @@ export default function CartScreen() {
 				{/* Add More Items */}
 				<Pressable
 					style={styles.addMoreButton}
-					onPress={() => router.push('/(tabs)')}
+					onPress={() => router.push('/(protected)/(tabs)')}
 				>
 					<IconSymbol name='plus' size={20} color='#000000' />
 					<Text style={styles.addMoreText}>Add more items</Text>

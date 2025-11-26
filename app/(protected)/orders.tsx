@@ -317,7 +317,7 @@ export default function OrdersScreen() {
 		});
 
 		// Navigate to cart
-		router.push('/(tabs)/cart');
+		router.push('/(protected)/(tabs)/cart');
 	};
 
 	return (

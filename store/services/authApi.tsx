@@ -110,7 +110,7 @@
 // import { TOKEN_NAME } from '@/store/constants';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { LoginBodyType, LoginPayloadType } from './types';
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND;
+const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const tags = ['self'];
 
 const TOKEN_NAME = 'bazarey';
@@ -144,7 +144,7 @@ export const authApi = createApi({
 		// ✅ login matches old file (auth/login)
 		login: builder.mutation<LoginPayloadType, LoginBodyType>({
 			query: ({ email, password }) => ({
-				url: `user-api/auth/login`,
+				url: `api/auth/login`,
 				method: 'POST',
 				body: { email, password },
 			}),
@@ -154,7 +154,7 @@ export const authApi = createApi({
 		// ✅ register matches old file (auth/register)
 		register: builder.mutation<any, any>({
 			query: body => ({
-				url: `user-api/auth/register`,
+				url: `api/auth/register`,
 				method: 'POST',
 				body,
 			}),
