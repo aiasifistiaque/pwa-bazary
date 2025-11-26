@@ -209,7 +209,10 @@ export const authApi = createApi({
 				method: 'PUT',
 				body: { field, preferences },
 			}),
-			invalidatesTags: (result, error, { field, preferences }) => [field, 'self'],
+			invalidatesTags: (result, error, { field, preferences }) => [
+				field,
+				'self',
+			],
 		}),
 		updatePassord: builder.mutation<any, any>({
 			query: ({ field, preferences }) => ({
@@ -217,7 +220,10 @@ export const authApi = createApi({
 				method: 'PUT',
 				body: { field, preferences },
 			}),
-			invalidatesTags: (result, error, { field, preferences }) => [field, 'self'],
+			invalidatesTags: (result, error, { field, preferences }) => [
+				field,
+				'self',
+			],
 		}),
 
 		requestPasswordChange: builder.mutation({
@@ -240,6 +246,14 @@ export const authApi = createApi({
 				body: { token, password },
 			}),
 		}),
+		updateUserSelf: builder.mutation<any, any>({
+			query: body => ({
+				url: `api/auth/self`,
+				method: 'PUT',
+				body,
+			}),
+			invalidatesTags: ['self'],
+		}),
 	}),
 });
 
@@ -257,6 +271,7 @@ export const {
 	usePlaceOrderMutation,
 	useGetMyOrdersQuery,
 	useGetSingleOrderQuery,
+	useUpdateUserSelfMutation
 } = authApi;
 
 export default authApi;
