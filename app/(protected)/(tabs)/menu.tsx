@@ -1,6 +1,16 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { router } from 'expo-router';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo } from 'react';
+import {
+	Pressable,
+	SafeAreaView,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from 'react-native';
+
+import { useGetSelfQuery } from '@/store/services/authApi';
 
 type MenuItemProps = {
 	icon: string;
@@ -9,23 +19,18 @@ type MenuItemProps = {
 	iconColor?: string;
 };
 
-const MenuItem = ({ icon, title, onPress, iconColor = '#666666' }: MenuItemProps) => (
-	<Pressable
-		style={styles.menuItem}
-		onPress={onPress}>
+const MenuItem = ({
+	icon,
+	title,
+	onPress,
+	iconColor = '#666666',
+}: MenuItemProps) => (
+	<Pressable style={styles.menuItem} onPress={onPress}>
 		<View style={styles.menuItemLeft}>
-			<IconSymbol
-				name={icon}
-				size={24}
-				color={iconColor}
-			/>
+			<IconSymbol name={icon} size={24} color={iconColor} />
 			<Text style={styles.menuItemText}>{title}</Text>
 		</View>
-		<IconSymbol
-			name='chevron.right'
-			size={20}
-			color='#999999'
-		/>
+		<IconSymbol name='chevron.right' size={20} color='#999999' />
 	</Pressable>
 );
 
@@ -36,19 +41,21 @@ type CardButtonProps = {
 };
 
 const CardButton = ({ icon, title, onPress }: CardButtonProps) => (
-	<Pressable
-		style={styles.cardButton}
-		onPress={onPress}>
-		<IconSymbol
-			name={icon}
-			size={32}
-			color='#666666'
-		/>
+	<Pressable style={styles.cardButton} onPress={onPress}>
+		<IconSymbol name={icon} size={32} color='#666666' />
 		<Text style={styles.cardButtonText}>{title}</Text>
 	</Pressable>
 );
 
 export default function MenuScreen() {
+	const { data: userData, isLoading } = useGetSelfQuery({});
+	const userName = userData?.name?.trim();
+	const firstName = useMemo(() => {
+		if (!userName) return null;
+		return userName.split(' ')[0];
+	}, [userName]);
+	const headerTitle = firstName ? `Hi, ${firstName}` : 'Account';
+
 	const handleViewProfile = () => {
 		router.push('/profile');
 	};
@@ -70,30 +77,27 @@ export default function MenuScreen() {
 			<SafeAreaView style={styles.safeArea}>
 				{/* Header */}
 				<View style={styles.header}>
-					<Text style={styles.headerTitle}>Account</Text>
+					<Text style={styles.headerTitle}>
+						{isLoading ? 'Loading...' : headerTitle}
+					</Text>
 					<Pressable style={styles.settingsButton}>
-						<IconSymbol
-							name='gearshape'
-							size={24}
-							color='#000000'
-						/>
+						<IconSymbol name='gearshape' size={24} color='#000000' />
 					</Pressable>
 				</View>
 			</SafeAreaView>
 
 			<ScrollView
 				style={styles.scrollView}
-				showsVerticalScrollIndicator={false}>
+				showsVerticalScrollIndicator={false}
+			>
 				{/* User Profile Section */}
 				<View style={styles.profileSection}>
 					<View style={styles.profileHeader}>
-						<Text style={styles.userName}>Asif</Text>
+						<Text style={styles.userName}>
+							{isLoading ? 'Loading...' : userName || 'Guest'}
+						</Text>
 						<View style={styles.proBadge}>
-							<IconSymbol
-								name='crown.fill'
-								size={14}
-								color='#FFFFFF'
-							/>
+							<IconSymbol name='crown.fill' size={14} color='#FFFFFF' />
 							<Text style={styles.proText}>PRO</Text>
 						</View>
 					</View>
@@ -108,10 +112,7 @@ export default function MenuScreen() {
 							title='Orders'
 							onPress={handleOrdersPress}
 						/>
-						<CardButton
-							icon='heart'
-							title='Favourites'
-						/>
+						<CardButton icon='heart' title='Favourites' />
 						<CardButton
 							icon='mappin.circle'
 							title='Addresses'
@@ -122,18 +123,10 @@ export default function MenuScreen() {
 					{/* Refund Account */}
 					<Pressable style={styles.refundCard}>
 						<View style={styles.menuItemLeft}>
-							<IconSymbol
-								name='creditcard'
-								size={28}
-								color='#E63946'
-							/>
+							<IconSymbol name='creditcard' size={28} color='#E63946' />
 							<Text style={styles.refundText}>Refund Account</Text>
 						</View>
-						<IconSymbol
-							name='chevron.right'
-							size={20}
-							color='#999999'
-						/>
+						<IconSymbol name='chevron.right' size={20} color='#999999' />
 					</Pressable>
 				</View>
 
@@ -145,21 +138,9 @@ export default function MenuScreen() {
 						title='Subscription'
 						iconColor='#8B5CF6'
 					/>
-					<MenuItem
-						icon='ticket'
-						title='Vouchers'
-						iconColor='#666666'
-					/>
-					<MenuItem
-						icon='trophy'
-						title='bazarey rewards'
-						iconColor='#666666'
-					/>
-					<MenuItem
-						icon='gift'
-						title='Invite friends'
-						iconColor='#666666'
-					/>
+					<MenuItem icon='ticket' title='Vouchers' iconColor='#666666' />
+					<MenuItem icon='trophy' title='bazarey rewards' iconColor='#666666' />
+					<MenuItem icon='gift' title='Invite friends' iconColor='#666666' />
 				</View>
 
 				{/* General Section */}
@@ -181,11 +162,7 @@ export default function MenuScreen() {
 						title='Privacy Policy'
 						iconColor='#666666'
 					/>
-					<MenuItem
-						icon='info.circle'
-						title='About'
-						iconColor='#666666'
-					/>
+					<MenuItem icon='info.circle' title='About' iconColor='#666666' />
 				</View>
 
 				{/* Bottom Spacing */}

@@ -13,7 +13,6 @@ const tags = [
 	'coupons',
 	'filter',
 	'filters',
-	'organizatin',
 	'organizations',
 	'product',
 	'products',
@@ -31,6 +30,8 @@ const tags = [
 	'user-api/orders',
 	'user-api/categories',
 	'user-api/products',
+	'/categorys',
+	'categorys',
 ];
 
 // src/store/types.ts
