@@ -9,6 +9,7 @@ import {
 	TouchableWithoutFeedback,
 	Keyboard,
 	ActivityIndicator,
+	Platform,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { useRegisterMutation } from '@/store/services/authApi';
@@ -51,8 +52,7 @@ export default function RegisterScreen() {
 			}
 		}
 		if (!password) newErrors.password = 'Password is required';
-		if (!confirm)
-			newErrors.confirm = 'Confirm Password is required';
+		if (!confirm) newErrors.confirm = 'Confirm Password is required';
 		if (password && confirm && password !== confirm) {
 			newErrors.confirm = 'Passwords do not match';
 		}
@@ -76,197 +76,193 @@ export default function RegisterScreen() {
 	};
 
 	useEffect(() => {
-		if (registerResponse.isSuccess) {
-			const token = registerResponse.data?.token;
-			if (token) {
-				dispatch(login(token));
+		if (registerResponse.isSuccess && registerResponse.data) {
+			dispatch(login(registerResponse.data));
+			resetAll();
+
+			// Use setTimeout to ensure state updates complete before navigation
+			setTimeout(() => {
 				router.replace('/');
-				resetAll();
-			} else {
-				Alert.alert('Error', 'Registration successful, but no token received.');
-			}
+			}, 100);
 		} else if (registerResponse.isError) {
 			setDialogVisible(true);
 		}
-	}, [registerResponse]);
+	}, [
+		registerResponse.isSuccess,
+		registerResponse.isError,
+		registerResponse.data,
+	]);
+
+	const dismissKeyboard = () => {
+		if (Platform.OS !== 'web') {
+			Keyboard.dismiss();
+		}
+	};
+
+	const content = (
+		<View style={styles.container}>
+			<Text style={styles.title}>Register</Text>
+
+			<TextInput
+				style={styles.input}
+				placeholder='Name'
+				placeholderTextColor={'#6d6b6b'}
+				value={name}
+				onChangeText={value => {
+					setName(value);
+					if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+				}}
+				autoCapitalize='words'
+			/>
+			{errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+
+			<TextInput
+				style={styles.input}
+				placeholder='Email'
+				placeholderTextColor={'#6d6b6b'}
+				value={email}
+				onChangeText={value => {
+					setemail(value);
+					// Clear previous error
+					if (errors.email) {
+						setErrors(prev => ({ ...prev, email: '' }));
+					}
+					// If it's a phone number (only contains digits), validate length
+					if (isPhoneNumber(value) && value.length > 0 && value.length !== 11) {
+						setErrors(prev => ({
+							...prev,
+							email: 'Phone number must be 11 digits',
+						}));
+					}
+				}}
+				autoCapitalize='none'
+				keyboardType='default'
+			/>
+			{errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+
+			<View style={styles.passwordContainer}>
+				<TextInput
+					style={[styles.input, styles.passwordInput]}
+					placeholder='Password'
+					placeholderTextColor={'#6d6b6b'}
+					value={password}
+					onChangeText={value => {
+						setPassword(value);
+						if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+					}}
+					secureTextEntry={!showPassword}
+				/>
+				<TouchableOpacity
+					style={styles.eyeButton}
+					onPress={() => setShowPassword(prev => !prev)}
+				>
+					{showPassword ? (
+						<FontAwesome name='eye' size={20} color='#000' />
+					) : (
+						<FontAwesome name='eye-slash' size={20} color='#000' />
+					)}
+				</TouchableOpacity>
+			</View>
+			{errors.password && (
+				<Text style={styles.errorText}>{errors.password}</Text>
+			)}
+
+			<View style={styles.passwordContainer}>
+				<TextInput
+					style={[styles.input, styles.passwordInput]}
+					placeholder='Confirm Password'
+					placeholderTextColor={'#6d6b6b'}
+					value={confirm}
+					onChangeText={value => {
+						setconfirm(value);
+						if (errors.confirm) setErrors(prev => ({ ...prev, confirm: '' }));
+					}}
+					secureTextEntry={!showconfirm}
+				/>
+				<TouchableOpacity
+					style={styles.eyeButton}
+					onPress={() => setShowconfirm(prev => !prev)}
+				>
+					{showconfirm ? (
+						<FontAwesome name='eye' size={20} color='#000' />
+					) : (
+						<FontAwesome name='eye-slash' size={20} color='#000' />
+					)}
+				</TouchableOpacity>
+			</View>
+			{errors.confirm && <Text style={styles.errorText}>{errors.confirm}</Text>}
+
+			<TouchableOpacity
+				style={[
+					styles.button,
+					registerResponse.isLoading && styles.buttonDisabled,
+				]}
+				onPress={handleRegister}
+				disabled={registerResponse.isLoading}
+			>
+				<Text style={styles.buttonText}>
+					{registerResponse.isLoading ? (
+						<ActivityIndicator size={'small'} color={'#fff'} />
+					) : (
+						'Register'
+					)}
+				</Text>
+			</TouchableOpacity>
+
+			<Text style={styles.footerText}>
+				Already registered?{' '}
+				<Text style={styles.linkText} onPress={() => router.push('/login')}>
+					Login now!
+				</Text>
+			</Text>
+
+			{/* React Native Paper Dialog */}
+			<Portal>
+				<Dialog
+					visible={isDialogVisible}
+					onDismiss={() => setDialogVisible(false)}
+				>
+					<Dialog.Title>Oops!</Dialog.Title>
+					<Dialog.Content>
+						<Paragraph>
+							{(() => {
+								if (
+									registerResponse?.error &&
+									'data' in registerResponse.error
+								) {
+									const errorData = registerResponse.error.data as {
+										message?: string;
+									};
+									return (
+										errorData?.message || 'An error occurred. Please try again.'
+									);
+								}
+								if (
+									registerResponse?.error &&
+									'message' in registerResponse.error
+								) {
+									return registerResponse.error.message;
+								}
+								return 'An error occurred. Please try again.';
+							})()}
+						</Paragraph>
+					</Dialog.Content>
+					<Dialog.Actions>
+						<Button onPress={() => setDialogVisible(false)}>OK</Button>
+					</Dialog.Actions>
+				</Dialog>
+			</Portal>
+		</View>
+	);
+
+	// Only wrap in TouchableWithoutFeedback on mobile platforms
+	if (Platform.OS === 'web') {
+		return content;
+	}
 
 	return (
-		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-			<View style={styles.container}>
-				<Text style={styles.title}>Register</Text>
-
-				<TextInput
-					style={styles.input}
-					placeholder='Name'
-					placeholderTextColor={'#6d6b6b'}
-					value={name}
-					onChangeText={value => {
-						setName(value);
-						if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
-					}}
-					autoCapitalize='words'
-				/>
-				{errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-
-				<TextInput
-					style={styles.input}
-					placeholder='Email'
-					placeholderTextColor={'#6d6b6b'}
-					value={email}
-					onChangeText={value => {
-						setemail(value);
-						// Clear previous error
-						if (errors.email) {
-							setErrors(prev => ({ ...prev, email: '' }));
-						}
-						// If it's a phone number (only contains digits), validate length
-						if (
-							isPhoneNumber(value) &&
-							value.length > 0 &&
-							value.length !== 11
-						) {
-							setErrors(prev => ({
-								...prev,
-								email: 'Phone number must be 11 digits',
-							}));
-						}
-					}}
-					autoCapitalize='none'
-					keyboardType='default'
-				/>
-				{errors.email && (
-					<Text style={styles.errorText}>{errors.email}</Text>
-				)}
-
-				<View style={styles.passwordContainer}>
-					<TextInput
-						style={[styles.input, styles.passwordInput]}
-						placeholder='Password'
-						placeholderTextColor={'#6d6b6b'}
-						value={password}
-						onChangeText={value => {
-							setPassword(value);
-							if (errors.password)
-								setErrors(prev => ({ ...prev, password: '' }));
-						}}
-						secureTextEntry={!showPassword}
-					/>
-					<TouchableOpacity
-						style={styles.eyeButton}
-						onPress={() => setShowPassword(prev => !prev)}
-					>
-						{showPassword ? (
-							<FontAwesome name='eye' size={20} color='#000' />
-						) : (
-							<FontAwesome name='eye-slash' size={20} color='#000' />
-						)}
-					</TouchableOpacity>
-				</View>
-				{errors.password && (
-					<Text style={styles.errorText}>{errors.password}</Text>
-				)}
-
-				<View style={styles.passwordContainer}>
-					<TextInput
-						style={[styles.input, styles.passwordInput]}
-						placeholder='Confirm Password'
-						placeholderTextColor={'#6d6b6b'}
-						value={confirm}
-						onChangeText={value => {
-							setconfirm(value);
-							if (errors.confirm)
-								setErrors(prev => ({ ...prev, confirm: '' }));
-						}}
-						secureTextEntry={!showconfirm}
-					/>
-					<TouchableOpacity
-						style={styles.eyeButton}
-						onPress={() => setShowconfirm(prev => !prev)}
-					>
-						{showconfirm ? (
-							<FontAwesome name='eye' size={20} color='#000' />
-						) : (
-							<FontAwesome name='eye-slash' size={20} color='#000' />
-						)}
-					</TouchableOpacity>
-				</View>
-				{errors.confirm && (
-					<Text style={styles.errorText}>{errors.confirm}</Text>
-				)}
-
-				<TouchableOpacity
-					style={[
-						styles.button,
-						registerResponse.isLoading && styles.buttonDisabled,
-					]}
-					onPress={handleRegister}
-					disabled={registerResponse.isLoading}
-				>
-					<Text style={styles.buttonText}>
-						{registerResponse.isLoading ? (
-							<ActivityIndicator size={'small'} color={'#fff'} />
-						) : (
-							'Register'
-						)}
-					</Text>
-				</TouchableOpacity>
-
-				<Text style={styles.footerText}>
-					Already registered?{' '}
-					<Text
-						style={styles.linkText}
-						onPress={() => router.push('/login')}
-					>
-						Login now!
-					</Text>
-				</Text>
-
-				{/* React Native Paper Dialog */}
-				<Portal>
-					<Dialog
-						visible={isDialogVisible}
-						onDismiss={() => setDialogVisible(false)}
-					>
-						<Dialog.Title>Oops!</Dialog.Title>
-						<Dialog.Content>
-							{/* <Paragraph>
-								{(() => {
-									if (
-										registerResponse?.error &&
-										'data' in registerResponse.error
-									) {
-										return JSON.stringify(registerResponse.error);
-									}
-									return JSON.stringify(registerResponse.error);
-								})()}
-							</Paragraph> */}
-							<Paragraph>
-								{(() => {
-									if (
-										registerResponse?.error &&
-										'data' in registerResponse.error
-									) {
-										const errorData = registerResponse.error.data as {
-											message?: string;
-										};
-										return errorData?.message;
-									}
-									if (
-										registerResponse?.error &&
-										'message' in registerResponse.error
-									) {
-										return registerResponse.error.message;
-									}
-									return null;
-								})()}
-							</Paragraph>
-						</Dialog.Content>
-						<Dialog.Actions>
-							<Button onPress={() => setDialogVisible(false)}>OK</Button>
-						</Dialog.Actions>
-					</Dialog>
-				</Portal>
-			</View>
+		<TouchableWithoutFeedback onPress={dismissKeyboard}>
+			{content}
 		</TouchableWithoutFeedback>
 	);
 }
