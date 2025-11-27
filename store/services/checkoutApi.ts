@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import mainApi from './guestMainApi';
+
+import mainApi from "./mainApi";
 
 export const checkoutAPi = mainApi.injectEndpoints({
 	overrideExisting: true,

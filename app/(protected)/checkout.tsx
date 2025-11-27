@@ -1,6 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RootState } from '@/store';
 import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
+import { resetCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -14,6 +15,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useCreateOrderMutation } from '@/store/services/checkoutApi';
 
 type DeliveryTimeSlot = {
 	id: string;
@@ -43,8 +45,9 @@ const paymentMethods: PaymentMethod[] = [
 
 export default function CheckoutScreen() {
 	const dispatch = useDispatch();
+	const [createOrder, { isLoading }] = useCreateOrderMutation();
 	const [errorMsg, setErrorMsg] = useState<string>('');
-	const { total, subTotal, shipping, vat, discount } = useSelector(
+	const { total, subTotal, shipping, vat, discount, cartItems } = useSelector(
 		(state: RootState) => state.cart
 	);
 	const savedAddresses = useSelector(
@@ -105,12 +108,11 @@ export default function CheckoutScreen() {
 		console.warn('Checkout validation error:', msg);
 	};
 
-	const handlePlaceOrder = () => {
+	const handlePlaceOrder = async () => {
 		// clear previous error first
 		setErrorMsg('');
 		if (!selectedTimeSlot) {
 			setError('Please select a delivery time slot.');
-			// Alert.alert('Missing Information', 'Please select a delivery time slot');
 			return;
 		}
 		if (
@@ -123,34 +125,62 @@ export default function CheckoutScreen() {
 			setError(
 				'Please complete your delivery address (name, phone, street, area, city).'
 			);
-			// Alert.alert(
-			// 	'Missing Information',
-			// 	'Please complete your delivery address'
-			// );
 			return;
 		}
 		if (!selectedPayment) {
 			setError('Please select a payment method.');
-			// Alert.alert('Missing Information', 'Please select a payment method');
 			return;
 		}
-		// ✅ LOG EVERYTHING NECESSARY BEFORE PLACING ORDER/
-		console.log('✅ Placing order payload:', {
-			selectedTimeSlot,
-			selectedPayment,
-			couponCode,
-			totals: { total, subTotal, shipping, vat, discount },
-			address,
-			// If you want cart items too, uncomment:
-			// cartItems: useSelector((state: RootState) => state.cart.cartItems),
-			timestamp: new Date().toISOString(),
-		});
-		Alert.alert('Success', 'Your order has been placed successfully!', [
-			{
-				text: 'OK',
-				onPress: () => router.push('/(protected)/(tabs)'),
-			},
-		]);
+
+		try {
+			const payload = {
+				cart: {
+					items: cartItems.map((item: any) => ({
+						_id: item._id || item.id,
+						name: item.name,
+						qty: item.qty,
+						unitPrice: item.unitPrice,
+						totalPrice: item.price,
+						image: item.image,
+						uniqueId: item.uniqueId,
+						unitVat: item.vat,
+					})),
+					total,
+					subTotal,
+					vat,
+					shipping,
+					discount,
+					couponId: null,
+					dueAmount: total,
+				},
+				address,
+				paymentMethod: selectedPayment,
+				paymentAmount: total,
+				status: 'pending',
+				origin: 'app',
+				orderDate: new Date(),
+			};
+
+			const res = await createOrder({
+				storeId: 'default',
+				body: payload,
+			}).unwrap();
+
+			if (res) {
+				dispatch(resetCart());
+				Alert.alert('Success', 'Your order has been placed successfully!', [
+					{
+						text: 'OK',
+						onPress: () => router.push('/(protected)/(tabs)'),
+					},
+				]);
+			}
+		} catch (error: any) {
+			console.error(error);
+			setError(
+				error?.data?.message || 'Failed to place order. Please try again.'
+			);
+		}
 	};
 
 	return (

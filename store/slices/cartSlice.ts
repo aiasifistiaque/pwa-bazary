@@ -76,9 +76,12 @@ const saveStateToLocalStorage = (state: typeof initialState) => {
 
 // Helper function to calculate totals
 const calculateTotals = (state: State) => {
-	state.subTotal = state.cartItems.reduce((total: number, cartItem: CartItem) => {
-		return total + cartItem.price * cartItem.qty;
-	}, 0);
+	state.subTotal = state.cartItems.reduce(
+		(total: number, cartItem: CartItem) => {
+			return total + cartItem.price;
+		},
+		0
+	);
 
 	state.vat = state.cartItems.reduce((total: number, cartItem: CartItem) => {
 		if (cartItem.vat) {
@@ -88,7 +91,10 @@ const calculateTotals = (state: State) => {
 	}, 0);
 
 	state.total = state.subTotal + state.vat + state.shipping - state.discount;
-	state.totalItems = state.cartItems.reduce((total, item) => total + item.qty, 0);
+	state.totalItems = state.cartItems.reduce(
+		(total, item) => total + item.qty,
+		0
+	);
 };
 
 export const cartSlice = createSlice({
@@ -99,7 +105,13 @@ export const cartSlice = createSlice({
 	})(),
 	reducers: {
 		calculateCartTotals: (state, action) => {
-			const { subTotal = 0, total = 0, vat = 0, discount = 0, shipping = 0 } = action.payload;
+			const {
+				subTotal = 0,
+				total = 0,
+				vat = 0,
+				discount = 0,
+				shipping = 0,
+			} = action.payload;
 			state.subTotal = subTotal;
 			state.total = total;
 			state.vat = vat;
@@ -117,7 +129,8 @@ export const cartSlice = createSlice({
 			// Create unique ID based on product and variation
 			const baseId = item?._id || item?.id;
 			const variationPart =
-				item.variationId || `${item.selectedSize || 'no-size'}-${item.selectedColor || 'no-color'}`;
+				item.variationId ||
+				`${item.selectedSize || 'no-size'}-${item.selectedColor || 'no-color'}`;
 			const uniqueId = `${baseId}-${variationPart}`;
 
 			// Check stock if variation has stock info

@@ -81,7 +81,7 @@ const recipeCombos = [
 // Mock product data with more realistic grocery items
 const newInAppProducts = [
 	{
-		id: '1',
+		id: '507f1f77bcf86cd799439011',
 		name: 'Pepsi Lemon Zero',
 		price: '1,028',
 		unit: '6 × 1,25L',
@@ -92,7 +92,7 @@ const newInAppProducts = [
 			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
 	},
 	{
-		id: '2',
+		id: '507f1f77bcf86cd799439012',
 		name: 'Pineapple Slices in Juice',
 		price: '206',
 		unit: 'XL 340g',
@@ -103,7 +103,7 @@ const newInAppProducts = [
 			'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400&h=400&fit=crop',
 	},
 	{
-		id: '3',
+		id: '507f1f77bcf86cd799439013',
 		name: 'Fresh Orange Juice',
 		price: '401',
 		unit: '1L',
@@ -114,7 +114,7 @@ const newInAppProducts = [
 			'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
 	},
 	{
-		id: '4',
+		id: '507f1f77bcf86cd799439014',
 		name: 'Organic Bananas',
 		price: '263',
 		unit: '1kg',
@@ -126,7 +126,7 @@ const newInAppProducts = [
 
 const popularProducts = [
 	{
-		id: '5',
+		id: '507f1f77bcf86cd799439015',
 		name: 'Whole Milk',
 		price: '171',
 		unit: '1L',
@@ -135,7 +135,7 @@ const popularProducts = [
 			'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=400&fit=crop',
 	},
 	{
-		id: '6',
+		id: '507f1f77bcf86cd799439016',
 		name: 'Fresh Bread',
 		price: '344',
 		unit: '500g',
@@ -144,7 +144,7 @@ const popularProducts = [
 			'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
 	},
 	{
-		id: '7',
+		id: '507f1f77bcf86cd799439017',
 		name: 'Eggs Free Range',
 		price: '436',
 		unit: '10 pieces',
@@ -153,7 +153,7 @@ const popularProducts = [
 			'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=400&fit=crop',
 	},
 	{
-		id: '8',
+		id: '507f1f77bcf86cd799439018',
 		name: 'Greek Yogurt',
 		price: '229',
 		unit: '500g',
@@ -165,7 +165,7 @@ const popularProducts = [
 
 const freshProduceProducts = [
 	{
-		id: '9',
+		id: '507f1f77bcf86cd799439019',
 		name: 'Fresh Tomatoes',
 		price: '286',
 		unit: '500g',
@@ -174,7 +174,7 @@ const freshProduceProducts = [
 			'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&h=400&fit=crop',
 	},
 	{
-		id: '10',
+		id: '507f1f77bcf86cd79943901a',
 		name: 'Green Lettuce',
 		price: '148',
 		unit: '1 piece',
@@ -183,7 +183,7 @@ const freshProduceProducts = [
 			'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400&h=400&fit=crop',
 	},
 	{
-		id: '11',
+		id: '507f1f77bcf86cd79943901b',
 		name: 'Red Apples',
 		price: '401',
 		unit: '1kg',
@@ -192,7 +192,7 @@ const freshProduceProducts = [
 			'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop',
 	},
 	{
-		id: '12',
+		id: '507f1f77bcf86cd79943901c',
 		name: 'Baby Carrots',
 		price: '217',
 		unit: '500g',
@@ -204,7 +204,7 @@ const freshProduceProducts = [
 
 const beverageProducts = [
 	{
-		id: '13',
+		id: '507f1f77bcf86cd79943901d',
 		name: 'Coca Cola Zero',
 		price: '919',
 		unit: '6 × 1,5L',
@@ -213,7 +213,7 @@ const beverageProducts = [
 			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
 	},
 	{
-		id: '14',
+		id: '507f1f77bcf86cd79943901e',
 		name: 'Sparkling Water',
 		price: '286',
 		unit: '6 × 1,5L',
@@ -222,7 +222,7 @@ const beverageProducts = [
 			'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop',
 	},
 	{
-		id: '15',
+		id: '507f1f77bcf86cd79943901f',
 		name: 'Apple Juice',
 		price: '344',
 		unit: '1L',
@@ -231,7 +231,7 @@ const beverageProducts = [
 			'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
 	},
 	{
-		id: '16',
+		id: '507f1f77bcf86cd799439020',
 		name: 'Green Tea',
 		price: '401',
 		unit: '20 bags',
@@ -243,7 +243,7 @@ const beverageProducts = [
 
 const specialOffersProducts = [
 	{
-		id: '17',
+		id: '507f1f77bcf86cd799439021',
 		name: 'Pasta Penne',
 		price: '148',
 		unit: '500g',
@@ -254,7 +254,7 @@ const specialOffersProducts = [
 			'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop',
 	},
 	{
-		id: '18',
+		id: '507f1f77bcf86cd799439022',
 		name: 'Olive Oil Extra Virgin',
 		price: '804',
 		unit: '500ml',
@@ -265,7 +265,7 @@ const specialOffersProducts = [
 			'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
 	},
 	{
-		id: '19',
+		id: '507f1f77bcf86cd799439023',
 		name: 'Chocolate Bar Dark',
 		price: '286',
 		unit: '100g',
@@ -276,7 +276,7 @@ const specialOffersProducts = [
 			'https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&h=400&fit=crop',
 	},
 	{
-		id: '20',
+		id: '507f1f77bcf86cd799439024',
 		name: 'Coffee Beans',
 		price: '1,034',
 		unit: '500g',

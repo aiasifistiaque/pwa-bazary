@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux';
 // Mock favorite products data
 const favoriteProducts = [
 	{
-		id: '1',
+		id: '507f1f77bcf86cd799439046',
 		name: 'Bio Apfel Pink Lady',
 		category: 'Sweet-sour',
 		price: '367',
@@ -15,10 +15,11 @@ const favoriteProducts = [
 		unit: '550g',
 		unitPrice: '৳667/kg',
 		discount: '20% Off',
-		image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop',
 	},
 	{
-		id: '2',
+		id: '507f1f77bcf86cd799439047',
 		name: 'Bio Apfel Elstar',
 		category: 'Sweet-sour',
 		price: '344',
@@ -26,10 +27,11 @@ const favoriteProducts = [
 		unit: '1kg',
 		unitPrice: '৳344/kg',
 		badge: 'now ৳344',
-		image: 'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?w=400&h=400&fit=crop',
 	},
 	{
-		id: '3',
+		id: '507f1f77bcf86cd799439048',
 		name: 'Fresh Raspberries',
 		category: 'Berries',
 		price: '275',
@@ -37,19 +39,21 @@ const favoriteProducts = [
 		unit: '125g',
 		unitPrice: '৳2,200/kg',
 		discount: '20% Off',
-		image: 'https://images.unsplash.com/photo-1577069861033-55d04cec4ef5?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1577069861033-55d04cec4ef5?w=400&h=400&fit=crop',
 	},
 	{
-		id: '4',
+		id: '507f1f77bcf86cd799439049',
 		name: 'Fresh Strawberries',
 		category: 'Berries',
 		price: '401',
 		unit: '500g',
 		unitPrice: '৳802/kg',
-		image: 'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=400&h=400&fit=crop',
 	},
 	{
-		id: '5',
+		id: '507f1f77bcf86cd79943904a',
 		name: 'Organic Blueberries',
 		category: 'Berries',
 		price: '459',
@@ -57,19 +61,21 @@ const favoriteProducts = [
 		unit: '125g',
 		unitPrice: '৳3,672/kg',
 		discount: '20% Off',
-		image: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?w=400&h=400&fit=crop',
 	},
 	{
-		id: '6',
+		id: '507f1f77bcf86cd79943904b',
 		name: 'Fresh Blackberries',
 		category: 'Berries',
 		price: '344',
 		unit: '150g',
 		unitPrice: '৳2,293/kg',
-		image: 'https://images.unsplash.com/photo-1588169844932-d63cb3d9d220?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1588169844932-d63cb3d9d220?w=400&h=400&fit=crop',
 	},
 	{
-		id: '7',
+		id: '507f1f77bcf86cd79943904c',
 		name: 'Organic Pears',
 		category: 'Sweet',
 		price: '286',
@@ -77,17 +83,19 @@ const favoriteProducts = [
 		unit: '1kg',
 		unitPrice: '৳286/kg',
 		discount: '15% Off',
-		image: 'https://images.unsplash.com/photo-1568632234157-ce7aecd03d0d?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1568632234157-ce7aecd03d0d?w=400&h=400&fit=crop',
 	},
 	{
-		id: '8',
+		id: '507f1f77bcf86cd79943904d',
 		name: 'Red Grapes',
 		category: 'Sweet',
 		price: '459',
 		unit: '500g',
 		unitPrice: '৳918/kg',
 		badge: 'now ৳459',
-		image: 'https://images.unsplash.com/photo-1599819177121-95d8e4c9c656?w=400&h=400&fit=crop',
+		image:
+			'https://images.unsplash.com/photo-1599819177121-95d8e4c9c656?w=400&h=400&fit=crop',
 	},
 ];
 
@@ -116,16 +124,15 @@ export default function FavoritesScreen() {
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
-			<ScrollView
-				style={styles.container}
-				showsVerticalScrollIndicator={false}>
+			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 				<View style={styles.header}>
 					<Text style={styles.title}>Favorites</Text>
 					<Text style={styles.description}>
 						Discover a small selection from our diverse range. After your{' '}
-						<Text style={styles.bold}>first order</Text> you'll find your personal favorites here.{' '}
-						<Text style={styles.bold}>More than 10,000 items</Text> are waiting to be discovered by
-						you!
+						<Text style={styles.bold}>first order</Text> you'll find your
+						personal favorites here.{' '}
+						<Text style={styles.bold}>More than 10,000 items</Text> are waiting
+						to be discovered by you!
 					</Text>
 				</View>
 
