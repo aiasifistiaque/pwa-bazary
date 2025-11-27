@@ -38,6 +38,7 @@ const MAPPING = {
 	gearshape: 'settings',
 	'location.fill': 'location-on',
 	'mappin.circle.fill': 'place',
+	'mappin.circle': 'place',
 	'clock.fill': 'schedule',
 	'creditcard.fill': 'credit-card',
 	creditcard: 'credit-card',
@@ -48,6 +49,13 @@ const MAPPING = {
 	checkmark: 'check',
 	tray: 'inbox',
 	'arrow.clockwise': 'refresh',
+	'doc.text': 'description',
+	ticket: 'confirmation-number',
+	trophy: 'emoji-events',
+	gift: 'card-giftcard',
+	'questionmark.circle': 'help-outline',
+	'shield.checkmark': 'verified-user',
+	'info.circle': 'info-outline',
 } as IconMapping;
 
 /**

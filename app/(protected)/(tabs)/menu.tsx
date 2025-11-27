@@ -72,6 +72,10 @@ export default function MenuScreen() {
 		router.push('/addresses');
 	};
 
+	const handleFavoritesPress = () => {
+		router.push('/(protected)/(tabs)/favorites');
+	};
+
 	return (
 		<View style={styles.container}>
 			<SafeAreaView style={styles.safeArea}>
@@ -112,7 +116,11 @@ export default function MenuScreen() {
 							title='Orders'
 							onPress={handleOrdersPress}
 						/>
-						<CardButton icon='heart' title='Favourites' />
+						<CardButton
+							icon='heart'
+							title='Favourites'
+							onPress={handleFavoritesPress}
+						/>
 						<CardButton
 							icon='mappin.circle'
 							title='Addresses'
@@ -136,7 +144,7 @@ export default function MenuScreen() {
 					<MenuItem
 						icon='crown.fill'
 						title='Subscription'
-						iconColor='#8B5CF6'
+						iconColor='#666666'
 					/>
 					<MenuItem icon='ticket' title='Vouchers' iconColor='#666666' />
 					<MenuItem icon='trophy' title='bazarey rewards' iconColor='#666666' />
