@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RootState } from '@/store';
+import { usePlaceOrderMutation } from '@/store/services/authApi';
 import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
 import { resetCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
@@ -50,6 +51,7 @@ export default function CheckoutScreen() {
 	const { total, subTotal, shipping, vat, discount, cartItems } = useSelector(
 		(state: RootState) => state.cart
 	);
+
 	const savedAddresses = useSelector(
 		(state: RootState) => state.address.addresses
 	);
@@ -61,6 +63,10 @@ export default function CheckoutScreen() {
 	const [selectedPayment, setSelectedPayment] = useState<string>('');
 	const [couponCode, setCouponCode] = useState<string>('');
 	const [showSavedAddresses, setShowSavedAddresses] = useState<boolean>(false);
+	// Get cart items and user from Redux store
+	const state = useSelector((state: RootState) => state);
+	const cartItems = state.cart.cartItems;
+	const userId = state.auth.user?._id;
 	const [address, setAddress] = useState({
 		name: '',
 		phone: '',
@@ -262,7 +268,7 @@ export default function CheckoutScreen() {
 									style={[
 										styles.savedAddressCard,
 										selectedCheckoutAddr?.id === addr.id &&
-											styles.selectedSavedAddress,
+										styles.selectedSavedAddress,
 									]}
 									onPress={() => handleSelectSavedAddress(addr)}
 								>
@@ -385,7 +391,7 @@ export default function CheckoutScreen() {
 									<View style={styles.radioSelected} />
 								)}
 							</View>
-							<IconSymbol name={method.icon} size={24} color='#666666' />
+							<IconSymbol name={method?.icon} size={24} color='#666666' />
 							<Text style={styles.paymentMethodName}>{method.name}</Text>
 						</Pressable>
 					))}
