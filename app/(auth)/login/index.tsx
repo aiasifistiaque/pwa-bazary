@@ -65,7 +65,6 @@ export default function LoginScreen() {
 console.log("login res",loginResponse)
 	useEffect(() => {
 		if (loginResponse.isSuccess && loginResponse.data) {
-			dispatch(login(loginResponse.data.user));
 			resetAll();
 
 			// Use setTimeout to ensure state updates complete before navigation
