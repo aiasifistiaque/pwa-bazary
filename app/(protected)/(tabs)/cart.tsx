@@ -20,21 +20,21 @@ import { useDispatch, useSelector } from 'react-redux';
 // Mock data for popular items
 const popularItems = [
 	{
-		id: 'p1',
+		id: '507f1f77bcf86cd799439025',
 		name: 'Classic Burger',
 		image:
 			'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
 		price: 450,
 	},
 	{
-		id: 'p2',
+		id: '507f1f77bcf86cd799439026',
 		name: 'Cheese Burger',
 		image:
 			'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop',
 		price: 550,
 	},
 	{
-		id: 'p3',
+		id: '507f1f77bcf86cd799439027',
 		name: 'Chicken Burger',
 		image:
 			'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=300&fit=crop',
