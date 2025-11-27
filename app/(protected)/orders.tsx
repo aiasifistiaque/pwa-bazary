@@ -192,7 +192,7 @@ export default function OrdersScreen() {
 	);
 
 	const handleOrderPress = (orderId: string) => {
-		router.push(`/order-detail/${orderId}`);
+		// router.push(`/order-detail/${orderId}`);
 	};
 
 	const handleReorder = (order: Order) => {
