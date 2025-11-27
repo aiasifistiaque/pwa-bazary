@@ -2,8 +2,18 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+	ActivityIndicator,
+	Image,
+	Pressable,
+	SafeAreaView,
+	ScrollView,
+	StyleSheet,
+	Text,
+	View,
+} from 'react-native';
 import { useDispatch } from 'react-redux';
+import { useGetOrdersQuery } from '@/store/services/checkoutApi';
 
 type OrderItem = {
 	id: string;
@@ -22,160 +32,6 @@ type Order = {
 	total: number;
 	deliveryAddress: string;
 };
-
-const mockOngoingOrders: Order[] = [
-	{
-		id: 'ord1',
-		orderNumber: '#12345',
-		date: '2025-11-13',
-		status: 'delivering',
-		items: [
-			{
-				id: '1',
-				name: 'Basmati Rice',
-				quantity: 2,
-				price: 150,
-				image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&h=200&fit=crop',
-			},
-			{
-				id: '2',
-				name: 'Fresh Tomatoes',
-				quantity: 1,
-				price: 80,
-				image: 'https://images.unsplash.com/photo-1546470427-e26264be0b0d?w=200&h=200&fit=crop',
-			},
-			{
-				id: '3',
-				name: 'Chicken Breast',
-				quantity: 1,
-				price: 350,
-				image: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=200&h=200&fit=crop',
-			},
-		],
-		total: 730,
-		deliveryAddress: 'House 45, Road 12, Dhanmondi, Dhaka',
-	},
-	{
-		id: 'ord2',
-		orderNumber: '#12344',
-		date: '2025-11-13',
-		status: 'confirmed',
-		items: [
-			{
-				id: '4',
-				name: 'Milk',
-				quantity: 2,
-				price: 85,
-				image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-			},
-			{
-				id: '5',
-				name: 'Whole Wheat Bread',
-				quantity: 1,
-				price: 45,
-				image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&h=200&fit=crop',
-			},
-		],
-		total: 215,
-		deliveryAddress: 'House 45, Road 12, Dhanmondi, Dhaka',
-	},
-];
-
-const mockPastOrders: Order[] = [
-	{
-		id: 'ord3',
-		orderNumber: '#12340',
-		date: '2025-11-10',
-		status: 'delivered',
-		items: [
-			{
-				id: '6',
-				name: 'Basmati Rice',
-				quantity: 1,
-				price: 150,
-				image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&h=200&fit=crop',
-			},
-			{
-				id: '7',
-				name: 'Cooking Oil',
-				quantity: 1,
-				price: 180,
-				image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=200&h=200&fit=crop',
-			},
-			{
-				id: '8',
-				name: 'Onions',
-				quantity: 1,
-				price: 40,
-				image: 'https://images.unsplash.com/photo-1587486913049-53fc88980cbe?w=200&h=200&fit=crop',
-			},
-			{
-				id: '9',
-				name: 'Potatoes',
-				quantity: 1,
-				price: 40,
-				image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200&h=200&fit=crop',
-			},
-		],
-		total: 410,
-		deliveryAddress: 'House 45, Road 12, Dhanmondi, Dhaka',
-	},
-	{
-		id: 'ord4',
-		orderNumber: '#12335',
-		date: '2025-11-08',
-		status: 'delivered',
-		items: [
-			{
-				id: '10',
-				name: 'Fresh Vegetables Mix',
-				quantity: 1,
-				price: 120,
-				image: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=200&h=200&fit=crop',
-			},
-			{
-				id: '11',
-				name: 'Yogurt',
-				quantity: 2,
-				price: 65,
-				image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-			},
-			{
-				id: '12',
-				name: 'Eggs (12 pcs)',
-				quantity: 1,
-				price: 95,
-				image: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=200&h=200&fit=crop',
-			},
-		],
-		total: 345,
-		deliveryAddress: 'House 45, Road 12, Dhanmondi, Dhaka',
-	},
-	{
-		id: 'ord5',
-		orderNumber: '#12330',
-		date: '2025-11-05',
-		status: 'delivered',
-		items: [
-			{
-				id: '13',
-				name: 'Chicken Biryani Masala',
-				quantity: 1,
-				price: 85,
-				image: 'https://images.unsplash.com/photo-1596040033229-a0b34e5e5a88?w=200&h=200&fit=crop',
-			},
-			{
-				id: '14',
-				name: 'Ghee',
-				quantity: 1,
-				price: 180,
-				image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-			},
-		],
-		total: 265,
-		deliveryAddress: 'House 45, Road 12, Dhanmondi, Dhaka',
-	},
-];
 
 const getStatusColor = (status: Order['status']) => {
 	switch (status) {
@@ -218,39 +74,43 @@ type OrderCardProps = {
 	onPress?: (orderId: string) => void;
 };
 
-const OrderCard = ({ order, showReorderButton = false, onReorder, onPress }: OrderCardProps) => {
+const OrderCard = ({
+	order,
+	showReorderButton = false,
+	onReorder,
+	onPress,
+}: OrderCardProps) => {
 	const statusColor = getStatusColor(order.status);
 	const statusText = getStatusText(order.status);
+	const fallbackImage = 'https://via.placeholder.com/200'; // Fallback image
 
 	return (
-		<Pressable
-			style={styles.orderCard}
-			onPress={() => onPress?.(order.id)}>
+		<Pressable style={styles.orderCard} onPress={() => onPress?.(order.id)}>
 			{/* Order Header */}
 			<View style={styles.orderHeader}>
 				<View>
 					<Text style={styles.orderNumber}>{order.orderNumber}</Text>
 					<Text style={styles.orderDate}>{order.date}</Text>
 				</View>
-				<View style={[styles.statusBadge, { backgroundColor: `${statusColor}15` }]}>
-					<Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
+				<View
+					style={[styles.statusBadge, { backgroundColor: `${statusColor}15` }]}
+				>
+					<Text style={[styles.statusText, { color: statusColor }]}>
+						{statusText}
+					</Text>
 				</View>
 			</View>
 
 			{/* Order Items Preview */}
 			<View style={styles.itemsPreview}>
 				{order.items.slice(0, 3).map((item, index) => (
-					<View
-						key={item.id}
-						style={styles.itemRow}>
+					<View key={item.id} style={styles.itemRow}>
 						<Image
-							source={{ uri: item.image }}
+							source={{ uri: item.image || fallbackImage }}
 							style={styles.itemImage}
 						/>
 						<View style={styles.itemInfo}>
-							<Text
-								style={styles.itemName}
-								numberOfLines={1}>
+							<Text style={styles.itemName} numberOfLines={1}>
 								{item.name}
 							</Text>
 							<Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
@@ -259,7 +119,9 @@ const OrderCard = ({ order, showReorderButton = false, onReorder, onPress }: Ord
 					</View>
 				))}
 				{order.items.length > 3 && (
-					<Text style={styles.moreItems}>+{order.items.length - 3} more items</Text>
+					<Text style={styles.moreItems}>
+						+{order.items.length - 3} more items
+					</Text>
 				)}
 			</View>
 
@@ -276,12 +138,9 @@ const OrderCard = ({ order, showReorderButton = false, onReorder, onPress }: Ord
 						onPress={e => {
 							e.stopPropagation();
 							onReorder?.(order);
-						}}>
-						<IconSymbol
-							name='arrow.clockwise'
-							size={16}
-							color='#E63946'
-						/>
+						}}
+					>
+						<IconSymbol name='arrow.clockwise' size={16} color='#E63946' />
 						<Text style={styles.reorderButtonText}>Reorder</Text>
 					</Pressable>
 				)}
@@ -293,6 +152,44 @@ const OrderCard = ({ order, showReorderButton = false, onReorder, onPress }: Ord
 export default function OrdersScreen() {
 	const dispatch = useDispatch();
 	const [activeTab, setActiveTab] = useState<'ongoing' | 'past'>('ongoing');
+	const { data, isLoading } = useGetOrdersQuery({ storeId: 'default' });
+
+	const orders: Order[] =
+		data?.doc?.map((order: any) => ({
+			id: order._id,
+			orderNumber: order.invoice
+				? `#${order.invoice}`
+				: `#${order._id.slice(-6)}`,
+			date: new Date(order.orderDate).toISOString().split('T')[0],
+			status: order.status,
+			items: order.items.map((item: any) => ({
+				id: item._id,
+				name: item.name,
+				quantity: item.qty,
+				price: item.unitPrice,
+				image: item.image,
+			})),
+			total: order.total,
+			deliveryAddress: order.address
+				? `${order.address.street || ''}, ${order.address.city || ''}`
+				: 'N/A',
+		})) || [];
+
+	const ongoingOrders = orders.filter(order =>
+		[
+			'pending',
+			'confirmed',
+			'delivering',
+			'processing',
+			'ready-to-ship',
+			'out-for-delivery',
+		].includes(order.status)
+	);
+	const pastOrders = orders.filter(order =>
+		['delivered', 'cancelled', 'completed', 'refunded', 'failed'].includes(
+			order.status
+		)
+	);
 
 	const handleOrderPress = (orderId: string) => {
 		router.push(`/order-detail/${orderId}`);
@@ -324,14 +221,8 @@ export default function OrdersScreen() {
 		<SafeAreaView style={styles.safeArea}>
 			{/* Header */}
 			<View style={styles.header}>
-				<Pressable
-					onPress={() => router.back()}
-					style={styles.backButton}>
-					<IconSymbol
-						name='chevron.left'
-						size={24}
-						color='#000000'
-					/>
+				<Pressable onPress={() => router.back()} style={styles.backButton}>
+					<IconSymbol name='chevron.left' size={24} color='#000000' />
 				</Pressable>
 				<Text style={styles.headerTitle}>My Orders</Text>
 				<View style={{ width: 40 }} />
@@ -341,16 +232,28 @@ export default function OrdersScreen() {
 			<View style={styles.tabContainer}>
 				<Pressable
 					style={[styles.tab, activeTab === 'ongoing' && styles.activeTab]}
-					onPress={() => setActiveTab('ongoing')}>
-					<Text style={[styles.tabText, activeTab === 'ongoing' && styles.activeTabText]}>
-						Ongoing ({mockOngoingOrders.length})
+					onPress={() => setActiveTab('ongoing')}
+				>
+					<Text
+						style={[
+							styles.tabText,
+							activeTab === 'ongoing' && styles.activeTabText,
+						]}
+					>
+						Ongoing ({ongoingOrders.length})
 					</Text>
 				</Pressable>
 				<Pressable
 					style={[styles.tab, activeTab === 'past' && styles.activeTab]}
-					onPress={() => setActiveTab('past')}>
-					<Text style={[styles.tabText, activeTab === 'past' && styles.activeTabText]}>
-						Past Orders ({mockPastOrders.length})
+					onPress={() => setActiveTab('past')}
+				>
+					<Text
+						style={[
+							styles.tabText,
+							activeTab === 'past' && styles.activeTabText,
+						]}
+					>
+						Past Orders ({pastOrders.length})
 					</Text>
 				</Pressable>
 			</View>
@@ -358,20 +261,21 @@ export default function OrdersScreen() {
 			{/* Orders List */}
 			<ScrollView
 				style={styles.scrollView}
-				showsVerticalScrollIndicator={false}>
-				{activeTab === 'ongoing' ? (
+				showsVerticalScrollIndicator={false}
+			>
+				{isLoading ? (
+					<View style={styles.loadingContainer}>
+						<ActivityIndicator size='large' color='#E63946' />
+					</View>
+				) : activeTab === 'ongoing' ? (
 					<View style={styles.ordersContainer}>
-						{mockOngoingOrders.length === 0 ? (
+						{ongoingOrders.length === 0 ? (
 							<View style={styles.emptyState}>
-								<IconSymbol
-									name='tray'
-									size={64}
-									color='#D0D0D0'
-								/>
+								<IconSymbol name='tray' size={64} color='#D0D0D0' />
 								<Text style={styles.emptyStateText}>No ongoing orders</Text>
 							</View>
 						) : (
-							mockOngoingOrders.map(order => (
+							ongoingOrders.map(order => (
 								<OrderCard
 									key={order.id}
 									order={order}
@@ -382,17 +286,13 @@ export default function OrdersScreen() {
 					</View>
 				) : (
 					<View style={styles.ordersContainer}>
-						{mockPastOrders.length === 0 ? (
+						{pastOrders.length === 0 ? (
 							<View style={styles.emptyState}>
-								<IconSymbol
-									name='tray'
-									size={64}
-									color='#D0D0D0'
-								/>
+								<IconSymbol name='tray' size={64} color='#D0D0D0' />
 								<Text style={styles.emptyStateText}>No past orders</Text>
 							</View>
 						) : (
-							mockPastOrders.map(order => (
+							pastOrders.map(order => (
 								<OrderCard
 									key={order.id}
 									order={order}
@@ -599,5 +499,11 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#999999',
 		marginTop: 16,
+	},
+	loadingContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingTop: 50,
 	},
 });

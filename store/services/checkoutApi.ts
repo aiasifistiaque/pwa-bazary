@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import mainApi from "./mainApi";
+import mainApi from './mainApi';
 
 export const checkoutAPi = mainApi.injectEndpoints({
 	overrideExisting: true,
@@ -30,6 +30,13 @@ export const checkoutAPi = mainApi.injectEndpoints({
 			}),
 			invalidatesTags: ['cart'],
 		}),
+		getOrders: builder.query({
+			query: ({ storeId }) => ({
+				url: `orders?storeId=${storeId}`,
+				method: 'GET',
+			}),
+			providesTags: ['order'],
+		}),
 	}),
 });
 
@@ -37,4 +44,5 @@ export const {
 	useCreateOrderMutation,
 	useVerifyCouponMutation,
 	useCartTotalsMutation,
+	useGetOrdersQuery,
 } = checkoutAPi;
