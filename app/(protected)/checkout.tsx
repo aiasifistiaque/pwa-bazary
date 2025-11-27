@@ -63,10 +63,8 @@ export default function CheckoutScreen() {
 	const [selectedPayment, setSelectedPayment] = useState<string>('');
 	const [couponCode, setCouponCode] = useState<string>('');
 	const [showSavedAddresses, setShowSavedAddresses] = useState<boolean>(false);
-	// Get cart items and user from Redux store
-	const state = useSelector((state: RootState) => state);
-	const cartItems = state.cart.cartItems;
-	const userId = state.auth.user?._id;
+	const userId = useSelector((state: RootState) => state.auth.user?._id);
+
 	const [address, setAddress] = useState({
 		name: '',
 		phone: '',
@@ -268,7 +266,7 @@ export default function CheckoutScreen() {
 									style={[
 										styles.savedAddressCard,
 										selectedCheckoutAddr?.id === addr.id &&
-										styles.selectedSavedAddress,
+											styles.selectedSavedAddress,
 									]}
 									onPress={() => handleSelectSavedAddress(addr)}
 								>

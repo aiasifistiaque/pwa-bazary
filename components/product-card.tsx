@@ -2,6 +2,8 @@ import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
 
+const fallback = require('../assets/images/fallback-fruit.png');
+
 type ProductCardProps = {
 	id: string;
 	name: string;
@@ -30,45 +32,33 @@ export function ProductCard({
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
 
 	return (
-		<TouchableOpacity
-			style={styles.card}
-			onPress={onPress}
-			activeOpacity={0.7}>
+		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
 			<View style={styles.imageContainer}>
 				<Image
-					source={imageSource}
+					source={imageSource || fallback}
 					style={styles.image}
 					resizeMode='contain'
 				/>
 				<TouchableOpacity
 					style={styles.addButton}
 					onPress={onAddPress}
-					activeOpacity={0.8}>
-					<IconSymbol
-						name='plus'
-						size={20}
-						color='#E63946'
-					/>
+					activeOpacity={0.8}
+				>
+					<IconSymbol name='plus' size={20} color='#E63946' />
 				</TouchableOpacity>
 			</View>
 
 			{badge && (
 				<View style={styles.badgeContainer}>
 					{badgeIcon && (
-						<IconSymbol
-							name={badgeIcon as any}
-							size={12}
-							color='#E63946'
-						/>
+						<IconSymbol name={badgeIcon as any} size={12} color='#E63946' />
 					)}
 					<Text style={styles.badgeText}>{badge}</Text>
 				</View>
 			)}
 
 			<View style={styles.info}>
-				<Text
-					style={styles.name}
-					numberOfLines={2}>
+				<Text style={styles.name} numberOfLines={2}>
 					{name}
 				</Text>
 				<Text style={styles.price}>৳{price}</Text>

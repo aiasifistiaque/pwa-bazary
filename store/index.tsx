@@ -10,6 +10,7 @@ import buyNowSlice from './slices/buyNowSlice';
 import { cartSlice } from './slices/cartSlice';
 import { tableSlice } from './slices/tableSlice';
 import { wishlistSlice } from './slices/wishlistSlice';
+import { favoritesSlice } from './slices/favoritesSlice';
 
 // import { routeSlice, tableSlice, cartSlice, authSlice } from '@/components/library/store';
 
@@ -20,6 +21,7 @@ export const store = configureStore({
 		table: tableSlice.reducer,
 		cart: cartSlice.reducer,
 		wishlist: wishlistSlice.reducer,
+		favorites: favoritesSlice.reducer,
 		buyNow: buyNowSlice,
 		address: addressSlice,
 

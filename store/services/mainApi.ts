@@ -32,6 +32,8 @@ const tags = [
 	'user-api/products',
 	'/categorys',
 	'categorys',
+	'/products',
+	'order'
 ];
 
 // src/store/types.ts
