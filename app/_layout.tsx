@@ -5,20 +5,26 @@ import { PaperProvider } from 'react-native-paper';
 import ReduxProvider from '@/store/provider/ReduxProvider';
 import { useEffect } from 'react';
 import { hydrateAuth, loadStoredToken } from '@/store/slices/authSlice';
+import { loadFavorites, setFavorites } from '@/store/slices/favoritesSlice';
 
 function AuthHydrator({ children }: { children: React.ReactNode }) {
 	const dispatch = useDispatch();
 
 	useEffect(() => {
-		// Load token from secure storage on app start
-		const initAuth = async () => {
+		// Load token and favorites from storage on app start
+		const initApp = async () => {
+			// Load auth token
 			const token = await loadStoredToken();
 			if (token) {
 				dispatch(hydrateAuth(token));
 			}
+
+			// Load favorites
+			const favorites = await loadFavorites();
+			dispatch(setFavorites(favorites));
 		};
 
-		initAuth();
+		initApp();
 	}, [dispatch]);
 
 	return <>{children}</>;

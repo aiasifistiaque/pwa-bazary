@@ -6,7 +6,7 @@ type FavoriteProductCardProps = {
 	id: string;
 	name: string;
 	category?: any;
-	price: string;
+	price: number;
 	originalPrice?: string;
 	unit?: string;
 	unitPrice?: string;
@@ -33,7 +33,7 @@ export function FavoriteProductCard({
 	onAddPress,
 }: FavoriteProductCardProps) {
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
-	
+
 	return (
 		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
 			<View style={styles.imageContainer}>
@@ -63,9 +63,7 @@ export function FavoriteProductCard({
 			</View>
 
 			<View style={styles.info}>
-				{name && (
-					<Text style={styles.category}>{name}</Text>
-				)}
+				{name && <Text style={styles.category}>{name}</Text>}
 				<View style={styles.nameContainer}>
 					<Text style={styles.name} numberOfLines={1}>
 						{category?.name}

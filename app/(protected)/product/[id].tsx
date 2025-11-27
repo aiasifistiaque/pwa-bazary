@@ -2,10 +2,13 @@ import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetByIdQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
+import { toggleFavorite } from '@/store/slices/favoritesSlice';
+import { RootState } from '@/store';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 
 import {
+	Alert,
 	Image,
 	Platform,
 	SafeAreaView,
@@ -15,91 +18,22 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 const fallback = require('../../../assets/images/fallback-fruit.png');
-// Mock product data - in real app, fetch based on ID
-const getProductById = (id: string) => {
-	const products: Record<string, any> = {
-		'1': {
-			id: '1',
-			name: 'Pepsi Lemon Zero',
-			category: 'Beverages',
-			price: '1,028',
-			originalPrice: '1,200',
-			unit: '6 × 1,25L',
-			unitPrice: '৳137/L',
-			badge: 'New',
-			discount: '15% Off',
-			image:
-				'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=800&h=800&fit=crop',
-			description:
-				'Refreshing Pepsi with a twist of lemon. Zero sugar, zero calories. Perfect for those who want the taste without the guilt. Enjoy the crisp, citrus flavor combined with the classic Pepsi taste.',
-			ingredients:
-				'Carbonated Water, Colour (Caramel E150d), Sweeteners (Aspartame, Acesulfame K), Acids (Phosphoric Acid, Citric Acid), Flavourings (Including Caffeine), Preservative (Potassium Sorbate)',
-			nutritionPer100ml: {
-				energy: '0.8 kJ / 0.2 kcal',
-				fat: '0g',
-				saturates: '0g',
-				carbohydrate: '0g',
-				sugars: '0g',
-				protein: '0g',
-				salt: '0.02g',
-			},
-			inStock: true,
-			origin: 'Germany',
-		},
-		'2': {
-			id: '2',
-			name: 'Pineapple Slices in Juice',
-			category: 'Canned Fruits',
-			price: '206',
-			unit: 'XL 340g',
-			unitPrice: '৳605/kg',
-			badge: 'New · Own juice',
-			image:
-				'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800&h=800&fit=crop',
-			description:
-				'Premium pineapple slices preserved in their own natural juice. No added sugar, just pure tropical sweetness. Perfect for breakfast, desserts, or as a healthy snack.',
-			ingredients: 'Pineapple, Pineapple Juice',
-			nutritionPer100g: {
-				energy: '218 kJ / 52 kcal',
-				fat: '0.1g',
-				saturates: '0g',
-				carbohydrate: '12.4g',
-				sugars: '11.2g',
-				protein: '0.4g',
-				salt: '0g',
-			},
-			inStock: true,
-			origin: 'Thailand',
-		},
-	};
-
-	return (
-		products[id] || {
-			id,
-			name: 'Product Not Found',
-			price: '0',
-			unit: '',
-			image: '',
-			description: 'This product could not be found.',
-			inStock: false,
-		}
-	);
-};
 
 export default function ProductDetailScreen() {
 	const dispatch = useDispatch();
 	const { id } = useLocalSearchParams<{ id: string }>();
 
-	// const product = getProductById(id || '1');
 	const { data: productD, isLoading } = useGetByIdQuery({
 		path: 'products',
 		id,
 	});
 	const product: any = productD ? productD : {};
-	console.log('product ::', product);
 	const [quantity, setQuantity] = useState(1);
+
+	const favorites = useSelector((state: RootState) => state.favorites.items);
+	const isFavorite = favorites.some(item => item.id === product.id);
 
 	const handleBack = () => {
 		router.back();
@@ -114,17 +48,6 @@ export default function ProductDetailScreen() {
 	};
 
 	const handleAddToCart = () => {
-		console.log('addded"::', {
-			item: {
-				id: product?.id,
-				_id: product?.id,
-				name: product?.name,
-				price: product?.price,
-				image: product?.image || null,
-				vat: 0,
-			},
-			qty: quantity,
-		});
 		dispatch(
 			addToCart({
 				item: {
@@ -138,7 +61,25 @@ export default function ProductDetailScreen() {
 				qty: quantity,
 			})
 		);
-		// router.back();
+		Alert.alert('Success', 'Added to cart');
+	};
+
+	const handleFavoritePress = () => {
+		const willBeFavorite = !isFavorite;
+		dispatch(
+			toggleFavorite({
+				id: product.id,
+				name: product.name,
+				price: product.sellPrice || product.price, // Handle different price fields if necessary
+				image: product.image,
+				unit: product.unit,
+				unitPrice: product.unitPrice,
+			})
+		);
+		Alert.alert(
+			'Success',
+			willBeFavorite ? 'Added to favorites' : 'Removed from favorites'
+		);
 	};
 
 	// Ensure product.price is parsed safely (handles numbers or strings with commas)
@@ -163,7 +104,7 @@ export default function ProductDetailScreen() {
 				>
 					{/* Product Image */}
 					<View style={styles.imageContainer}>
-						{product.images[0] ? (
+						{product.images?.[0] ? (
 							<Image
 								source={{ uri: product.images[0] }}
 								style={styles.image}
@@ -189,8 +130,16 @@ export default function ProductDetailScreen() {
 						>
 							<IconSymbol name='chevron.left' size={24} color='#000' />
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.favoriteButton} activeOpacity={0.7}>
-							<IconSymbol name='heart' size={24} color='#000' />
+						<TouchableOpacity
+							style={styles.favoriteButton}
+							activeOpacity={0.7}
+							onPress={handleFavoritePress}
+						>
+							<IconSymbol
+								name={isFavorite ? 'heart.fill' : 'heart'}
+								size={24}
+								color={isFavorite ? '#E63946' : '#000'}
+							/>
 						</TouchableOpacity>
 					</View>
 

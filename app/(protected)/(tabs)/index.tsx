@@ -78,232 +78,12 @@ const recipeCombos = [
 	},
 ];
 
-// Mock product data with more realistic grocery items
-const newInAppProducts = [
-	{
-		id: '507f1f77bcf86cd799439011',
-		name: 'Pepsi Lemon Zero',
-		price: '1,028',
-		unit: '6 × 1,25L',
-		unitPrice: '৳137/L',
-		badge: 'New',
-		badgeIcon: 'sparkles',
-		image:
-			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439012',
-		name: 'Pineapple Slices in Juice',
-		price: '206',
-		unit: 'XL 340g',
-		unitPrice: '৳605/kg',
-		badge: 'New · Own juice',
-		badgeIcon: 'sparkles',
-		image:
-			'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439013',
-		name: 'Fresh Orange Juice',
-		price: '401',
-		unit: '1L',
-		unitPrice: '৳401/L',
-		badge: 'New',
-		badgeIcon: 'sparkles',
-		image:
-			'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439014',
-		name: 'Organic Bananas',
-		price: '263',
-		unit: '1kg',
-		unitPrice: '৳263/kg',
-		image:
-			'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400&h=400&fit=crop',
-	},
-];
-
-const popularProducts = [
-	{
-		id: '507f1f77bcf86cd799439015',
-		name: 'Whole Milk',
-		price: '171',
-		unit: '1L',
-		unitPrice: '৳171/L',
-		image:
-			'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439016',
-		name: 'Fresh Bread',
-		price: '344',
-		unit: '500g',
-		unitPrice: '৳688/kg',
-		image:
-			'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439017',
-		name: 'Eggs Free Range',
-		price: '436',
-		unit: '10 pieces',
-		unitPrice: '৳44/piece',
-		image:
-			'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439018',
-		name: 'Greek Yogurt',
-		price: '229',
-		unit: '500g',
-		unitPrice: '৳458/kg',
-		image:
-			'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=400&fit=crop',
-	},
-];
-
-const freshProduceProducts = [
-	{
-		id: '507f1f77bcf86cd799439019',
-		name: 'Fresh Tomatoes',
-		price: '286',
-		unit: '500g',
-		unitPrice: '৳573/kg',
-		image:
-			'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd79943901a',
-		name: 'Green Lettuce',
-		price: '148',
-		unit: '1 piece',
-		unitPrice: '৳148/piece',
-		image:
-			'https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd79943901b',
-		name: 'Red Apples',
-		price: '401',
-		unit: '1kg',
-		unitPrice: '৳401/kg',
-		image:
-			'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd79943901c',
-		name: 'Baby Carrots',
-		price: '217',
-		unit: '500g',
-		unitPrice: '৳435/kg',
-		image:
-			'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&h=400&fit=crop',
-	},
-];
-
-const beverageProducts = [
-	{
-		id: '507f1f77bcf86cd79943901d',
-		name: 'Coca Cola Zero',
-		price: '919',
-		unit: '6 × 1,5L',
-		unitPrice: '৳102/L',
-		image:
-			'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd79943901e',
-		name: 'Sparkling Water',
-		price: '286',
-		unit: '6 × 1,5L',
-		unitPrice: '৳32/L',
-		image:
-			'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd79943901f',
-		name: 'Apple Juice',
-		price: '344',
-		unit: '1L',
-		unitPrice: '৳344/L',
-		image:
-			'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439020',
-		name: 'Green Tea',
-		price: '401',
-		unit: '20 bags',
-		unitPrice: '৳20/bag',
-		image:
-			'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=400&h=400&fit=crop',
-	},
-];
-
-const specialOffersProducts = [
-	{
-		id: '507f1f77bcf86cd799439021',
-		name: 'Pasta Penne',
-		price: '148',
-		unit: '500g',
-		unitPrice: '৳297/kg',
-		badge: 'Sale',
-		badgeIcon: 'tag.fill',
-		image:
-			'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439022',
-		name: 'Olive Oil Extra Virgin',
-		price: '804',
-		unit: '500ml',
-		unitPrice: '৳1,608/L',
-		badge: 'Sale',
-		badgeIcon: 'tag.fill',
-		image:
-			'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439023',
-		name: 'Chocolate Bar Dark',
-		price: '286',
-		unit: '100g',
-		unitPrice: '৳2,864/kg',
-		badge: 'Sale',
-		badgeIcon: 'tag.fill',
-		image:
-			'https://images.unsplash.com/photo-1511381939415-e44015466834?w=400&h=400&fit=crop',
-	},
-	{
-		id: '507f1f77bcf86cd799439024',
-		name: 'Coffee Beans',
-		price: '1,034',
-		unit: '500g',
-		unitPrice: '৳2,068/kg',
-		badge: 'Sale',
-		badgeIcon: 'tag.fill',
-		image:
-			'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=400&fit=crop',
-	},
-];
-
-const sections = [
-	{ id: 'section1', title: 'New in the App', products: newInAppProducts },
-	{ id: 'section2', title: 'Popular Products', products: popularProducts },
-	{ id: 'section3', title: 'Fresh Produce', products: freshProduceProducts },
-	{ id: 'section4', title: 'Beverages', products: beverageProducts },
-	{ id: 'section5', title: 'Special Offers', products: specialOffersProducts },
-];
-
-export default function DiscoverScreen() {
-	// data fetching
-	const { data: categoryData, isLoading } = useGetAllQuery({
-		path: '/categorys',
-		filters: { displayInHomePage: true },
-	});
-
+const FeaturedCategorySection = ({ category }: { category: any }) => {
 	const dispatch = useDispatch();
+	const { data: productsData, isLoading } = useGetAllQuery({
+		path: '/products',
+		filters: { category: category.id },
+	});
 
 	const handleProductPress = (productId: string) => {
 		router.push(`/product/${productId}`);
@@ -316,7 +96,7 @@ export default function DiscoverScreen() {
 					id: product.id,
 					_id: product.id,
 					name: product.name,
-					price: parseFloat(product.price.replace(',', '')),
+					price: product.sellPrice,
 					image: product.image,
 					vat: 0,
 				},
@@ -325,12 +105,49 @@ export default function DiscoverScreen() {
 		);
 	};
 
-	const handleSeeAllPress = (sectionTitle: string) => {
-		router.push({
-			pathname: '/product-list',
-			params: { category: sectionTitle },
-		});
+	const handleSeeAllPress = () => {
+		router.push(`/category/${category.id}`);
 	};
+
+	if (isLoading || !productsData?.doc?.length) return null;
+
+	return (
+		<View style={styles.section}>
+			<SectionHeader title={category.name} onSeeAllPress={handleSeeAllPress} />
+			<FlatList
+				horizontal
+				data={productsData.doc}
+				renderItem={({ item }) => (
+					<ProductCard
+						id={item.id}
+						name={item.name}
+						price={item.sellPrice.toString()}
+						image={item.image}
+						unit={item.unit}
+						unitPrice={item.unitPrice} // Assuming backend sends this or it's calculated
+						onPress={() => handleProductPress(item.id)}
+						onAddPress={() => handleAddPress(item)}
+					/>
+				)}
+				keyExtractor={item => item.id}
+				showsHorizontalScrollIndicator={false}
+				contentContainerStyle={styles.productList}
+			/>
+		</View>
+	);
+};
+
+export default function DiscoverScreen() {
+	// data fetching
+	const { data: categoryData, isLoading } = useGetAllQuery({
+		path: '/categorys',
+		filters: { displayInHomePage: true },
+	});
+
+	const { data: featuredCategoriesData } = useGetAllQuery({
+		path: '/categorys',
+		filters: { isFeatured: true },
+	});
 
 	const handleDeliveryTimePress = () => {
 		console.log('Delivery time pressed');
@@ -424,28 +241,9 @@ export default function DiscoverScreen() {
 					/>
 				</View>
 
-				{/* Product Sections */}
-				{sections.map((section, index) => (
-					<View key={section.id} style={styles.section}>
-						<SectionHeader
-							title={section.title}
-							onSeeAllPress={() => handleSeeAllPress(section.title)}
-						/>
-						<FlatList
-							horizontal
-							data={section.products}
-							renderItem={({ item }) => (
-								<ProductCard
-									{...item}
-									onPress={() => handleProductPress(item.id)}
-									onAddPress={() => handleAddPress(item)}
-								/>
-							)}
-							keyExtractor={item => item.id}
-							showsHorizontalScrollIndicator={false}
-							contentContainerStyle={styles.productList}
-						/>
-					</View>
+				{/* Featured Product Sections */}
+				{featuredCategoriesData?.doc?.map((category: any) => (
+					<FeaturedCategorySection key={category.id} category={category} />
 				))}
 			</ScrollView>
 		</SafeAreaView>

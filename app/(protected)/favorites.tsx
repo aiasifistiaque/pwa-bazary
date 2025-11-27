@@ -1,4 +1,4 @@
-import { FavoriteProductCard } from '@/components/favorite-product-card';
+// import { FavoriteProductCard } from '@/components/favorite-product-card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { addToCart } from '@/store/slices/cartSlice';
 import { removeFromFavorites } from '@/store/slices/favoritesSlice';
@@ -14,6 +14,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { FavoriteProductCard } from '@/components/favorite-product-card';
 
 export default function FavoritesScreen() {
 	const dispatch = useDispatch();
@@ -93,6 +94,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#FFFFFF',
 	},
+
 	listContent: {
 		padding: 16,
 	},
