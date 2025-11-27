@@ -7,11 +7,14 @@ import { storage } from '@/utils/storage';
 type AuthStateType = {
 	token: string | null;
 	loggedIn: boolean;
+	user: any;
+	refreshToken: string | null,
 };
 
 type LoginPayloadType = {
 	token: string;
 	refreshToken?: string;
+	user: any;
 };
 
 const TOKEN_NAME = 'TOKEN_NAME';
@@ -21,6 +24,8 @@ const REFRESH_TOKEN = 'REFRESH_TOKEN';
 const initialState: AuthStateType = {
 	token: '',
 	loggedIn: false,
+	user: "",
+	refreshToken: null,
 };
 
 export const authSlice = createSlice({
@@ -41,23 +46,21 @@ export const authSlice = createSlice({
 			state.loggedIn = false;
 		},
 		login: (state, action: PayloadAction<LoginPayloadType>): void => {
-			const { token, refreshToken }: LoginPayloadType = action.payload;
+			const { token, refreshToken, user }: LoginPayloadType = action.payload;
 			state.token = token;
+			state.refreshToken = refreshToken || null;
+			state.user = user || null;
 			state.loggedIn = true;
 
 			// Store tokens securely on native, localStorage on web
 			if (Platform.OS === 'web') {
 				storage.setItemSync(TOKEN_NAME, token);
-				if (refreshToken) {
-					storage.setItemSync(REFRESH_TOKEN, refreshToken);
-				}
+				if (refreshToken) storage.setItemSync(REFRESH_TOKEN, refreshToken);
+				if (user) storage.setItemSync("auth_user", JSON.stringify(user));
 			} else {
 				SecureStore.setItemAsync(TOKEN_NAME, token).catch(console.error);
-				if (refreshToken) {
-					SecureStore.setItemAsync(REFRESH_TOKEN, refreshToken).catch(
-						console.error
-					);
-				}
+				if (refreshToken) SecureStore.setItemAsync(REFRESH_TOKEN, refreshToken).catch(console.error);
+				if (user) SecureStore.setItemAsync("auth_user", JSON.stringify(user)).catch(console.error);
 			}
 		},
 		refresh: (state, action: PayloadAction<string>): void => {
@@ -70,6 +73,15 @@ export const authSlice = createSlice({
 				storage.setItemSync(TOKEN_NAME, token);
 			} else {
 				SecureStore.setItemAsync(TOKEN_NAME, token).catch(console.error);
+			}
+		},
+		setUser: (state, action: PayloadAction<any>): void => {
+			state.user = action.payload;
+
+			if (Platform.OS === "web") {
+				storage.setItemSync("auth_user", JSON.stringify(action.payload));
+			} else {
+				SecureStore.setItemAsync("auth_user", JSON.stringify(action.payload)).catch(console.error);
 			}
 		},
 		// Add action to hydrate auth state from storage
