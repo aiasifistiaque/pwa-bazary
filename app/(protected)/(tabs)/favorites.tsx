@@ -1,4 +1,4 @@
-import { FavoriteProductCard } from '@/components/favorite-product-card';
+import { ProductCard } from '@/components/product-card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { addToCart } from '@/store/slices/cartSlice';
 import { removeFromFavorites } from '@/store/slices/favoritesSlice';
@@ -8,6 +8,7 @@ import React from 'react';
 import {
 	FlatList,
 	SafeAreaView,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -57,32 +58,45 @@ export default function FavoritesScreen() {
 					</TouchableOpacity>
 				</View>
 			) : (
-				<FlatList
-					data={favorites}
-					renderItem={({ item }) => (
-						<View style={styles.itemContainer}>
-							<FavoriteProductCard
-								{...item}
-								onPress={() => handleProductPress(item.id)}
-								onAddPress={() => handleAddPress(item)}
-							/>
-							<TouchableOpacity
-								style={styles.removeButton}
-								onPress={() => handleRemovePress(item.id)}
-							>
-								<IconSymbol
-									name='xmark.circle.fill'
-									size={24}
-									color='#E63946'
+				<ScrollView style={styles.container}>
+					<View style={styles.header}>
+						<Text style={styles.headerTitle}>My Favorites</Text>
+						<Text style={styles.headerSubtitle}>
+							{favorites.length} {favorites.length === 1 ? 'item' : 'items'}
+						</Text>
+					</View>
+					<FlatList
+						horizontal
+						data={favorites}
+						renderItem={({ item }) => (
+							<View style={styles.itemContainer}>
+								<ProductCard
+									id={item.id}
+									name={item.name}
+									price={item.price.toString()}
+									image={item.image}
+									unit={item.unit}
+									unitPrice={item.unitPrice}
+									onPress={() => handleProductPress(item.id)}
+									onAddPress={() => handleAddPress(item)}
 								/>
-							</TouchableOpacity>
-						</View>
-					)}
-					keyExtractor={item => item.id}
-					contentContainerStyle={styles.listContent}
-					numColumns={2}
-					columnWrapperStyle={styles.columnWrapper}
-				/>
+								<TouchableOpacity
+									style={styles.removeButton}
+									onPress={() => handleRemovePress(item.id)}
+								>
+									<IconSymbol
+										name='xmark.circle.fill'
+										size={24}
+										color='#E63946'
+									/>
+								</TouchableOpacity>
+							</View>
+						)}
+						keyExtractor={item => item.id}
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.listContent}
+					/>
+				</ScrollView>
 			)}
 		</SafeAreaView>
 	);
@@ -93,16 +107,32 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#FFFFFF',
 	},
-	listContent: {
-		padding: 16,
+	container: {
+		flex: 1,
+		backgroundColor: '#FFFFFF',
 	},
-	columnWrapper: {
-		justifyContent: 'space-between',
-		marginBottom: 16,
+	header: {
+		paddingHorizontal: 16,
+		paddingTop: 16,
+		paddingBottom: 12,
+	},
+	headerTitle: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		color: '#000',
+		marginBottom: 4,
+	},
+	headerSubtitle: {
+		fontSize: 14,
+		color: '#666',
+	},
+	listContent: {
+		paddingHorizontal: 16,
+		paddingBottom: 16,
 	},
 	itemContainer: {
 		position: 'relative',
-		width: '48%',
+		marginRight: 12,
 	},
 	removeButton: {
 		position: 'absolute',
