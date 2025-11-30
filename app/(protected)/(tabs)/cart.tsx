@@ -9,12 +9,12 @@ import { router } from 'expo-router';
 import {
 	Image,
 	Pressable,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
 	View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
 // Mock data for popular items
@@ -90,7 +90,7 @@ export default function CartScreen() {
 	return (
 		<View style={styles.safeArea}>
 			{/* Header with Progress */}
-			<SafeAreaView style={styles.headerSafeArea}>
+			<View style={styles.headerSafeArea}>
 				<View style={styles.header}>
 					<Pressable onPress={handleBack} style={styles.closeButton}>
 						<IconSymbol name='xmark' size={24} color='#000000' />
@@ -123,7 +123,7 @@ export default function CartScreen() {
 						<Text style={styles.stepLabel}>Checkout</Text>
 					</View>
 				</View>
-			</SafeAreaView>
+			</View>
 
 			<ScrollView
 				style={styles.container}
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 	},
 	headerSafeArea: {
-		backgroundColor: '#FFFFFF',
+		backgroundColor: '#ffffff',
 		borderBottomWidth: 1,
 		borderBottomColor: '#E5E5E5',
 	},

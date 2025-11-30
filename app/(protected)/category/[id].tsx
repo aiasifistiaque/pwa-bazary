@@ -8,13 +8,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
 	Image,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
 const fallback = require('../../../assets/images/splash-icon.png');
@@ -92,13 +92,6 @@ export default function CategoryScreen() {
 					>
 						<IconSymbol name='chevron.left' size={24} color='#000' />
 					</TouchableOpacity>
-					{/* {isCatNameLoading ? (
-						<View style={styles.container}>
-							<ActivityIndicator />
-						</View>
-					) : (
-						<Text style={styles.headerTitle}>{catName?.name}</Text>
-					)} */}
 					<Text style={styles.headerTitle}>{catName?.name}</Text>
 					<View style={styles.headerSpacer} />
 				</View>
@@ -150,7 +143,13 @@ export default function CategoryScreen() {
 										/>
 									))
 								) : (
-									<Text>No products found</Text>
+									<View style={styles.emptyStateContainer}>
+										<IconSymbol name='cart.fill' size={64} color='#8B4513' />
+										<Text style={styles.emptyStateText}>No Products Found</Text>
+										<Text style={styles.emptyStateSubtext}>
+											Check back later for new items
+										</Text>
+									</View>
 								)}
 							</View>
 						</View>
@@ -226,22 +225,22 @@ const styles = StyleSheet.create({
 		flexWrap: 'wrap',
 		justifyContent: 'space-between',
 	},
+	emptyStateContainer: {
+		width: '100%',
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingVertical: 80,
+		gap: 12,
+	},
+	emptyStateText: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#8B4513',
+		marginTop: 8,
+	},
+	emptyStateSubtext: {
+		fontSize: 14,
+		color: '#A0826D',
+		marginTop: 4,
+	},
 });
-
-{
-	/* Products */
-}
-// {!categoryData.hasSubcategories && categoryData.products && (
-// 	<View style={styles.section}>
-// 		<View style={styles.productsGrid}>
-// 			{categoryData.products.map((product: any) => (
-// 				<FavoriteProductCard
-// 					key={product.id}
-// 					{...product}
-// 					onPress={() => handleProductPress(product.id)}
-// 					onAddPress={() => handleAddPress(product)}
-// 				/>
-// 			))}
-// 		</View>
-// 	</View>
-// )}

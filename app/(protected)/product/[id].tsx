@@ -11,7 +11,6 @@ import {
 	Alert,
 	Image,
 	Platform,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -19,6 +18,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 const fallback = require('../../../assets/images/fallback-fruit.png');
 
 export default function ProductDetailScreen() {
@@ -87,11 +87,7 @@ export default function ProductDetailScreen() {
 		parseFloat(String(product?.price ?? '0').replace(/,/g, '')) || 0;
 	const totalPrice = (priceNumber * quantity).toLocaleString();
 	if (isLoading) {
-		return (
-			<View>
-				<Loader />
-			</View>
-		);
+		return <Loader />;
 	}
 	return (
 		<SafeAreaView style={styles.safeArea}>

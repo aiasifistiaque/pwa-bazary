@@ -4,12 +4,12 @@ import { addToCart } from '@/store/slices/cartSlice';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
 	Pressable,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
 	View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
 // All products organized by section

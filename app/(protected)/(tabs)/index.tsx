@@ -11,7 +11,6 @@ import React from 'react';
 import {
 	FlatList,
 	Image,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -170,91 +169,80 @@ export default function DiscoverScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
-			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-				{/* Delivery Time Selector */}
-				<DeliveryTimeButton
-					text='Choose your delivery time'
-					onPress={handleDeliveryTimePress}
-				/>
+		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+			{/* Delivery Time Selector */}
+			<DeliveryTimeButton
+				text='Choose your delivery time'
+				onPress={handleDeliveryTimePress}
+			/>
 
-				{/* Banner Carousel */}
-				<BannerCarousel banners={banners} onBannerPress={handleBannerPress} />
+			{/* Banner Carousel */}
+			<BannerCarousel banners={banners} onBannerPress={handleBannerPress} />
 
-				{/* Categories Section */}
-				<View style={styles.categoriesSection}>
-					<SectionHeader title='Categories' />
-					{isLoading ? (
-						<View style={styles.categoriesGrid}>
-							{Array.from({ length: 4 }).map((_, i) => (
-								<CategorySkeleton key={i} />
-							))}
-						</View>
-					) : (
-						<View style={styles.categoriesGrid}>
-							{categoryData?.doc?.map((category: any) => (
-								<CategoryCard
-									key={category.id}
-									{...category}
-									onPress={() => handleCategoryPress(category.id)}
-								/>
-							))}
-						</View>
+			{/* Categories Section */}
+			<View style={styles.categoriesSection}>
+				<SectionHeader title='Categories' />
+				{isLoading ? (
+					<View style={styles.categoriesGrid}>
+						{Array.from({ length: 4 }).map((_, i) => (
+							<CategorySkeleton key={i} />
+						))}
+					</View>
+				) : (
+					<View style={styles.categoriesGrid}>
+						{categoryData?.doc?.map((category: any) => (
+							<CategoryCard
+								key={category.id}
+								{...category}
+								onPress={() => handleCategoryPress(category.id)}
+							/>
+						))}
+					</View>
+				)}
+
+				<TouchableOpacity
+					style={styles.showMoreButton}
+					onPress={handleShowMoreCategories}
+					activeOpacity={0.7}
+				>
+					<Text style={styles.showMoreText}>Show more categories</Text>
+				</TouchableOpacity>
+			</View>
+
+			{/* Recipe Combos Section */}
+			<View style={styles.section}>
+				<SectionHeader title='Combo Recipes' />
+				<FlatList
+					horizontal
+					data={recipeCombos}
+					renderItem={({ item }) => (
+						<TouchableOpacity
+							style={styles.recipeCard}
+							onPress={() => handleRecipePress(item.id)}
+							activeOpacity={0.8}
+						>
+							<Image source={{ uri: item.image }} style={styles.recipeImage} />
+							<View style={styles.recipeInfo}>
+								<Text style={styles.recipeName}>{item.name}</Text>
+								<Text style={styles.recipeDescription}>{item.description}</Text>
+							</View>
+						</TouchableOpacity>
 					)}
+					keyExtractor={item => item.id}
+					showsHorizontalScrollIndicator={false}
+					contentContainerStyle={styles.recipeList}
+				/>
+			</View>
 
-					<TouchableOpacity
-						style={styles.showMoreButton}
-						onPress={handleShowMoreCategories}
-						activeOpacity={0.7}
-					>
-						<Text style={styles.showMoreText}>Show more categories</Text>
-					</TouchableOpacity>
-				</View>
-
-				{/* Recipe Combos Section */}
-				<View style={styles.section}>
-					<SectionHeader title='Combo Recipes' />
-					<FlatList
-						horizontal
-						data={recipeCombos}
-						renderItem={({ item }) => (
-							<TouchableOpacity
-								style={styles.recipeCard}
-								onPress={() => handleRecipePress(item.id)}
-								activeOpacity={0.8}
-							>
-								<Image
-									source={{ uri: item.image }}
-									style={styles.recipeImage}
-								/>
-								<View style={styles.recipeInfo}>
-									<Text style={styles.recipeName}>{item.name}</Text>
-									<Text style={styles.recipeDescription}>
-										{item.description}
-									</Text>
-								</View>
-							</TouchableOpacity>
-						)}
-						keyExtractor={item => item.id}
-						showsHorizontalScrollIndicator={false}
-						contentContainerStyle={styles.recipeList}
-					/>
-				</View>
-
-				{/* Featured Product Sections */}
-				{featuredCategoriesData?.doc?.map((category: any) => (
-					<FeaturedCategorySection key={category.id} category={category} />
-				))}
-			</ScrollView>
-		</SafeAreaView>
+			{/* Featured Product Sections */}
+			{featuredCategoriesData?.doc?.map((category: any) => (
+				<FeaturedCategorySection key={category.id} category={category} />
+			))}
+		</ScrollView>
 	);
 }
 
 const styles = StyleSheet.create({
-	safeArea: {
-		flex: 1,
-		backgroundColor: '#FFFFFF',
-	},
 	container: {
 		flex: 1,
 		backgroundColor: '#FFFFFF',

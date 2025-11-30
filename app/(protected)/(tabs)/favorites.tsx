@@ -7,7 +7,6 @@ import { router } from 'expo-router';
 import React from 'react';
 import {
 	FlatList,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -15,6 +14,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function FavoritesScreen() {
 	const dispatch = useDispatch();
@@ -45,7 +45,7 @@ export default function FavoritesScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<View style={styles.safeArea}>
 			{favorites.length === 0 ? (
 				<View style={styles.emptyContainer}>
 					<IconSymbol name='heart' size={64} color='#CCC' />
@@ -98,7 +98,7 @@ export default function FavoritesScreen() {
 					/>
 				</ScrollView>
 			)}
-		</SafeAreaView>
+		</View>
 	);
 }
 

@@ -4,7 +4,6 @@ import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
 import {
 	Image,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -12,6 +11,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 const fallbackImage = require('../../../assets/images/fallback-fruit.png')
 // Featured categories for "This Week"
 const thisWeekCategories = [
@@ -47,7 +47,7 @@ export default function SearchScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<View style={styles.safeArea}>
 			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 				{/* Search Bar */}
 				<View style={styles.searchContainer}>
@@ -118,7 +118,7 @@ export default function SearchScreen() {
 					)}
 				</View>
 			</ScrollView>
-		</SafeAreaView>
+		</View>
 	);
 }
 

@@ -1,6 +1,5 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RootState } from '@/store';
-import { usePlaceOrderMutation } from '@/store/services/authApi';
 import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
 import { resetCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
@@ -8,7 +7,6 @@ import { useEffect, useState } from 'react';
 import {
 	Alert,
 	Pressable,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -17,6 +15,8 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCreateOrderMutation } from '@/store/services/checkoutApi';
+import { Image } from 'expo-image';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type DeliveryTimeSlot = {
 	id: string;
@@ -24,10 +24,13 @@ type DeliveryTimeSlot = {
 	time: string;
 };
 
+type IconName = React.ComponentProps<typeof IconSymbol>['name'];
+
 type PaymentMethod = {
 	id: string;
 	name: string;
-	icon: string;
+	icon: IconName | 'bkash' | 'nagad' | 'card' | 'cod';
+	type: 'image' | 'icon';
 };
 
 const deliverySlots: DeliveryTimeSlot[] = [
@@ -38,10 +41,15 @@ const deliverySlots: DeliveryTimeSlot[] = [
 ];
 
 const paymentMethods: PaymentMethod[] = [
-	{ id: 'bkash', name: 'bKash', icon: 'creditcard.fill' },
-	{ id: 'nagad', name: 'Nagad', icon: 'creditcard.fill' },
-	{ id: 'card', name: 'Credit/Debit Card', icon: 'creditcard' },
-	{ id: 'cod', name: 'Cash on Delivery', icon: 'banknote' },
+	{ id: 'bkash', name: 'bKash', icon: 'bkash', type: 'image' },
+	{ id: 'nagad', name: 'Nagad', icon: 'nagad', type: 'image' },
+	{ id: 'card', name: 'Credit/Debit Card', icon: 'card', type: 'image' },
+	{
+		id: 'cod',
+		name: 'Cash on Delivery',
+		icon: 'cod',
+		type: 'image',
+	},
 ];
 
 export default function CheckoutScreen() {
@@ -389,7 +397,26 @@ export default function CheckoutScreen() {
 									<View style={styles.radioSelected} />
 								)}
 							</View>
-							<IconSymbol name={method?.icon} size={24} color='#666666' />
+							{method.type === 'image' ? (
+								<Image
+									source={
+										method.id === 'bkash'
+											? require('@/assets/images/bkash-logo.png')
+											: method.id === 'nagad'
+											? require('@/assets/images/nagad-logo.png')
+											: method.id === 'cod'
+											? require('@/assets/images/cod-logo.png')
+											: require('@/assets/images/card-logo.png')
+									}
+									style={styles.paymentLogo}
+								/>
+							) : (
+								<IconSymbol
+									name={method.icon as IconName}
+									size={24}
+									color='#666666'
+								/>
+							)}
 							<Text style={styles.paymentMethodName}>{method.name}</Text>
 						</Pressable>
 					))}
@@ -453,7 +480,7 @@ export default function CheckoutScreen() {
 				</View>
 
 				{/* Bottom spacer */}
-				<View style={{ height: 100 }} />
+				{/* <View style={{ height: 100 }} /> */}
 			</ScrollView>
 			{/* Inline Error Banner */}
 			{errorMsg ? (
@@ -508,11 +535,11 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F5F5F5',
 	},
 	scrollContent: {
-		paddingBottom: 20,
+		// paddingBottom: 20,
 	},
 	section: {
 		backgroundColor: '#FFFFFF',
-		marginTop: 12,
+		// marginTop: 12,
 		padding: 16,
 	},
 	sectionHeader: {
@@ -780,5 +807,10 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		color: '#666666',
 		lineHeight: 18,
+	},
+	paymentLogo: {
+		width: 24,
+		height: 24,
+		resizeMode: 'contain',
 	},
 });
