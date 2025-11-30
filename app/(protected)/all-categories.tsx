@@ -107,6 +107,8 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		flexWrap: 'wrap',
 		padding: 12,
-		justifyContent: 'space-between',
+		// justifyContent: 'space-between',
+		justifyContent: 'flex-start',
+		gap: 10,
 	},
 });

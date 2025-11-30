@@ -1,4 +1,4 @@
-import { Redirect, Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useSelector } from 'react-redux';
@@ -7,13 +7,13 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { RootState } from '@/store';
-import { useGetSelfQuery } from '@/store/services/authApi';
 import ReduxProvider from '@/store/provider/ReduxProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
 	const colorScheme = useColorScheme();
-	const cartItemCount = useSelector((state: RootState) => state.cart.totalItems) || 0;
+	const cartItemCount =
+		useSelector((state: RootState) => state.cart.totalItems) || 0;
 
 	return (
 		<ReduxProvider>
@@ -36,17 +36,14 @@ export default function TabLayout() {
 							fontSize: 11,
 							fontWeight: '500',
 						},
-					}}>
+					}}
+				>
 					<Tabs.Screen
 						name='index'
 						options={{
 							title: 'Discover',
 							tabBarIcon: ({ color }) => (
-								<IconSymbol
-									size={24}
-									name='storefront.fill'
-									color={color}
-								/>
+								<IconSymbol size={24} name='storefront.fill' color={color} />
 							),
 						}}
 					/>
@@ -55,11 +52,7 @@ export default function TabLayout() {
 						options={{
 							title: 'Search',
 							tabBarIcon: ({ color }) => (
-								<IconSymbol
-									size={24}
-									name='magnifyingglass'
-									color={color}
-								/>
+								<IconSymbol size={24} name='magnifyingglass' color={color} />
 							),
 						}}
 					/>
@@ -69,11 +62,7 @@ export default function TabLayout() {
 							title: 'Cart',
 							tabBarIcon: ({ color }) => (
 								<View style={styles.cartIconContainer}>
-									<IconSymbol
-										size={24}
-										name='cart.fill'
-										color={color}
-									/>
+									<IconSymbol size={24} name='cart.fill' color={color} />
 									{cartItemCount > 0 && (
 										<View style={styles.badge}>
 											<Text style={styles.badgeText}>{cartItemCount}</Text>
@@ -101,11 +90,7 @@ export default function TabLayout() {
 						options={{
 							title: 'Menu',
 							tabBarIcon: ({ color }) => (
-								<IconSymbol
-									size={24}
-									name='line.3.horizontal'
-									color={color}
-								/>
+								<IconSymbol size={24} name='line.3.horizontal' color={color} />
 							),
 						}}
 					/>
@@ -124,7 +109,6 @@ export default function TabLayout() {
 				</Tabs>
 			</SafeAreaView>
 		</ReduxProvider>
-
 	);
 }
 

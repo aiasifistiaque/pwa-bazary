@@ -45,7 +45,7 @@ export default function FavoritesScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<View style={styles.safeArea}>
 			{favorites.length === 0 ? (
 				<View style={styles.emptyContainer}>
 					<IconSymbol name='heart' size={64} color='#CCC' />
@@ -98,7 +98,7 @@ export default function FavoritesScreen() {
 					/>
 				</ScrollView>
 			)}
-		</SafeAreaView>
+		</View>
 	);
 }
 

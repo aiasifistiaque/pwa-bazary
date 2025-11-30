@@ -47,7 +47,7 @@ export default function SearchScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<View style={styles.safeArea}>
 			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 				{/* Search Bar */}
 				<View style={styles.searchContainer}>
@@ -118,7 +118,7 @@ export default function SearchScreen() {
 					)}
 				</View>
 			</ScrollView>
-		</SafeAreaView>
+		</View>
 	);
 }
 
