@@ -150,7 +150,13 @@ export default function CategoryScreen() {
 										/>
 									))
 								) : (
-									<Text>No products found</Text>
+									<View style={styles.emptyStateContainer}>
+										<IconSymbol name='cart' size={64} color='#8B4513' />
+										<Text style={styles.emptyStateText}>No Products Found</Text>
+										<Text style={styles.emptyStateSubtext}>
+											Check back later for new items
+										</Text>
+									</View>
 								)}
 							</View>
 						</View>
@@ -226,22 +232,22 @@ const styles = StyleSheet.create({
 		flexWrap: 'wrap',
 		justifyContent: 'space-between',
 	},
+	emptyStateContainer: {
+		width: '100%',
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingVertical: 80,
+		gap: 12,
+	},
+	emptyStateText: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#8B4513',
+		marginTop: 8,
+	},
+	emptyStateSubtext: {
+		fontSize: 14,
+		color: '#A0826D',
+		marginTop: 4,
+	},
 });
-
-{
-	/* Products */
-}
-// {!categoryData.hasSubcategories && categoryData.products && (
-// 	<View style={styles.section}>
-// 		<View style={styles.productsGrid}>
-// 			{categoryData.products.map((product: any) => (
-// 				<FavoriteProductCard
-// 					key={product.id}
-// 					{...product}
-// 					onPress={() => handleProductPress(product.id)}
-// 					onAddPress={() => handleAddPress(product)}
-// 				/>
-// 			))}
-// 		</View>
-// 	</View>
-// )}

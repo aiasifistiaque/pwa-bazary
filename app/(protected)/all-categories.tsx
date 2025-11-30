@@ -16,8 +16,16 @@ import {
 export default function AllCategoriesScreen() {
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
+		limit: 200,
+		sort: '-priority',
 	});
-	// console.log('categoryData', categoryData)
+
+	const parentCategories = categoryData?.doc?.filter(
+		(category: any) => !category.parentCategory
+	);
+
+	console.log('categoryData', categoryData);
+	console.log('parentCategories', parentCategories);
 	const handleBack = () => {
 		router.back();
 	};
@@ -48,7 +56,7 @@ export default function AllCategoriesScreen() {
 						showsVerticalScrollIndicator={false}
 					>
 						<View style={styles.categoriesGrid}>
-							{categoryData?.doc?.map((category: any) => (
+							{parentCategories?.map((category: any) => (
 								<CategoryCard
 									key={category.id}
 									{...category}
