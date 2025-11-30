@@ -87,11 +87,7 @@ export default function ProductDetailScreen() {
 		parseFloat(String(product?.price ?? '0').replace(/,/g, '')) || 0;
 	const totalPrice = (priceNumber * quantity).toLocaleString();
 	if (isLoading) {
-		return (
-			<View>
-				<Loader />
-			</View>
-		);
+		return <Loader />;
 	}
 	return (
 		<SafeAreaView style={styles.safeArea}>

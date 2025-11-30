@@ -1,5 +1,6 @@
 import { CategoryCard } from '@/components/category-card';
 import CategorySkeleton from '@/components/category-skeleton/CategorySkeleton';
+import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
@@ -28,11 +29,7 @@ export default function AllCategoriesScreen() {
 	return (
 		<>
 			{isLoading ? (
-				<View style={styles.categoriesGrid}>
-					{Array.from({ length: 4 }).map((_, index) => (
-						<CategorySkeleton key={index} />
-					))}
-				</View>
+				<Loader />
 			) : (
 				<View style={styles.container}>
 					<SafeAreaView style={styles.safeArea}>
