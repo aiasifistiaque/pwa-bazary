@@ -7,7 +7,6 @@ import { router } from 'expo-router';
 import React from 'react';
 import {
 	FlatList,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -15,6 +14,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function FavoritesScreen() {
 	const dispatch = useDispatch();

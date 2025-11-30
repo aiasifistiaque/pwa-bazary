@@ -1,6 +1,6 @@
 import { Redirect, Tabs, useRouter } from 'expo-router';
 import React from 'react';
-import { Platform, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useSelector } from 'react-redux';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -9,6 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { RootState } from '@/store';
 import { useGetSelfQuery } from '@/store/services/authApi';
 import ReduxProvider from '@/store/provider/ReduxProvider';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
 	const colorScheme = useColorScheme();

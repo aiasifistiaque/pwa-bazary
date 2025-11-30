@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import {
 	Alert,
 	Pressable,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -17,6 +16,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { useCreateOrderMutation } from '@/store/services/checkoutApi';
 import { Image } from 'expo-image';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type DeliveryTimeSlot = {
 	id: string;
@@ -480,7 +480,7 @@ export default function CheckoutScreen() {
 				</View>
 
 				{/* Bottom spacer */}
-				<View style={{ height: 100 }} />
+				{/* <View style={{ height: 100 }} /> */}
 			</ScrollView>
 			{/* Inline Error Banner */}
 			{errorMsg ? (
@@ -535,11 +535,11 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F5F5F5',
 	},
 	scrollContent: {
-		paddingBottom: 20,
+		// paddingBottom: 20,
 	},
 	section: {
 		backgroundColor: '#FFFFFF',
-		marginTop: 12,
+		// marginTop: 12,
 		padding: 16,
 	},
 	sectionHeader: {

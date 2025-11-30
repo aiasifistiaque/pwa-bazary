@@ -6,7 +6,6 @@ import {
 	ActivityIndicator,
 	Image,
 	Pressable,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { useGetOrdersQuery } from '@/store/services/checkoutApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type OrderItem = {
 	id: string;

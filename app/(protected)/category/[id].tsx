@@ -8,13 +8,13 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
 	Image,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
 const fallback = require('../../../assets/images/splash-icon.png');
@@ -92,13 +92,6 @@ export default function CategoryScreen() {
 					>
 						<IconSymbol name='chevron.left' size={24} color='#000' />
 					</TouchableOpacity>
-					{/* {isCatNameLoading ? (
-						<View style={styles.container}>
-							<ActivityIndicator />
-						</View>
-					) : (
-						<Text style={styles.headerTitle}>{catName?.name}</Text>
-					)} */}
 					<Text style={styles.headerTitle}>{catName?.name}</Text>
 					<View style={styles.headerSpacer} />
 				</View>
@@ -151,7 +144,7 @@ export default function CategoryScreen() {
 									))
 								) : (
 									<View style={styles.emptyStateContainer}>
-										<IconSymbol name='cart' size={64} color='#8B4513' />
+										<IconSymbol name='cart.fill' size={64} color='#8B4513' />
 										<Text style={styles.emptyStateText}>No Products Found</Text>
 										<Text style={styles.emptyStateSubtext}>
 											Check back later for new items

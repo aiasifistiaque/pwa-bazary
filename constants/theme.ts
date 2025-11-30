@@ -53,7 +53,7 @@ export const Fonts = Platform.select({
 });
 
 export const CustomColors = {
-	bodyColor: '#FFFCF2',
+	bodyColor: '#ffffff',
 	cardColor: '#fff',
 
 	textColor: '#333333',

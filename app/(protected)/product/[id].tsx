@@ -11,7 +11,6 @@ import {
 	Alert,
 	Image,
 	Platform,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -19,6 +18,7 @@ import {
 	View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 const fallback = require('../../../assets/images/fallback-fruit.png');
 
 export default function ProductDetailScreen() {

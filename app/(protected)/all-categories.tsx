@@ -1,17 +1,16 @@
 import { CategoryCard } from '@/components/category-card';
-import CategorySkeleton from '@/components/category-skeleton/CategorySkeleton';
 import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
 import {
 	Pressable,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
 	View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AllCategoriesScreen() {
 	const { data: categoryData, isLoading } = useGetAllQuery({
@@ -39,8 +38,8 @@ export default function AllCategoriesScreen() {
 			{isLoading ? (
 				<Loader />
 			) : (
-				<View style={styles.container}>
-					<SafeAreaView style={styles.safeArea}>
+				<SafeAreaView style={styles.container}>
+					<View style={styles.safeArea}>
 						{/* Header */}
 						<View style={styles.header}>
 							<Pressable onPress={handleBack} style={styles.backButton}>
@@ -49,7 +48,7 @@ export default function AllCategoriesScreen() {
 							<Text style={styles.headerTitle}>All Categories</Text>
 							<View style={{ width: 40 }} />
 						</View>
-					</SafeAreaView>
+					</View>
 
 					<ScrollView
 						style={styles.scrollView}
@@ -65,7 +64,7 @@ export default function AllCategoriesScreen() {
 							))}
 						</View>
 					</ScrollView>
-				</View>
+				</SafeAreaView>
 			)}
 		</>
 	);

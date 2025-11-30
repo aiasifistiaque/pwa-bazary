@@ -1,19 +1,14 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import {
-	Pressable,
-	SafeAreaView,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useGetSelfQuery } from '@/store/services/authApi';
 
+type IconName = React.ComponentProps<typeof IconSymbol>['name'];
+
 type MenuItemProps = {
-	icon: string;
+	icon: IconName;
 	title: string;
 	onPress?: () => void;
 	iconColor?: string;
@@ -35,7 +30,7 @@ const MenuItem = ({
 );
 
 type CardButtonProps = {
-	icon: string;
+	icon: IconName;
 	title: string;
 	onPress?: () => void;
 };
@@ -78,7 +73,7 @@ export default function MenuScreen() {
 
 	return (
 		<View style={styles.container}>
-			<SafeAreaView style={styles.safeArea}>
+			<View style={styles.safeArea}>
 				{/* Header */}
 				<View style={styles.header}>
 					<Text style={styles.headerTitle}>
@@ -88,7 +83,7 @@ export default function MenuScreen() {
 						<IconSymbol name='gearshape' size={24} color='#000000' />
 					</Pressable>
 				</View>
-			</SafeAreaView>
+			</View>
 
 			<ScrollView
 				style={styles.scrollView}
@@ -166,7 +161,7 @@ export default function MenuScreen() {
 						iconColor='#666666'
 					/>
 					<MenuItem
-						icon='shield.checkmark'
+						icon='doc.text'
 						title='Privacy Policy'
 						iconColor='#666666'
 					/>

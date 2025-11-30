@@ -1,7 +1,8 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type OrderItem = {
 	id: string;
