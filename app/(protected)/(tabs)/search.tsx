@@ -1,4 +1,4 @@
-import CategorySkeleton from '@/components/category-skeleton/CategorySkeleton';
+import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
@@ -12,7 +12,7 @@ import {
 	View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-const fallbackImage = require('../../../assets/images/fallback-fruit.png')
+const fallbackImage = require('../../../assets/images/fallback-fruit.png');
 // Featured categories for "This Week"
 const thisWeekCategories = [
 	{
