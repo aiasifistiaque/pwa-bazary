@@ -93,7 +93,7 @@ const FeaturedCategorySection = ({ category }: { category: any }) => {
 						price={item.sellPrice.toString()}
 						image={item.image}
 						unit={item.unit}
-						unitPrice={item.unitPrice} // Assuming backend sends this or it's calculated
+						unitPrice={item.unitPrice}
 						onPress={() => handleProductPress(item.id)}
 						onAddPress={() => handleAddPress(item)}
 					/>
@@ -122,8 +122,6 @@ export default function DiscoverScreen() {
 		path: '/combos',
 		filters: { isFeatured: true },
 	});
-
-	console.log('combosData', combosData);
 
 	const handleDeliveryTimePress = () => {
 		console.log('Delivery time pressed');

@@ -1,236 +1,157 @@
+import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useGetAllQuery, useGetByIdQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+	ActivityIndicator,
 	Image,
 	Pressable,
-	SafeAreaView,
 	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
-type Ingredient = {
-	id: string;
-	name: string;
-	quantity: string;
-	price: number;
-	image: string;
-	productId: string;
-};
+// Component to fetch and display individual product
+const IngredientWithProduct = ({
+	item,
+	isSelected,
+	isRequired,
+	onToggle,
+}: {
+	item: any;
+	isSelected: boolean;
+	isRequired: boolean;
+	onToggle: () => void;
+}) => {
+	const { data: productData, isLoading } = useGetByIdQuery(
+		{
+			path: 'products',
+			id: item.product,
+		},
+		{
+			skip: !item.product,
+		}
+	);
 
-type Recipe = {
-	id: string;
-	name: string;
-	description: string;
-	image: string;
-	ingredients: Ingredient[];
-};
+	const productName = productData?.name || 'Loading...';
+	const productImage = productData?.image || productData?.images?.[0] || '';
+	const productPrice = productData?.price || productData?.sellPrice || 0;
 
-const recipesData: Record<string, Recipe> = {
-	recipe1: {
-		id: 'recipe1',
-		name: 'Khichuri Recipe',
-		description: 'Traditional Bengali comfort food - perfect for rainy days',
-		image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800&h=400&fit=crop',
-		ingredients: [
-			{
-				id: 'ing1',
-				name: 'Basmati Rice',
-				quantity: '500g',
-				price: 150,
-				image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&h=200&fit=crop',
-				productId: 'rice1',
-			},
-			{
-				id: 'ing2',
-				name: 'Moong Dal (Yellow Lentils)',
-				quantity: '250g',
-				price: 80,
-				image: 'https://images.unsplash.com/photo-1608797178974-15b35a64ede9?w=200&h=200&fit=crop',
-				productId: 'dal1',
-			},
-			{
-				id: 'ing3',
-				name: 'Khichuri Masala',
-				quantity: '50g',
-				price: 45,
-				image: 'https://images.unsplash.com/photo-1596040033229-a0b34e5e5a88?w=200&h=200&fit=crop',
-				productId: 'masala1',
-			},
-			{
-				id: 'ing4',
-				name: 'Ghee (Clarified Butter)',
-				quantity: '100ml',
-				price: 120,
-				image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-				productId: 'ghee1',
-			},
-			{
-				id: 'ing5',
-				name: 'Mixed Vegetables',
-				quantity: '300g',
-				price: 60,
-				image: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=200&h=200&fit=crop',
-				productId: 'veg1',
-			},
-		],
-	},
-	recipe2: {
-		id: 'recipe2',
-		name: 'Teheri Recipe',
-		description: 'Flavorful rice dish with aromatic spices',
-		image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&h=400&fit=crop',
-		ingredients: [
-			{
-				id: 'ing1',
-				name: 'Basmati Rice',
-				quantity: '500g',
-				price: 150,
-				image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&h=200&fit=crop',
-				productId: 'rice1',
-			},
-			{
-				id: 'ing2',
-				name: 'Potatoes',
-				quantity: '400g',
-				price: 40,
-				image: 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=200&h=200&fit=crop',
-				productId: 'potato1',
-			},
-			{
-				id: 'ing3',
-				name: 'Teheri Masala Mix',
-				quantity: '60g',
-				price: 55,
-				image: 'https://images.unsplash.com/photo-1596040033229-a0b34e5e5a88?w=200&h=200&fit=crop',
-				productId: 'masala2',
-			},
-			{
-				id: 'ing4',
-				name: 'Cooking Oil',
-				quantity: '200ml',
-				price: 90,
-				image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=200&h=200&fit=crop',
-				productId: 'oil1',
-			},
-			{
-				id: 'ing5',
-				name: 'Fried Onions',
-				quantity: '100g',
-				price: 70,
-				image: 'https://images.unsplash.com/photo-1587486913049-53fc88980cbe?w=200&h=200&fit=crop',
-				productId: 'onion1',
-			},
-		],
-	},
-	recipe3: {
-		id: 'recipe3',
-		name: 'Biryani Recipe',
-		description: 'Aromatic rice with tender meat and rich spices',
-		image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&h=400&fit=crop',
-		ingredients: [
-			{
-				id: 'ing1',
-				name: 'Basmati Rice',
-				quantity: '1kg',
-				price: 280,
-				image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&h=200&fit=crop',
-				productId: 'rice1',
-			},
-			{
-				id: 'ing2',
-				name: 'Chicken (Cut Pieces)',
-				quantity: '800g',
-				price: 350,
-				image: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=200&h=200&fit=crop',
-				productId: 'chicken1',
-			},
-			{
-				id: 'ing3',
-				name: 'Biryani Masala',
-				quantity: '80g',
-				price: 85,
-				image: 'https://images.unsplash.com/photo-1596040033229-a0b34e5e5a88?w=200&h=200&fit=crop',
-				productId: 'masala3',
-			},
-			{
-				id: 'ing4',
-				name: 'Yogurt',
-				quantity: '250g',
-				price: 65,
-				image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-				productId: 'yogurt1',
-			},
-			{
-				id: 'ing5',
-				name: 'Ghee (Clarified Butter)',
-				quantity: '150ml',
-				price: 180,
-				image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-				productId: 'ghee1',
-			},
-		],
-	},
-	recipe4: {
-		id: 'recipe4',
-		name: 'Polao Recipe',
-		description: 'Fragrant basmati rice dish with subtle spices',
-		image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800&h=400&fit=crop',
-		ingredients: [
-			{
-				id: 'ing1',
-				name: 'Basmati Rice',
-				quantity: '500g',
-				price: 150,
-				image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&h=200&fit=crop',
-				productId: 'rice1',
-			},
-			{
-				id: 'ing2',
-				name: 'Whole Spices (Bay Leaf, Cinnamon)',
-				quantity: '30g',
-				price: 50,
-				image: 'https://images.unsplash.com/photo-1596040033229-a0b34e5e5a88?w=200&h=200&fit=crop',
-				productId: 'spices1',
-			},
-			{
-				id: 'ing3',
-				name: 'Ghee (Clarified Butter)',
-				quantity: '100ml',
-				price: 120,
-				image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=200&h=200&fit=crop',
-				productId: 'ghee1',
-			},
-			{
-				id: 'ing4',
-				name: 'Green Peas',
-				quantity: '200g',
-				price: 45,
-				image: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=200&h=200&fit=crop',
-				productId: 'peas1',
-			},
-		],
-	},
+	// Calculate actual price (product price - deductible price)
+	const actualPrice = Math.max(0, productPrice - (item.dedactablePrice || 0));
+
+	return (
+		<Pressable
+			style={[
+				styles.ingredientCard,
+				!isSelected && styles.ingredientCardDisabled,
+			]}
+			onPress={onToggle}
+			disabled={isRequired || isLoading}
+		>
+			{/* Checkbox */}
+			<Pressable
+				style={styles.checkboxContainer}
+				onPress={onToggle}
+				disabled={isRequired || isLoading}
+			>
+				<View
+					style={[
+						styles.checkbox,
+						isSelected && styles.checkboxChecked,
+						isRequired && styles.checkboxDisabled,
+					]}
+				>
+					{isSelected && (
+						<IconSymbol name='checkmark' size={16} color='#FFFFFF' />
+					)}
+				</View>
+			</Pressable>
+
+			{/* Ingredient Image */}
+			{isLoading ? (
+				<View style={[styles.ingredientImage, styles.loadingImageContainer]}>
+					<ActivityIndicator size='small' color='#E63946' />
+				</View>
+			) : (
+				<Image source={{ uri: productImage }} style={styles.ingredientImage} />
+			)}
+
+			{/* Ingredient Info */}
+			<View style={styles.ingredientInfo}>
+				<Text
+					style={[
+						styles.ingredientName,
+						!isSelected && styles.ingredientNameDisabled,
+					]}
+				>
+					{productName}
+				</Text>
+				<Text
+					style={[
+						styles.ingredientQuantity,
+						!isSelected && styles.ingredientQuantityDisabled,
+					]}
+				>
+					{item.qty}g
+				</Text>
+			</View>
+
+			{/* Price */}
+			{/* <Text
+				style={[
+					styles.ingredientPrice,
+					!isSelected && styles.ingredientPriceDisabled,
+				]}
+			>
+				৳{actualPrice}
+			</Text> */}
+		</Pressable>
+	);
 };
 
 export default function RecipeDetailScreen() {
+	const { data: combosData, isLoading: combosLoading } = useGetAllQuery({
+		path: '/combos',
+		filters: { isFeatured: true },
+	});
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const dispatch = useDispatch();
-	const recipe = recipesData[id || 'recipe1'];
+	const recipe = combosData?.doc?.find((item: any) => item.id === id);
 
 	// Track selected ingredients with all selected by default
-	const [selectedIngredients, setSelectedIngredients] = useState<Record<string, boolean>>(
-		recipe.ingredients.reduce((acc, ing) => ({ ...acc, [ing.id]: true }), {})
+	const [selectedIngredients, setSelectedIngredients] = useState<
+		Record<string, boolean>
+	>({});
+
+	// Store fetched product data
+	const [productPrices, setProductPrices] = useState<Record<string, number>>(
+		{}
 	);
 
-	const toggleIngredient = (ingredientId: string, index: number) => {
-		// First two ingredients cannot be unchecked
-		if (index < 2) return;
+	useEffect(() => {
+		if (recipe && Array.isArray(recipe.items)) {
+			setSelectedIngredients(
+				recipe.items.reduce(
+					(acc: any, ing: any) => ({ ...acc, [ing.id]: true }),
+					{}
+				)
+			);
+		}
+	}, [recipe]);
+
+	const toggleIngredient = (ingredientId: string) => {
+		const ingredient = recipe?.items?.find(
+			(item: any) => item.id === ingredientId
+		);
+
+		if (ingredient && !ingredient.isRemovable) return;
 
 		setSelectedIngredients(prev => ({
 			...prev,
@@ -239,131 +160,125 @@ export default function RecipeDetailScreen() {
 	};
 
 	const calculateTotal = () => {
-		return recipe.ingredients.reduce((total, ingredient) => {
-			if (selectedIngredients[ingredient.id]) {
-				return total + ingredient.price;
+		if (!recipe || !recipe.items) return 0;
+
+		// Start with the base recipe sellPrice
+		let total = recipe.sellPrice || 0;
+
+		// Subtract deductable price for unselected removable items
+		recipe.items.forEach((item: any) => {
+			if (item.isRemovable && !selectedIngredients[item.id]) {
+				total -= item.dedactablePrice || 0;
 			}
-			return total;
-		}, 0);
+		});
+
+		return total;
 	};
 
 	const handleAddAllToCart = () => {
-		recipe.ingredients.forEach(ingredient => {
-			if (selectedIngredients[ingredient.id]) {
-				dispatch(
-					addToCart({
-						item: {
-							id: ingredient.productId,
-							_id: ingredient.productId,
-							name: ingredient.name,
-							price: ingredient.price,
-							image: ingredient.image,
-							vat: 0,
-						},
-						qty: 1,
-					})
-				);
-			}
+		if (!recipe || !recipe.items) return;
+
+		// Get all selected items
+		const selectedItems = recipe.items.filter(
+			(item: any) => selectedIngredients[item.id]
+		);
+
+		// Add each selected product to cart
+		selectedItems.forEach((item: any) => {
+			dispatch(
+				addToCart({
+					item: {
+						id: item.product,
+						_id: item.product,
+						name: recipe.name, // We'll use recipe name for now
+						price: recipe.sellPrice / recipe.items.length, // Divide price equally
+						image: recipe.image,
+						vat: recipe.vat || 0,
+					},
+					qty: 1,
+				})
+			);
 		});
 		router.back();
 	};
 
-	const selectedCount = Object.values(selectedIngredients).filter(Boolean).length;
+	if (combosLoading) {
+		return <Loader />;
+	}
+
+	if (!recipe || !recipe?.items) {
+		return (
+			<SafeAreaView style={styles.safeArea}>
+				<View style={styles.headerActions}>
+					<TouchableOpacity
+						onPress={() => router.back()}
+						style={styles.backButton}
+						activeOpacity={0.7}
+					>
+						<IconSymbol name='chevron.left' size={24} color='#000' />
+					</TouchableOpacity>
+				</View>
+				<View
+					style={[
+						styles.container,
+						{ justifyContent: 'center', alignItems: 'center' },
+					]}
+				>
+					<Text style={styles.sectionTitle}>Recipe not found</Text>
+				</View>
+			</SafeAreaView>
+		);
+	}
+
+	const selectedCount =
+		Object.values(selectedIngredients).filter(Boolean).length;
 	const total = calculateTotal();
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
-			<ScrollView
-				style={styles.container}
-				showsVerticalScrollIndicator={false}>
+			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 				{/* Header Actions */}
 				<View style={styles.headerActions}>
 					<TouchableOpacity
 						onPress={() => router.back()}
 						style={styles.backButton}
-						activeOpacity={0.7}>
-						<IconSymbol
-							name='chevron.left'
-							size={24}
-							color='#000'
-						/>
+						activeOpacity={0.7}
+					>
+						<IconSymbol name='chevron.left' size={24} color='#000' />
 					</TouchableOpacity>
 				</View>
 
 				{/* Recipe Image */}
-				<Image
-					source={{ uri: recipe.image }}
-					style={styles.recipeImage}
-				/>
+				<Image source={{ uri: recipe?.image }} style={styles.recipeImage} />
 
 				{/* Recipe Info */}
 				<View style={styles.recipeInfo}>
-					<Text style={styles.recipeDescription}>{recipe.description}</Text>
+					<Text style={styles.recipeTitle}>{recipe?.name}</Text>
+					<Text style={styles.recipeDescription}>{recipe?.description}</Text>
+					{recipe?.saveAmount > 0 && (
+						<View style={styles.saveBadge}>
+							<Text style={styles.saveText}>Save ৳{recipe.saveAmount}</Text>
+						</View>
+					)}
 				</View>
 
 				{/* Ingredients Section */}
 				<View style={styles.ingredientsSection}>
 					<Text style={styles.sectionTitle}>
-						Ingredients ({selectedCount}/{recipe.ingredients.length})
+						Ingredients ({selectedCount}/{recipe?.items?.length})
 					</Text>
 
-					{recipe.ingredients.map((ingredient, index) => {
-						const isSelected = selectedIngredients[ingredient.id];
-						const isRequired = index < 2; // First two ingredients are required
+					{recipe?.items?.map((item: any) => {
+						const isSelected = selectedIngredients[item.id];
+						const isRequired = item.isRemovable === false;
 						return (
-							<Pressable
-								key={ingredient.id}
-								style={[styles.ingredientCard, !isSelected && styles.ingredientCardDisabled]}
-								onPress={() => toggleIngredient(ingredient.id, index)}
-								disabled={isRequired}>
-								{/* Checkbox */}
-								<Pressable
-									style={styles.checkboxContainer}
-									onPress={() => toggleIngredient(ingredient.id, index)}
-									disabled={isRequired}>
-									<View
-										style={[
-											styles.checkbox,
-											isSelected && styles.checkboxChecked,
-											isRequired && styles.checkboxDisabled,
-										]}>
-										{isSelected && (
-											<IconSymbol
-												name='checkmark'
-												size={16}
-												color='#FFFFFF'
-											/>
-										)}
-									</View>
-								</Pressable>
-
-								{/* Ingredient Image */}
-								<Image
-									source={{ uri: ingredient.image }}
-									style={styles.ingredientImage}
-								/>
-
-								{/* Ingredient Info */}
-								<View style={styles.ingredientInfo}>
-									<Text
-										style={[styles.ingredientName, !isSelected && styles.ingredientNameDisabled]}>
-										{ingredient.name}
-									</Text>
-									<Text
-										style={[
-											styles.ingredientQuantity,
-											!isSelected && styles.ingredientQuantityDisabled,
-										]}>
-										{ingredient.quantity}
-									</Text>
-								</View>
-
-								{/* Price */}
-								<Text
-									style={[styles.ingredientPrice, !isSelected && styles.ingredientPriceDisabled]}>
-									৳{ingredient.price}
-								</Text>
-							</Pressable>
+							<IngredientWithProduct
+								key={item.id}
+								item={item}
+								isSelected={isSelected}
+								isRequired={isRequired}
+								onToggle={() => toggleIngredient(item.id)}
+							/>
 						);
 					})}
 				</View>
@@ -379,9 +294,13 @@ export default function RecipeDetailScreen() {
 					<Text style={styles.totalPrice}>৳{total}</Text>
 				</View>
 				<Pressable
-					style={[styles.addButton, selectedCount === 0 && styles.addButtonDisabled]}
+					style={[
+						styles.addButton,
+						selectedCount === 0 && styles.addButtonDisabled,
+					]}
 					onPress={handleAddAllToCart}
-					disabled={selectedCount === 0}>
+					disabled={selectedCount === 0}
+				>
 					<Text style={styles.addButtonText}>
 						Add {selectedCount} {selectedCount === 1 ? 'item' : 'items'} to cart
 					</Text>
@@ -422,7 +341,7 @@ const styles = StyleSheet.create({
 	},
 	recipeImage: {
 		width: '100%',
-		height: 200,
+		height: 250,
 		resizeMode: 'cover',
 	},
 	recipeInfo: {
@@ -431,10 +350,29 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: '#F0F0F0',
 	},
+	recipeTitle: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		color: '#000000',
+		marginBottom: 8,
+	},
 	recipeDescription: {
 		fontSize: 15,
 		color: '#666666',
 		lineHeight: 22,
+		marginBottom: 12,
+	},
+	saveBadge: {
+		backgroundColor: '#E63946',
+		paddingHorizontal: 12,
+		paddingVertical: 6,
+		borderRadius: 6,
+		alignSelf: 'flex-start',
+	},
+	saveText: {
+		color: '#FFFFFF',
+		fontSize: 14,
+		fontWeight: '600',
 	},
 	ingredientsSection: {
 		padding: 20,
@@ -488,6 +426,11 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		marginRight: 12,
 		resizeMode: 'cover',
+	},
+	loadingImageContainer: {
+		backgroundColor: '#F0F0F0',
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 	ingredientInfo: {
 		flex: 1,
