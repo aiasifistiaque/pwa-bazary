@@ -23,8 +23,6 @@ export default function AllCategoriesScreen() {
 		(category: any) => !category.parentCategory
 	);
 
-	console.log('categoryData', categoryData);
-	console.log('parentCategories', parentCategories);
 	const handleBack = () => {
 		router.back();
 	};

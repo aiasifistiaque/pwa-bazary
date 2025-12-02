@@ -146,10 +146,10 @@ export default function DiscoverScreen() {
 	return (
 		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 			{/* Delivery Time Selector */}
-			<DeliveryTimeButton
+			{/* <DeliveryTimeButton
 				text='Choose your delivery time'
 				onPress={handleDeliveryTimePress}
-			/>
+			/> */}
 
 			{/* Banner Carousel */}
 			<BannerCarousel banners={banners} onBannerPress={handleBannerPress} />
@@ -237,6 +237,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: '#FFFFFF',
+		paddingTop: 4,
 	},
 	categoriesSection: {
 		marginBottom: 16,
@@ -270,6 +271,8 @@ const styles = StyleSheet.create({
 	},
 	productList: {
 		paddingHorizontal: 16,
+		gap: 12,
+		paddingVertical: 8,
 	},
 	recipeList: {
 		paddingHorizontal: 16,
