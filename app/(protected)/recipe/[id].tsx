@@ -23,11 +23,13 @@ const IngredientWithProduct = ({
 	isSelected,
 	isRequired,
 	onToggle,
+	onProductDataLoaded,
 }: {
 	item: any;
 	isSelected: boolean;
 	isRequired: boolean;
 	onToggle: () => void;
+	onProductDataLoaded: (productId: string, productName: string) => void;
 }) => {
 	const { data: productData, isLoading } = useGetByIdQuery(
 		{
@@ -41,10 +43,13 @@ const IngredientWithProduct = ({
 
 	const productName = productData?.name || 'Loading...';
 	const productImage = productData?.image || productData?.images?.[0] || '';
-	const productPrice = productData?.price || productData?.sellPrice || 0;
 
-	// Calculate actual price (product price - deductible price)
-	const actualPrice = Math.max(0, productPrice - (item.dedactablePrice || 0));
+	// Pass product name to parent when loaded
+	useEffect(() => {
+		if (productData?.name && item.product) {
+			onProductDataLoaded(item.product, productData.name);
+		}
+	}, [productData?.name, item.product]);
 
 	return (
 		<Pressable
@@ -102,16 +107,6 @@ const IngredientWithProduct = ({
 					{item.qty}g
 				</Text>
 			</View>
-
-			{/* Price */}
-			{/* <Text
-				style={[
-					styles.ingredientPrice,
-					!isSelected && styles.ingredientPriceDisabled,
-				]}
-			>
-				৳{actualPrice}
-			</Text> */}
 		</Pressable>
 	);
 };
@@ -130,10 +125,8 @@ export default function RecipeDetailScreen() {
 		Record<string, boolean>
 	>({});
 
-	// Store fetched product data
-	const [productPrices, setProductPrices] = useState<Record<string, number>>(
-		{}
-	);
+	// Store product names as they're loaded
+	const [productNames, setProductNames] = useState<Record<string, string>>({});
 
 	useEffect(() => {
 		if (recipe && Array.isArray(recipe.items)) {
@@ -145,6 +138,14 @@ export default function RecipeDetailScreen() {
 			);
 		}
 	}, [recipe]);
+
+	// Callback to receive product names from child components
+	const handleProductDataLoaded = (productId: string, productName: string) => {
+		setProductNames(prev => ({
+			...prev,
+			[productId]: productName,
+		}));
+	};
 
 	const toggleIngredient = (ingredientId: string) => {
 		const ingredient = recipe?.items?.find(
@@ -175,31 +176,86 @@ export default function RecipeDetailScreen() {
 		return total;
 	};
 
-	const handleAddAllToCart = () => {
-		if (!recipe || !recipe.items) return;
+	// Helper function to get removed ingredients with their names
+	const getRemovedIngredients = () => {
+		if (!recipe || !recipe.items) return [];
 
-		// Get all selected items
-		const selectedItems = recipe.items.filter(
+		return recipe.items.filter(
+			(item: any) => item.isRemovable && !selectedIngredients[item.id]
+		);
+	};
+
+	// Build the note with actual product names - both removed and included
+	const buildNote = () => {
+		if (!recipe || !recipe.items) return '';
+
+		const removedIngredients = recipe.items.filter(
+			(item: any) => item.isRemovable && !selectedIngredients[item.id]
+		);
+
+		const includedIngredients = recipe.items.filter(
 			(item: any) => selectedIngredients[item.id]
 		);
 
-		// Add each selected product to cart
-		selectedItems.forEach((item: any) => {
-			dispatch(
-				addToCart({
-					item: {
-						id: item.product,
-						_id: item.product,
-						name: recipe.name, // We'll use recipe name for now
-						price: recipe.sellPrice / recipe.items.length, // Divide price equally
-						image: recipe.image,
-						vat: recipe.vat || 0,
-					},
-					qty: 1,
-				})
-			);
-		});
-		router.back();
+		const parts: string[] = [];
+
+		// Add included items
+		if (includedIngredients.length > 0) {
+			const includedNames = includedIngredients
+				.map(
+					(item: any) => productNames[item.product] || `Item ${item.product}`
+				)
+				.join(', ');
+			parts.push(`Includes: ${includedNames}`);
+		}
+
+		// Add removed items
+		if (removedIngredients.length > 0) {
+			const removedNames = removedIngredients
+				.map(
+					(item: any) => productNames[item.product] || `Item ${item.product}`
+				)
+				.join(', ');
+			parts.push(`Removed: ${removedNames}`);
+		}
+
+		return parts.join(' | ');
+	};
+
+	const handleAddAllToCart = () => {
+		if (!recipe || !recipe.items) return;
+
+		const adjustedPrice = calculateTotal();
+		const note = buildNote();
+
+		// Create unique ID for the combo with customization
+		const baseId = recipe.id || recipe._id;
+		const customizationHash = getRemovedIngredients()
+			.map((item: any) => item.id)
+			.sort()
+			.join('-');
+		const uniqueId = customizationHash
+			? `${baseId}-custom-${customizationHash}`
+			: baseId;
+
+		// Add combo as a single item to cart
+		dispatch(
+			addToCart({
+				item: {
+					id: recipe.id || recipe._id,
+					_id: recipe._id,
+					name: recipe.name,
+					price: adjustedPrice,
+					image: recipe.image,
+					vat: recipe.vat || 0,
+					// Add note if there are removed ingredients
+					...(note && { note: note }),
+				},
+				qty: 1,
+			})
+		);
+
+		router.replace('/(protected)/(tabs)/cart');
 	};
 
 	if (combosLoading) {
@@ -233,6 +289,12 @@ export default function RecipeDetailScreen() {
 	const selectedCount =
 		Object.values(selectedIngredients).filter(Boolean).length;
 	const total = calculateTotal();
+	const removedIngredients = getRemovedIngredients();
+	const removedCount = removedIngredients.length;
+	const totalDeduction = removedIngredients.reduce(
+		(sum: number, item: any) => sum + (item.dedactablePrice || 0),
+		0
+	);
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
@@ -278,10 +340,31 @@ export default function RecipeDetailScreen() {
 								isSelected={isSelected}
 								isRequired={isRequired}
 								onToggle={() => toggleIngredient(item.id)}
+								onProductDataLoaded={handleProductDataLoaded}
 							/>
 						);
 					})}
 				</View>
+
+				{/* Show removed items info if any */}
+				{removedCount > 0 && (
+					<View style={styles.removedInfoContainer}>
+						<IconSymbol
+							name='info.circle'
+							size={18}
+							color='#856404'
+							style={styles.infoIcon}
+						/>
+						<View style={styles.removedInfoTextContainer}>
+							<Text style={styles.removedInfoText}>
+								{removedCount} ingredient{removedCount > 1 ? 's' : ''} removed
+							</Text>
+							<Text style={styles.removedInfoSubtext}>
+								Price adjusted by ৳{totalDeduction}
+							</Text>
+						</View>
+					</View>
+				)}
 
 				{/* Bottom spacing for fixed button */}
 				<View style={{ height: 124 }} />
@@ -290,7 +373,14 @@ export default function RecipeDetailScreen() {
 			{/* Fixed Bottom Button */}
 			<View style={styles.bottomContainer}>
 				<View style={styles.totalContainer}>
-					<Text style={styles.totalLabel}>Total</Text>
+					<View>
+						<Text style={styles.totalLabel}>Total</Text>
+						{removedCount > 0 && (
+							<Text style={styles.originalPriceText}>
+								Was ৳{recipe.sellPrice}
+							</Text>
+						)}
+					</View>
 					<Text style={styles.totalPrice}>৳{total}</Text>
 				</View>
 				<Pressable
@@ -301,9 +391,7 @@ export default function RecipeDetailScreen() {
 					onPress={handleAddAllToCart}
 					disabled={selectedCount === 0}
 				>
-					<Text style={styles.addButtonText}>
-						Add {selectedCount} {selectedCount === 1 ? 'item' : 'items'} to cart
-					</Text>
+					<Text style={styles.addButtonText}>Add combo to cart</Text>
 				</Pressable>
 			</View>
 		</SafeAreaView>
@@ -451,14 +539,33 @@ const styles = StyleSheet.create({
 	ingredientQuantityDisabled: {
 		color: '#AAAAAA',
 	},
-	ingredientPrice: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		color: '#E63946',
-		marginLeft: 8,
+	removedInfoContainer: {
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		marginHorizontal: 20,
+		marginBottom: 16,
+		padding: 14,
+		backgroundColor: '#FFF3CD',
+		borderRadius: 10,
+		borderLeftWidth: 4,
+		borderLeftColor: '#FFC107',
 	},
-	ingredientPriceDisabled: {
-		color: '#AAAAAA',
+	infoIcon: {
+		marginRight: 10,
+		marginTop: 2,
+	},
+	removedInfoTextContainer: {
+		flex: 1,
+	},
+	removedInfoText: {
+		fontSize: 14,
+		color: '#856404',
+		fontWeight: '600',
+		marginBottom: 2,
+	},
+	removedInfoSubtext: {
+		fontSize: 13,
+		color: '#856404',
 	},
 	bottomContainer: {
 		position: 'absolute',
@@ -486,6 +593,12 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '600',
 		color: '#000000',
+	},
+	originalPriceText: {
+		fontSize: 13,
+		color: '#999999',
+		textDecorationLine: 'line-through',
+		marginTop: 2,
 	},
 	totalPrice: {
 		fontSize: 24,

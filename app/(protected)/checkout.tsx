@@ -156,6 +156,8 @@ export default function CheckoutScreen() {
 						image: item.image,
 						uniqueId: item.uniqueId,
 						unitVat: item.vat,
+						...(item.note && { note: item.note }), 
+						...(item.variantName && { variantName: item.variantName }), 
 					})),
 					total,
 					subTotal,
@@ -180,12 +182,20 @@ export default function CheckoutScreen() {
 
 			if (res) {
 				dispatch(resetCart());
-				Alert.alert('Success', 'Your order has been placed successfully!', [
-					{
-						text: 'OK',
-						onPress: () => router.replace('/(protected)/(tabs)'),
-					},
-				]);
+				Alert.alert(
+					'Success',
+					'Your order has been placed successfully!',
+					[
+						{
+							text: 'OK',
+							onPress: () => {
+								// Use replace to prevent going back to checkout
+								router.replace('/(protected)/orders');
+							},
+						},
+					],
+					{ cancelable: false } // Prevent dismissing alert without pressing OK
+				);
 			}
 		} catch (error: any) {
 			console.error(error);
