@@ -1,4 +1,4 @@
-import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
+import SearchCategorySkeleton from '@/components/skeleton/SearchCategorySkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
@@ -182,8 +182,8 @@ export default function SearchScreen() {
 							<Text style={styles.sectionTitle}>All Categories</Text>
 							{isCategoryLoading ? (
 								<View>
-									{Array.from({ length: 3 }).map((_, index) => (
-										<CategorySkeleton key={index} />
+									{Array.from({ length: 8 }).map((_, index) => (
+										<SearchCategorySkeleton key={index} />
 									))}
 								</View>
 							) : (
