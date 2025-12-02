@@ -74,10 +74,10 @@ export function ProductCard({
 
 const styles = StyleSheet.create({
 	card: {
-		width: 180,
+		width: '100%',
+		minWidth: 180,
 		backgroundColor: '#FFF',
 		borderRadius: 12,
-		marginRight: 12,
 		overflow: 'hidden',
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 2 },

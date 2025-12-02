@@ -1,4 +1,4 @@
-import { FavoriteProductCard } from '@/components/favorite-product-card';
+import { ProductCard } from '@/components/product-card';
 import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery, useGetByIdQuery } from '@/store/services/commonApi';
@@ -27,24 +27,23 @@ export default function CategoryScreen() {
 		path: 'categorys',
 		id,
 	});
+
 	// get the categories based on if id
 	const { data: childCategories, isLoading: childCatLoading } = useGetAllQuery({
 		path: 'categorys',
 		filters: { parentCategory: id },
 	});
+
 	const hasSubcategories = childCategories?.doc?.length > 0;
+
 	const { data: productsData, isLoading: productsDataLoading } = useGetAllQuery(
 		{
 			path: 'products',
 			filters: {
 				category_in: id,
-				// isActive: true,
-				// status: 'published',
 			},
 		}
 	);
-
-	// const categoryData = getCategoryData(id || 'fruit');
 
 	const handleBack = () => {
 		router.back();
@@ -55,9 +54,6 @@ export default function CategoryScreen() {
 	};
 
 	const handleProductPress = (productId: string) => {
-		// console.log('dffs', router);
-		// console.log('Pressed productId:', productId);
-		// router.push('/product/123');
 		router.push(`/product/${productId}`);
 	};
 
@@ -76,10 +72,11 @@ export default function CategoryScreen() {
 			})
 		);
 	};
-	// childCatLoading
+
 	if (childCatLoading || productsDataLoading) {
 		return <Loader />;
 	}
+
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			<View style={styles.container}>
@@ -135,12 +132,20 @@ export default function CategoryScreen() {
 							<View style={styles.productsGrid}>
 								{productsData?.doc?.length > 0 ? (
 									productsData?.doc?.map((product: any) => (
-										<FavoriteProductCard
-											key={product.id}
-											{...product}
-											onPress={() => handleProductPress(product.id)}
-											onAddPress={() => handleAddPress(product)}
-										/>
+										<View key={product.id} style={styles.productCardWrapper}>
+											<ProductCard
+												id={product.id}
+												name={product.name}
+												price={product.price}
+												unit={product.unit}
+												unitPrice={product.unitPrice}
+												badge={product.badge}
+												badgeIcon={product.badgeIcon}
+												image={product.image}
+												onPress={() => handleProductPress(product.id)}
+												onAddPress={() => handleAddPress(product)}
+											/>
+										</View>
 									))
 								) : (
 									<View style={styles.emptyStateContainer}>
@@ -224,6 +229,10 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		flexWrap: 'wrap',
 		justifyContent: 'space-between',
+	},
+	productCardWrapper: {
+		width: '48%',
+		marginBottom: 12,
 	},
 	emptyStateContainer: {
 		width: '100%',

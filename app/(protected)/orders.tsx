@@ -104,7 +104,7 @@ const OrderCard = ({
 			{/* Order Items Preview */}
 			<View style={styles.itemsPreview}>
 				{order.items.slice(0, 3).map((item, index) => (
-					<View key={item.id} style={styles.itemRow}>
+					<View key={index} style={styles.itemRow}>
 						<Image
 							source={{ uri: item.image || fallbackImage }}
 							style={styles.itemImage}
