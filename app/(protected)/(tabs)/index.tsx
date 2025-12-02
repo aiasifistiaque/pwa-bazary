@@ -1,9 +1,10 @@
 import { BannerCarousel } from '@/components/banner-carousel';
 import { CategoryCard } from '@/components/category-card';
-import CategorySkeleton from '@/components/category-skeleton/CategorySkeleton';
 import { DeliveryTimeButton } from '@/components/delivery-time-button';
 import { ProductCard } from '@/components/product-card';
 import { SectionHeader } from '@/components/section-header';
+import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
+import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
@@ -45,37 +46,6 @@ const banners = [
 	},
 ];
 
-// Recipe combos data
-const recipeCombos = [
-	{
-		id: 'recipe1',
-		name: 'Khichuri Recipe',
-		image:
-			'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
-		description: 'Traditional Bengali comfort food',
-	},
-	{
-		id: 'recipe2',
-		name: 'Teheri Recipe',
-		image:
-			'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop',
-		description: 'Flavorful rice dish with spices',
-	},
-	{
-		id: 'recipe3',
-		name: 'Biryani Recipe',
-		image:
-			'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=400&fit=crop',
-		description: 'Aromatic rice with meat and spices',
-	},
-	{
-		id: 'recipe4',
-		name: 'Polao Recipe',
-		image:
-			'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=400&h=400&fit=crop',
-		description: 'Fragrant basmati rice dish',
-	},
-];
 
 const FeaturedCategorySection = ({ category }: { category: any }) => {
 	const dispatch = useDispatch();
@@ -123,7 +93,7 @@ const FeaturedCategorySection = ({ category }: { category: any }) => {
 						price={item.sellPrice.toString()}
 						image={item.image}
 						unit={item.unit}
-						unitPrice={item.unitPrice} // Assuming backend sends this or it's calculated
+						unitPrice={item.unitPrice}
 						onPress={() => handleProductPress(item.id)}
 						onAddPress={() => handleAddPress(item)}
 					/>
@@ -145,6 +115,11 @@ export default function DiscoverScreen() {
 
 	const { data: featuredCategoriesData } = useGetAllQuery({
 		path: '/categorys',
+		filters: { isFeatured: true },
+	});
+
+	const { data: combosData, isLoading: combosLoading } = useGetAllQuery({
+		path: '/combos',
 		filters: { isFeatured: true },
 	});
 
@@ -184,7 +159,7 @@ export default function DiscoverScreen() {
 				<SectionHeader title='Categories' />
 				{isLoading ? (
 					<View style={styles.categoriesGrid}>
-						{Array.from({ length: 4 }).map((_, i) => (
+						{Array.from({ length: 8 }).map((_, i) => (
 							<CategorySkeleton key={i} />
 						))}
 					</View>
@@ -212,26 +187,42 @@ export default function DiscoverScreen() {
 			{/* Recipe Combos Section */}
 			<View style={styles.section}>
 				<SectionHeader title='Combo Recipes' />
-				<FlatList
-					horizontal
-					data={recipeCombos}
-					renderItem={({ item }) => (
-						<TouchableOpacity
-							style={styles.recipeCard}
-							onPress={() => handleRecipePress(item.id)}
-							activeOpacity={0.8}
-						>
-							<Image source={{ uri: item.image }} style={styles.recipeImage} />
-							<View style={styles.recipeInfo}>
-								<Text style={styles.recipeName}>{item.name}</Text>
-								<Text style={styles.recipeDescription}>{item.description}</Text>
-							</View>
-						</TouchableOpacity>
-					)}
-					keyExtractor={item => item.id}
-					showsHorizontalScrollIndicator={false}
-					contentContainerStyle={styles.recipeList}
-				/>
+				{combosLoading ? (
+					<FlatList
+						horizontal
+						data={Array.from({ length: 3 })}
+						renderItem={({ index }) => <RecipeCardSkeleton key={index} />}
+						keyExtractor={(_, index) => `skeleton-${index}`}
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.recipeList}
+					/>
+				) : (
+					<FlatList
+						horizontal
+						data={combosData?.doc}
+						renderItem={({ item }) => (
+							<TouchableOpacity
+								style={styles.recipeCard}
+								onPress={() => handleRecipePress(item.id)}
+								activeOpacity={0.8}
+							>
+								<Image
+									source={{ uri: item.image }}
+									style={styles.recipeImage}
+								/>
+								<View style={styles.recipeInfo}>
+									<Text style={styles.recipeName}>{item.name}</Text>
+									<Text style={styles.recipeDescription}>
+										{item.shortDescription}
+									</Text>
+								</View>
+							</TouchableOpacity>
+						)}
+						keyExtractor={item => item.id}
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.recipeList}
+					/>
+				)}
 			</View>
 
 			{/* Featured Product Sections */}
@@ -282,6 +273,8 @@ const styles = StyleSheet.create({
 	},
 	recipeList: {
 		paddingHorizontal: 16,
+		flexDirection: 'row',
+		flexWrap: 'wrap',
 	},
 	recipeCard: {
 		width: 280,

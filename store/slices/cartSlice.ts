@@ -1,7 +1,5 @@
-// export default cartSlice.reducer;
 import { storage } from '@/utils/storage';
 import { createSlice } from '@reduxjs/toolkit';
-// import { CART_NAME } from '../../';
 
 export const CART_NAME = 'DDONG_CART_ONE';
 
@@ -22,6 +20,7 @@ export type CartItem = {
 	variantStock?: number;
 	variantName?: string;
 	variantId?: string;
+	note?: string;
 };
 
 export type Address = {
@@ -185,6 +184,8 @@ export const cartSlice = createSlice({
 							? `${item.selectedSize} / ${item.selectedColor}`
 							: item.selectedSize || item.selectedColor || '',
 					variantId: item.variationId,
+					// Combo-specific fields - Add this line
+					note: item.note,
 				};
 
 				state.cartItems = [...state.cartItems, newItem];

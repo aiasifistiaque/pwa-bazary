@@ -33,7 +33,8 @@ const tags = [
 	'/categorys',
 	'categorys',
 	'/products',
-	'order'
+	'order',
+	'/combos'
 ];
 
 // src/store/types.ts
