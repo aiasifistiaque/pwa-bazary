@@ -19,7 +19,6 @@ import {
 	useUpdateUserSelfMutation,
 } from '@/store/services/authApi';
 import { FontAwesome } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
 	const dispatch = useDispatch();
@@ -373,7 +372,6 @@ const styles = StyleSheet.create({
 	},
 	safeArea: {
 		backgroundColor: '#FFFFFF',
-		paddingTop: Platform.OS === 'ios' ? 0 : 40,
 	},
 	header: {
 		flexDirection: 'row',

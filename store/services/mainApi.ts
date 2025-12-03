@@ -34,7 +34,8 @@ const tags = [
 	'categorys',
 	'/products',
 	'order',
-	'/combos'
+	'/combos',
+	'addresses',
 ];
 
 // src/store/types.ts
