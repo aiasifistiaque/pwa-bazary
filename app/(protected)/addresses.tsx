@@ -9,6 +9,7 @@ import { Address } from '@/store/slices/addressSlice';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+	ActivityIndicator,
 	Alert,
 	Pressable,
 	ScrollView,
@@ -20,6 +21,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useGetSelfQuery } from '@/store/services/authApi';
+import { Loader } from '@/components/Loader';
 
 export default function AddressesScreen() {
 	const { data: userData } = useGetSelfQuery({});
@@ -37,6 +39,8 @@ export default function AddressesScreen() {
 
 	const [showAddForm, setShowAddForm] = useState(false);
 	const [editingId, setEditingId] = useState<string | null>(null);
+	const [isSaving, setIsSaving] = useState(false);
+	const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
 	const [formData, setFormData] = useState<Omit<Address, 'id' | 'isDefault'>>({
 		label: '',
 		name: '',
@@ -92,6 +96,7 @@ export default function AddressesScreen() {
 			return;
 		}
 
+		setIsSaving(true);
 		try {
 			if (editingId) {
 				// Update existing address
@@ -122,6 +127,8 @@ export default function AddressesScreen() {
 		} catch (error) {
 			console.error('Failed to save address:', error);
 			Alert.alert('Error', 'Failed to save address');
+		} finally {
+			setIsSaving(false);
 		}
 	};
 
@@ -146,11 +153,12 @@ export default function AddressesScreen() {
 			[
 				{ text: 'Cancel', style: 'cancel' },
 				{
-					text: 'Delete',
+					text: 'Confirm',
 					style: 'destructive',
 					onPress: async () => {
 						try {
 							await deleteAddress({ path: 'addresses', id }).unwrap();
+							Alert.alert('Success', 'Address deleted successfully');
 						} catch (error) {
 							console.error('Failed to delete address:', error);
 							Alert.alert('Error', 'Failed to delete address');
@@ -162,6 +170,7 @@ export default function AddressesScreen() {
 	};
 
 	const handleSetDefault = async (id: string) => {
+		setSettingDefaultId(id);
 		try {
 			// First unset current default if any
 			const currentDefault = addresses.find(addr => addr.isDefault);
@@ -182,6 +191,8 @@ export default function AddressesScreen() {
 		} catch (error) {
 			console.error('Failed to set default address:', error);
 			Alert.alert('Error', 'Failed to set default address');
+		} finally {
+			setSettingDefaultId(null);
 		}
 	};
 
@@ -196,18 +207,16 @@ export default function AddressesScreen() {
 				<View style={{ width: 40 }} />
 			</View>
 
-			<ScrollView
-				style={styles.scrollView}
-				showsVerticalScrollIndicator={false}
-			>
-				{/* Saved Addresses */}
-				<View style={styles.addressesContainer}>
-					{isLoading ? (
-						<Text style={{ textAlign: 'center', marginTop: 20 }}>
-							Loading addresses...
-						</Text>
-					) : (
-						addresses.map(address => (
+			{isLoading ? (
+				<Loader />
+			) : (
+				<ScrollView
+					style={styles.scrollView}
+					showsVerticalScrollIndicator={false}
+				>
+					{/* Saved Addresses */}
+					<View style={styles.addressesContainer}>
+						{addresses.map(address => (
 							<View
 								key={address.id || (address as any)._id}
 								style={[
@@ -264,180 +273,202 @@ export default function AddressesScreen() {
 
 								{!address.isDefault && (
 									<Pressable
-										style={styles.setDefaultButton}
+										style={[
+											styles.setDefaultButton,
+											settingDefaultId ===
+												(address.id || (address as any)._id) &&
+												styles.setDefaultButtonDisabled,
+										]}
 										onPress={() =>
 											handleSetDefault(address.id || (address as any)._id)
 										}
+										disabled={settingDefaultId !== null}
 									>
-										<Text style={styles.setDefaultText}>Set as Default</Text>
+										{settingDefaultId ===
+										(address.id || (address as any)._id) ? (
+											<ActivityIndicator size='small' color='#E63946' />
+										) : (
+											<Text style={styles.setDefaultText}>Set as Default</Text>
+										)}
 									</Pressable>
 								)}
 							</View>
-						))
-					)}
+						))}
 
-					{!isLoading && addresses.length === 0 && (
-						<View style={styles.emptyState}>
-							<IconSymbol name='mappin.circle' size={64} color='#D0D0D0' />
-							<Text style={styles.emptyStateText}>No saved addresses</Text>
-							<Text style={styles.emptyStateSubtext}>
-								Add your first address to get started
-							</Text>
-						</View>
-					)}
-				</View>
+						{addresses.length === 0 && (
+							<View style={styles.emptyState}>
+								<IconSymbol name='mappin.circle' size={64} color='#D0D0D0' />
+								<Text style={styles.emptyStateText}>No saved addresses</Text>
+								<Text style={styles.emptyStateSubtext}>
+									Add your first address to get started
+								</Text>
+							</View>
+						)}
+					</View>
 
-				{/* Add/Edit Address Form */}
-				{showAddForm && (
-					<View style={styles.formContainer}>
-						<View style={styles.formHeader}>
-							<Text style={styles.formTitle}>
-								{editingId ? 'Edit Address' : 'Add New Address'}
-							</Text>
+					{/* Add/Edit Address Form */}
+					{showAddForm && (
+						<View style={styles.formContainer}>
+							<View style={styles.formHeader}>
+								<Text style={styles.formTitle}>
+									{editingId ? 'Edit Address' : 'Add New Address'}
+								</Text>
+								<Pressable
+									onPress={() => {
+										setShowAddForm(false);
+										setEditingId(null);
+										setFormData({
+											label: '',
+											name: '',
+											phone: '',
+											street: '',
+											area: '',
+											city: '',
+											postalCode: '',
+										});
+									}}
+								>
+									<IconSymbol name='xmark' size={24} color='#666666' />
+								</Pressable>
+							</View>
+
+							{/* Location Button */}
 							<Pressable
-								onPress={() => {
-									setShowAddForm(false);
-									setEditingId(null);
-									setFormData({
-										label: '',
-										name: '',
-										phone: '',
-										street: '',
-										area: '',
-										city: '',
-										postalCode: '',
-									});
-								}}
+								style={styles.locationButton}
+								onPress={handleGetCurrentLocation}
 							>
-								<IconSymbol name='xmark' size={24} color='#666666' />
+								<IconSymbol name='location.fill' size={20} color='#E63946' />
+								<Text style={styles.locationButtonText}>
+									Use Current Location
+								</Text>
+							</Pressable>
+
+							{/* Form Fields */}
+							<View style={styles.formField}>
+								<Text style={styles.label}>Label *</Text>
+								<View style={styles.labelOptions}>
+									{['Home', 'Office', 'Other'].map(label => (
+										<Pressable
+											key={label}
+											style={[
+												styles.labelOption,
+												formData.label === label && styles.labelOptionActive,
+											]}
+											onPress={() => setFormData(prev => ({ ...prev, label }))}
+										>
+											<Text
+												style={[
+													styles.labelOptionText,
+													formData.label === label &&
+														styles.labelOptionTextActive,
+												]}
+											>
+												{label}
+											</Text>
+										</Pressable>
+									))}
+								</View>
+							</View>
+
+							<View style={styles.formField}>
+								<Text style={styles.label}>Full Name *</Text>
+								<TextInput
+									style={styles.input}
+									placeholder='Enter full name'
+									value={formData.name}
+									onChangeText={text =>
+										setFormData(prev => ({ ...prev, name: text }))
+									}
+								/>
+							</View>
+
+							<View style={styles.formField}>
+								<Text style={styles.label}>Phone Number *</Text>
+								<TextInput
+									style={styles.input}
+									placeholder='+880 1XXXXXXXXX'
+									keyboardType='phone-pad'
+									value={formData.phone}
+									onChangeText={text =>
+										setFormData(prev => ({ ...prev, phone: text }))
+									}
+								/>
+							</View>
+
+							<View style={styles.formField}>
+								<Text style={styles.label}>Street Address *</Text>
+								<TextInput
+									style={styles.input}
+									placeholder='House/Flat no., Street'
+									value={formData.street}
+									onChangeText={text =>
+										setFormData(prev => ({ ...prev, street: text }))
+									}
+								/>
+							</View>
+
+							<View style={styles.formField}>
+								<Text style={styles.label}>Area *</Text>
+								<TextInput
+									style={styles.input}
+									placeholder='Area/Locality'
+									value={formData.area}
+									onChangeText={text =>
+										setFormData(prev => ({ ...prev, area: text }))
+									}
+								/>
+							</View>
+
+							<View style={styles.formRow}>
+								<View style={[styles.formField, { flex: 1 }]}>
+									<Text style={styles.label}>City *</Text>
+									<TextInput
+										style={styles.input}
+										placeholder='City'
+										value={formData.city}
+										onChangeText={text =>
+											setFormData(prev => ({ ...prev, city: text }))
+										}
+									/>
+								</View>
+
+								<View style={[styles.formField, { flex: 1 }]}>
+									<Text style={styles.label}>Postal Code</Text>
+									<TextInput
+										style={styles.input}
+										placeholder='1200'
+										keyboardType='numeric'
+										value={formData.postalCode}
+										onChangeText={text =>
+											setFormData(prev => ({ ...prev, postalCode: text }))
+										}
+									/>
+								</View>
+							</View>
+
+							<Pressable
+								style={[
+									styles.saveButton,
+									isSaving && styles.saveButtonDisabled,
+								]}
+								onPress={handleSaveAddress}
+								disabled={isSaving}
+							>
+								{isSaving ? (
+									<ActivityIndicator size='small' color='#FFFFFF' />
+								) : (
+									<Text style={styles.saveButtonText}>
+										{editingId ? 'Update Address' : 'Save Address'}
+									</Text>
+								)}
 							</Pressable>
 						</View>
+					)}
 
-						{/* Location Button */}
-						<Pressable
-							style={styles.locationButton}
-							onPress={handleGetCurrentLocation}
-						>
-							<IconSymbol name='location.fill' size={20} color='#E63946' />
-							<Text style={styles.locationButtonText}>
-								Use Current Location
-							</Text>
-						</Pressable>
-
-						{/* Form Fields */}
-						<View style={styles.formField}>
-							<Text style={styles.label}>Label *</Text>
-							<View style={styles.labelOptions}>
-								{['Home', 'Office', 'Other'].map(label => (
-									<Pressable
-										key={label}
-										style={[
-											styles.labelOption,
-											formData.label === label && styles.labelOptionActive,
-										]}
-										onPress={() => setFormData(prev => ({ ...prev, label }))}
-									>
-										<Text
-											style={[
-												styles.labelOptionText,
-												formData.label === label &&
-													styles.labelOptionTextActive,
-											]}
-										>
-											{label}
-										</Text>
-									</Pressable>
-								))}
-							</View>
-						</View>
-
-						<View style={styles.formField}>
-							<Text style={styles.label}>Full Name *</Text>
-							<TextInput
-								style={styles.input}
-								placeholder='Enter full name'
-								value={formData.name}
-								onChangeText={text =>
-									setFormData(prev => ({ ...prev, name: text }))
-								}
-							/>
-						</View>
-
-						<View style={styles.formField}>
-							<Text style={styles.label}>Phone Number *</Text>
-							<TextInput
-								style={styles.input}
-								placeholder='+880 1XXXXXXXXX'
-								keyboardType='phone-pad'
-								value={formData.phone}
-								onChangeText={text =>
-									setFormData(prev => ({ ...prev, phone: text }))
-								}
-							/>
-						</View>
-
-						<View style={styles.formField}>
-							<Text style={styles.label}>Street Address *</Text>
-							<TextInput
-								style={styles.input}
-								placeholder='House/Flat no., Street'
-								value={formData.street}
-								onChangeText={text =>
-									setFormData(prev => ({ ...prev, street: text }))
-								}
-							/>
-						</View>
-
-						<View style={styles.formField}>
-							<Text style={styles.label}>Area *</Text>
-							<TextInput
-								style={styles.input}
-								placeholder='Area/Locality'
-								value={formData.area}
-								onChangeText={text =>
-									setFormData(prev => ({ ...prev, area: text }))
-								}
-							/>
-						</View>
-
-						<View style={styles.formRow}>
-							<View style={[styles.formField, { flex: 1 }]}>
-								<Text style={styles.label}>City *</Text>
-								<TextInput
-									style={styles.input}
-									placeholder='City'
-									value={formData.city}
-									onChangeText={text =>
-										setFormData(prev => ({ ...prev, city: text }))
-									}
-								/>
-							</View>
-
-							<View style={[styles.formField, { flex: 1 }]}>
-								<Text style={styles.label}>Postal Code</Text>
-								<TextInput
-									style={styles.input}
-									placeholder='1200'
-									keyboardType='numeric'
-									value={formData.postalCode}
-									onChangeText={text =>
-										setFormData(prev => ({ ...prev, postalCode: text }))
-									}
-								/>
-							</View>
-						</View>
-
-						<Pressable style={styles.saveButton} onPress={handleSaveAddress}>
-							<Text style={styles.saveButtonText}>
-								{editingId ? 'Update Address' : 'Save Address'}
-							</Text>
-						</Pressable>
-					</View>
-				)}
-
-				{/* Bottom Spacing */}
-				<View style={{ height: 100 }} />
-			</ScrollView>
+					{/* Bottom Spacing */}
+					<View style={{ height: 100 }} />
+				</ScrollView>
+			)}
 
 			{/* Add Address Button */}
 			{!showAddForm && (
@@ -564,12 +595,16 @@ const styles = StyleSheet.create({
 	},
 	setDefaultButton: {
 		alignSelf: 'flex-start',
+		minWidth: 130,
 		paddingHorizontal: 16,
 		paddingVertical: 8,
 		borderRadius: 8,
 		borderWidth: 1,
 		borderColor: '#E63946',
 		backgroundColor: '#FEF2F2',
+	},
+	setDefaultButtonDisabled: {
+		opacity: 0.5,
 	},
 	setDefaultText: {
 		fontSize: 13,
@@ -689,6 +724,9 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: 'bold',
 		color: '#FFFFFF',
+	},
+	saveButtonDisabled: {
+		opacity: 0.6,
 	},
 	bottomContainer: {
 		position: 'absolute',

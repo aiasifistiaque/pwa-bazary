@@ -64,7 +64,7 @@ export const userApi = mainApi.injectEndpoints({
 		update: builder.mutation({
 			query: ({ path, id, body }) => ({
 				url: `${path}/${id}`,
-				method: 'PATCH',
+				method: 'PUT',
 				body: body,
 			}),
 			invalidatesTags: (_result, _error, { path, invalidate = [] }) => [
