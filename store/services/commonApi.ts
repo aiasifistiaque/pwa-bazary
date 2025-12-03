@@ -29,12 +29,17 @@ export const userApi = mainApi.injectEndpoints({
 		}),
 
 		getById: builder.query({
-			query: ({ path, id, invalidate = [] }) => `${path}/${id}?invalidate=${invalidate}`,
-			providesTags: (_result, _error, { path, invalidate = [] }) => [path, ...invalidate],
+			query: ({ path, id, invalidate = [] }) =>
+				`${path}/${id}?invalidate=${invalidate}`,
+			providesTags: (_result, _error, { path, invalidate = [] }) => [
+				path,
+				...invalidate,
+			],
 		}),
 
 		getByParentCategory: builder.query({
-			query: ({ path, parentCategoryId }) => `${path}?parentCategory=${parentCategoryId}`,
+			query: ({ path, parentCategoryId }) =>
+				`${path}?parentCategory=${parentCategoryId}`,
 			providesTags: (_result, _error, { path }) => [path],
 		}),
 
@@ -55,6 +60,31 @@ export const userApi = mainApi.injectEndpoints({
 				...invalidate,
 			],
 		}),
+
+		update: builder.mutation({
+			query: ({ path, id, body }) => ({
+				url: `${path}/${id}`,
+				method: 'PATCH',
+				body: body,
+			}),
+			invalidatesTags: (_result, _error, { path, invalidate = [] }) => [
+				'filters',
+				path,
+				...invalidate,
+			],
+		}),
+
+		delete: builder.mutation({
+			query: ({ path, id }) => ({
+				url: `${path}/${id}`,
+				method: 'DELETE',
+			}),
+			invalidatesTags: (_result, _error, { path, invalidate = [] }) => [
+				'filters',
+				path,
+				...invalidate,
+			],
+		}),
 	}),
 });
 
@@ -65,4 +95,6 @@ export const {
 	usePostMutation,
 	useGetCountQuery,
 	useGetByParentCategoryQuery,
+	useUpdateMutation,
+	useDeleteMutation,
 } = userApi;

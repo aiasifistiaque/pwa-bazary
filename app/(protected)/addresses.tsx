@@ -1,12 +1,11 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { AppDispatch, RootState } from '@/store';
 import {
-	addAddress as addAddressAction,
-	Address,
-	deleteAddress as deleteAddressAction,
-	setDefaultAddress as setDefaultAddressAction,
-	updateAddress as updateAddressAction,
-} from '@/store/slices/addressSlice';
+	useDeleteMutation,
+	useGetAllQuery,
+	usePostMutation,
+	useUpdateMutation,
+} from '@/store/services/commonApi';
+import { Address } from '@/store/slices/addressSlice';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -19,11 +18,22 @@ import {
 	View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { useGetSelfQuery } from '@/store/services/authApi';
 
 export default function AddressesScreen() {
-	const dispatch = useDispatch<AppDispatch>();
-	const addresses = useSelector((state: RootState) => state.address.addresses);
+	const { data: userData } = useGetSelfQuery({});
+	const customerId = userData?._id;
+
+	const { data: addressesData, isLoading } = useGetAllQuery({
+		path: 'addresses',
+		filters: { customer: customerId },
+	});
+	const addresses = (addressesData?.doc as Address[]) || [];
+
+	const [addAddress] = usePostMutation();
+	const [updateAddress] = useUpdateMutation();
+	const [deleteAddress] = useDeleteMutation();
 
 	const [showAddForm, setShowAddForm] = useState(false);
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -64,7 +74,7 @@ export default function AddressesScreen() {
 		);
 	};
 
-	const handleSaveAddress = () => {
+	const handleSaveAddress = async () => {
 		if (
 			!formData.label ||
 			!formData.name ||
@@ -77,35 +87,42 @@ export default function AddressesScreen() {
 			return;
 		}
 
-		if (editingId) {
-			// Update existing address
-			const existingAddress = addresses.find(addr => addr.id === editingId);
-			if (existingAddress) {
-				dispatch(
-					updateAddressAction({
-						...formData,
-						id: editingId,
-						isDefault: existingAddress.isDefault,
-					})
-				);
-			}
-			setEditingId(null);
-		} else {
-			// Add new address
-			dispatch(addAddressAction(formData));
+		if (!customerId) {
+			Alert.alert('Error', 'User information not found. Please try again.');
+			return;
 		}
 
-		// Reset form
-		setFormData({
-			label: '',
-			name: '',
-			phone: '',
-			street: '',
-			area: '',
-			city: '',
-			postalCode: '',
-		});
-		setShowAddForm(false);
+		try {
+			if (editingId) {
+				// Update existing address
+				await updateAddress({
+					path: 'addresses',
+					id: editingId,
+					body: { ...formData, customer: customerId },
+				}).unwrap();
+				setEditingId(null);
+			} else {
+				// Add new address
+				await addAddress({
+					path: 'addresses',
+					body: { ...formData, customer: customerId },
+				}).unwrap();
+			}
+			// Reset form
+			setFormData({
+				label: '',
+				name: '',
+				phone: '',
+				street: '',
+				area: '',
+				city: '',
+				postalCode: '',
+			});
+			setShowAddForm(false);
+		} catch (error) {
+			console.error('Failed to save address:', error);
+			Alert.alert('Error', 'Failed to save address');
+		}
 	};
 
 	const handleEdit = (address: Address) => {
@@ -118,39 +135,62 @@ export default function AddressesScreen() {
 			city: address.city,
 			postalCode: address.postalCode,
 		});
-		setEditingId(address.id);
+		setEditingId(address.id || (address as any)._id);
 		setShowAddForm(true);
 	};
 
 	const handleDelete = (id: string) => {
-		Alert.alert('Delete Address', 'Are you sure you want to delete this address?', [
-			{ text: 'Cancel', style: 'cancel' },
-			{
-				text: 'Delete',
-				style: 'destructive',
-				onPress: () => {
-					dispatch(deleteAddressAction(id));
+		Alert.alert(
+			'Delete Address',
+			'Are you sure you want to delete this address?',
+			[
+				{ text: 'Cancel', style: 'cancel' },
+				{
+					text: 'Delete',
+					style: 'destructive',
+					onPress: async () => {
+						try {
+							await deleteAddress({ path: 'addresses', id }).unwrap();
+						} catch (error) {
+							console.error('Failed to delete address:', error);
+							Alert.alert('Error', 'Failed to delete address');
+						}
+					},
 				},
-			},
-		]);
+			]
+		);
 	};
 
-	const handleSetDefault = (id: string) => {
-		dispatch(setDefaultAddressAction(id));
+	const handleSetDefault = async (id: string) => {
+		try {
+			// First unset current default if any
+			const currentDefault = addresses.find(addr => addr.isDefault);
+			if (currentDefault) {
+				await updateAddress({
+					path: 'addresses',
+					id: currentDefault.id || (currentDefault as any)._id,
+					body: { isDefault: false },
+				}).unwrap();
+			}
+
+			// Set new default
+			await updateAddress({
+				path: 'addresses',
+				id,
+				body: { isDefault: true },
+			}).unwrap();
+		} catch (error) {
+			console.error('Failed to set default address:', error);
+			Alert.alert('Error', 'Failed to set default address');
+		}
 	};
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			{/* Header */}
 			<View style={styles.header}>
-				<Pressable
-					onPress={() => router.back()}
-					style={styles.backButton}>
-					<IconSymbol
-						name='chevron.left'
-						size={24}
-						color='#000000'
-					/>
+				<Pressable onPress={() => router.back()} style={styles.backButton}>
+					<IconSymbol name='chevron.left' size={24} color='#000000' />
 				</Pressable>
 				<Text style={styles.headerTitle}>My Addresses</Text>
 				<View style={{ width: 40 }} />
@@ -158,79 +198,91 @@ export default function AddressesScreen() {
 
 			<ScrollView
 				style={styles.scrollView}
-				showsVerticalScrollIndicator={false}>
+				showsVerticalScrollIndicator={false}
+			>
 				{/* Saved Addresses */}
 				<View style={styles.addressesContainer}>
-					{addresses.map(address => (
-						<View
-							key={address.id}
-							style={[styles.addressCard, address.isDefault && styles.defaultAddressCard]}>
-							<View style={styles.addressHeader}>
-								<View style={styles.addressLabelContainer}>
-									<IconSymbol
-										name={address.label === 'Home' ? 'house.fill' : 'building.2.fill'}
-										size={20}
-										color='#E63946'
-									/>
-									<Text style={styles.addressLabel}>{address.label}</Text>
-									{address.isDefault && (
-										<View style={styles.defaultBadge}>
-											<Text style={styles.defaultBadgeText}>Default</Text>
-										</View>
-									)}
-								</View>
-								<View style={styles.addressActions}>
-									<Pressable
-										onPress={() => handleEdit(address)}
-										style={styles.actionButton}>
+					{isLoading ? (
+						<Text style={{ textAlign: 'center', marginTop: 20 }}>
+							Loading addresses...
+						</Text>
+					) : (
+						addresses.map(address => (
+							<View
+								key={address.id || (address as any)._id}
+								style={[
+									styles.addressCard,
+									address.isDefault && styles.defaultAddressCard,
+								]}
+							>
+								<View style={styles.addressHeader}>
+									<View style={styles.addressLabelContainer}>
 										<IconSymbol
-											name='pencil'
-											size={18}
-											color='#666666'
+											name={
+												address.label === 'Home'
+													? 'house.fill'
+													: 'building.2.fill'
+											}
+											size={20}
+											color='#E63946'
 										/>
-									</Pressable>
-									<Pressable
-										onPress={() => handleDelete(address.id)}
-										style={styles.actionButton}>
-										<IconSymbol
-											name='trash'
-											size={18}
-											color='#EF4444'
-										/>
-									</Pressable>
+										<Text style={styles.addressLabel}>{address.label}</Text>
+										{address.isDefault && (
+											<View style={styles.defaultBadge}>
+												<Text style={styles.defaultBadgeText}>Default</Text>
+											</View>
+										)}
+									</View>
+									<View style={styles.addressActions}>
+										<Pressable
+											onPress={() => handleEdit(address)}
+											style={styles.actionButton}
+										>
+											<IconSymbol name='pencil' size={18} color='#666666' />
+										</Pressable>
+										<Pressable
+											onPress={() =>
+												handleDelete(address.id || (address as any)._id)
+											}
+											style={styles.actionButton}
+										>
+											<IconSymbol name='trash' size={18} color='#EF4444' />
+										</Pressable>
+									</View>
 								</View>
+
+								<View style={styles.addressContent}>
+									<Text style={styles.addressName}>{address.name}</Text>
+									<Text style={styles.addressText}>{address.phone}</Text>
+									<Text style={styles.addressText}>
+										{address.street}, {address.area}
+									</Text>
+									<Text style={styles.addressText}>
+										{address.city} - {address.postalCode}
+									</Text>
+								</View>
+
+								{!address.isDefault && (
+									<Pressable
+										style={styles.setDefaultButton}
+										onPress={() =>
+											handleSetDefault(address.id || (address as any)._id)
+										}
+									>
+										<Text style={styles.setDefaultText}>Set as Default</Text>
+									</Pressable>
+								)}
 							</View>
+						))
+					)}
 
-							<View style={styles.addressContent}>
-								<Text style={styles.addressName}>{address.name}</Text>
-								<Text style={styles.addressText}>{address.phone}</Text>
-								<Text style={styles.addressText}>
-									{address.street}, {address.area}
-								</Text>
-								<Text style={styles.addressText}>
-									{address.city} - {address.postalCode}
-								</Text>
-							</View>
-
-							{!address.isDefault && (
-								<Pressable
-									style={styles.setDefaultButton}
-									onPress={() => handleSetDefault(address.id)}>
-									<Text style={styles.setDefaultText}>Set as Default</Text>
-								</Pressable>
-							)}
-						</View>
-					))}
-
-					{addresses.length === 0 && (
+					{!isLoading && addresses.length === 0 && (
 						<View style={styles.emptyState}>
-							<IconSymbol
-								name='mappin.circle'
-								size={64}
-								color='#D0D0D0'
-							/>
+							<IconSymbol name='mappin.circle' size={64} color='#D0D0D0' />
 							<Text style={styles.emptyStateText}>No saved addresses</Text>
-							<Text style={styles.emptyStateSubtext}>Add your first address to get started</Text>
+							<Text style={styles.emptyStateSubtext}>
+								Add your first address to get started
+							</Text>
 						</View>
 					)}
 				</View>
@@ -239,7 +291,9 @@ export default function AddressesScreen() {
 				{showAddForm && (
 					<View style={styles.formContainer}>
 						<View style={styles.formHeader}>
-							<Text style={styles.formTitle}>{editingId ? 'Edit Address' : 'Add New Address'}</Text>
+							<Text style={styles.formTitle}>
+								{editingId ? 'Edit Address' : 'Add New Address'}
+							</Text>
 							<Pressable
 								onPress={() => {
 									setShowAddForm(false);
@@ -253,25 +307,21 @@ export default function AddressesScreen() {
 										city: '',
 										postalCode: '',
 									});
-								}}>
-								<IconSymbol
-									name='xmark'
-									size={24}
-									color='#666666'
-								/>
+								}}
+							>
+								<IconSymbol name='xmark' size={24} color='#666666' />
 							</Pressable>
 						</View>
 
 						{/* Location Button */}
 						<Pressable
 							style={styles.locationButton}
-							onPress={handleGetCurrentLocation}>
-							<IconSymbol
-								name='location.fill'
-								size={20}
-								color='#E63946'
-							/>
-							<Text style={styles.locationButtonText}>Use Current Location</Text>
+							onPress={handleGetCurrentLocation}
+						>
+							<IconSymbol name='location.fill' size={20} color='#E63946' />
+							<Text style={styles.locationButtonText}>
+								Use Current Location
+							</Text>
 						</Pressable>
 
 						{/* Form Fields */}
@@ -285,12 +335,15 @@ export default function AddressesScreen() {
 											styles.labelOption,
 											formData.label === label && styles.labelOptionActive,
 										]}
-										onPress={() => setFormData(prev => ({ ...prev, label }))}>
+										onPress={() => setFormData(prev => ({ ...prev, label }))}
+									>
 										<Text
 											style={[
 												styles.labelOptionText,
-												formData.label === label && styles.labelOptionTextActive,
-											]}>
+												formData.label === label &&
+													styles.labelOptionTextActive,
+											]}
+										>
 											{label}
 										</Text>
 									</Pressable>
@@ -304,7 +357,9 @@ export default function AddressesScreen() {
 								style={styles.input}
 								placeholder='Enter full name'
 								value={formData.name}
-								onChangeText={text => setFormData(prev => ({ ...prev, name: text }))}
+								onChangeText={text =>
+									setFormData(prev => ({ ...prev, name: text }))
+								}
 							/>
 						</View>
 
@@ -315,7 +370,9 @@ export default function AddressesScreen() {
 								placeholder='+880 1XXXXXXXXX'
 								keyboardType='phone-pad'
 								value={formData.phone}
-								onChangeText={text => setFormData(prev => ({ ...prev, phone: text }))}
+								onChangeText={text =>
+									setFormData(prev => ({ ...prev, phone: text }))
+								}
 							/>
 						</View>
 
@@ -325,7 +382,9 @@ export default function AddressesScreen() {
 								style={styles.input}
 								placeholder='House/Flat no., Street'
 								value={formData.street}
-								onChangeText={text => setFormData(prev => ({ ...prev, street: text }))}
+								onChangeText={text =>
+									setFormData(prev => ({ ...prev, street: text }))
+								}
 							/>
 						</View>
 
@@ -335,7 +394,9 @@ export default function AddressesScreen() {
 								style={styles.input}
 								placeholder='Area/Locality'
 								value={formData.area}
-								onChangeText={text => setFormData(prev => ({ ...prev, area: text }))}
+								onChangeText={text =>
+									setFormData(prev => ({ ...prev, area: text }))
+								}
 							/>
 						</View>
 
@@ -346,7 +407,9 @@ export default function AddressesScreen() {
 									style={styles.input}
 									placeholder='City'
 									value={formData.city}
-									onChangeText={text => setFormData(prev => ({ ...prev, city: text }))}
+									onChangeText={text =>
+										setFormData(prev => ({ ...prev, city: text }))
+									}
 								/>
 							</View>
 
@@ -357,14 +420,14 @@ export default function AddressesScreen() {
 									placeholder='1200'
 									keyboardType='numeric'
 									value={formData.postalCode}
-									onChangeText={text => setFormData(prev => ({ ...prev, postalCode: text }))}
+									onChangeText={text =>
+										setFormData(prev => ({ ...prev, postalCode: text }))
+									}
 								/>
 							</View>
 						</View>
 
-						<Pressable
-							style={styles.saveButton}
-							onPress={handleSaveAddress}>
+						<Pressable style={styles.saveButton} onPress={handleSaveAddress}>
 							<Text style={styles.saveButtonText}>
 								{editingId ? 'Update Address' : 'Save Address'}
 							</Text>
@@ -381,12 +444,9 @@ export default function AddressesScreen() {
 				<View style={styles.bottomContainer}>
 					<Pressable
 						style={styles.addButton}
-						onPress={() => setShowAddForm(true)}>
-						<IconSymbol
-							name='plus'
-							size={20}
-							color='#FFFFFF'
-						/>
+						onPress={() => setShowAddForm(true)}
+					>
+						<IconSymbol name='plus' size={20} color='#FFFFFF' />
 						<Text style={styles.addButtonText}>Add New Address</Text>
 					</Pressable>
 				</View>
