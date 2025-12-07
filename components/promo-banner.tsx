@@ -1,6 +1,6 @@
 import React from 'react';
 import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { IconSymbol } from './ui/icon-symbol';
+// import { IconSymbol } from './ui/icon-symbol';
 
 type PromoBannerProps = {
 	title: string;
@@ -20,19 +20,19 @@ export function PromoBanner({ title, description, couponCode, image, onPress }: 
 				source={{ uri: image }}
 				style={styles.background}
 				imageStyle={styles.backgroundImage}>
-				{couponCode && (
+				{/* {couponCode && (
 					<View style={styles.couponBadge}>
 						<Text style={styles.couponLabel}>CODE:</Text>
 						<Text style={styles.couponCode}>{couponCode}</Text>
 					</View>
-				)}
+				)} */}
 
 				<View style={styles.content}>
 					<Text style={styles.title}>{title}</Text>
 					<Text style={styles.subtitle}>{description}</Text>
 				</View>
 
-				<View style={styles.giftIcons}>
+				{/* <View style={styles.giftIcons}>
 					<View style={styles.giftBox}>
 						<IconSymbol
 							name='gift.fill'
@@ -49,7 +49,7 @@ export function PromoBanner({ title, description, couponCode, image, onPress }: 
 						/>
 						<Text style={styles.giftLabel}>2. Order</Text>
 					</View>
-				</View>
+				</View> */}
 			</ImageBackground>
 		</TouchableOpacity>
 	);
@@ -66,7 +66,8 @@ const styles = StyleSheet.create({
 		elevation: 3,
 	},
 	background: {
-		width: '100%',
+		// width: '100%',
+		width: 'auto',
 		height: 180,
 		justifyContent: 'space-between',
 		padding: 16,
