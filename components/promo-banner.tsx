@@ -4,13 +4,13 @@ import { IconSymbol } from './ui/icon-symbol';
 
 type PromoBannerProps = {
 	title: string;
-	subtitle: string;
+	description: string;
 	couponCode?: string;
 	image: string;
 	onPress?: () => void;
 };
 
-export function PromoBanner({ title, subtitle, couponCode, image, onPress }: PromoBannerProps) {
+export function PromoBanner({ title, description, couponCode, image, onPress }: PromoBannerProps) {
 	return (
 		<TouchableOpacity
 			style={styles.container}
@@ -29,7 +29,7 @@ export function PromoBanner({ title, subtitle, couponCode, image, onPress }: Pro
 
 				<View style={styles.content}>
 					<Text style={styles.title}>{title}</Text>
-					<Text style={styles.subtitle}>{subtitle}</Text>
+					<Text style={styles.subtitle}>{description}</Text>
 				</View>
 
 				<View style={styles.giftIcons}>

@@ -1,6 +1,3 @@
-
-
-
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SymbolWeight } from 'expo-symbols';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
@@ -47,6 +44,7 @@ const MAPPING = {
 	ticket: 'confirmation-number',
 	trophy: 'emoji-events',
 	gift: 'card-giftcard',
+	'gift.fill': 'card-giftcard',
 	'questionmark.circle': 'help-outline',
 	'shield.checkmark': 'verified-user',
 	'info.circle': 'info-outline',
@@ -58,8 +56,8 @@ const MAPPING = {
 	'exclamationmark.triangle.fill': 'warning',
 	'phone.fill': 'phone',
 	'note.text': 'notes',
-	'chevron.up': 'keyboard-arrow-up', 
-	'chevron.down': 'keyboard-arrow-down', 
+	'chevron.up': 'keyboard-arrow-up',
+	'chevron.down': 'keyboard-arrow-down',
 } as const;
 
 type IconSymbolName = keyof typeof MAPPING;

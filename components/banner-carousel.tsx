@@ -10,7 +10,7 @@ type BannerCarouselProps = {
 	banners: Array<{
 		id: string;
 		title: string;
-		subtitle: string;
+		description: string;
 		couponCode?: string;
 		image: string;
 	}>;
@@ -48,7 +48,7 @@ export function BannerCarousel({ banners, onBannerPress }: BannerCarouselProps) 
 					<View style={[styles.cardContainer, { width: CARD_WIDTH }]}>
 						<PromoBanner
 							title={item.title}
-							subtitle={item.subtitle}
+							description={item.description}
 							couponCode={item.couponCode}
 							image={item.image}
 							onPress={() => onBannerPress?.(item.id)}
@@ -60,10 +60,13 @@ export function BannerCarousel({ banners, onBannerPress }: BannerCarouselProps) 
 
 			{/* Pagination Dots */}
 			<View style={styles.pagination}>
-				{banners.map((_, index) => (
+				{banners?.map((_, index) => (
 					<View
 						key={index}
-						style={[styles.dot, index === activeIndex ? styles.activeDot : styles.inactiveDot]}
+						style={[
+							styles.dot,
+							index === activeIndex ? styles.activeDot : styles.inactiveDot,
+						]}
 					/>
 				))}
 			</View>
