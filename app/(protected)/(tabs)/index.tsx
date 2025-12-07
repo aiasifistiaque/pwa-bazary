@@ -46,7 +46,6 @@ const banners = [
 	},
 ];
 
-
 const FeaturedCategorySection = ({ category }: { category: any }) => {
 	const dispatch = useDispatch();
 	const { data: productsData, isLoading } = useGetAllQuery({
@@ -123,6 +122,12 @@ export default function DiscoverScreen() {
 		filters: { isFeatured: true },
 	});
 
+	const { data: bannersData, isLoading: bannersLoading } = useGetAllQuery({
+		path: '/banners',
+		filters: { isActive: true },
+	});
+
+	console.log('bannersData', bannersData);
 	const handleDeliveryTimePress = () => {
 		console.log('Delivery time pressed');
 	};
@@ -152,7 +157,10 @@ export default function DiscoverScreen() {
 			/> */}
 
 			{/* Banner Carousel */}
-			<BannerCarousel banners={banners} onBannerPress={handleBannerPress} />
+			<BannerCarousel
+				banners={bannersData?.doc}
+				onBannerPress={handleBannerPress}
+			/>
 
 			{/* Categories Section */}
 			<View style={styles.categoriesSection}>
