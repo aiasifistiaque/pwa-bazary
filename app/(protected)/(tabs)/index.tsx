@@ -134,6 +134,7 @@ export default function DiscoverScreen() {
 			<BannerCarousel
 				banners={bannersData?.doc}
 				onBannerPress={handleBannerPress}
+				isLoading={bannersLoading}
 			/>
 
 			{/* Categories Section */}
