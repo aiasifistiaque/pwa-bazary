@@ -66,7 +66,11 @@ export default function DiscoverScreen() {
 
 			{/* Categories Section */}
 			<View style={styles.categoriesSection}>
-				<SectionHeader title='Categories' />
+				{isLoading ? (
+					<View style={styles.sectionHeaderSkeleton} />
+				) : (
+					<SectionHeader title='Categories' />
+				)}
 				{isLoading ? (
 					<View style={styles.categoriesGrid}>
 						{Array.from({ length: 8 }).map((_, i) => (
@@ -84,19 +88,26 @@ export default function DiscoverScreen() {
 						))}
 					</View>
 				)}
-
-				<TouchableOpacity
-					style={styles.showMoreButton}
-					onPress={handleShowMoreCategories}
-					activeOpacity={0.7}
-				>
-					<Text style={styles.showMoreText}>Show more categories</Text>
-				</TouchableOpacity>
+				{isLoading ? (
+					<View style={styles.showMoreButtonSkeleton} />
+				) : (
+					<TouchableOpacity
+						style={styles.showMoreButton}
+						onPress={handleShowMoreCategories}
+						activeOpacity={0.7}
+					>
+						<Text style={styles.showMoreText}>Show more categories</Text>
+					</TouchableOpacity>
+				)}
 			</View>
 
 			{/* Recipe Combos Section */}
 			<View style={styles.section}>
-				<SectionHeader title='Combo Recipes' />
+				{combosLoading ? (
+					<View style={styles.sectionHeaderSkeleton} />
+				) : (
+					<SectionHeader title='Combo Recipes' />
+				)}
 				{combosLoading ? (
 					<FlatList
 						horizontal
@@ -220,5 +231,20 @@ const styles = StyleSheet.create({
 	recipeDescription: {
 		fontSize: 13,
 		color: '#666666',
+	},
+	sectionHeaderSkeleton: {
+		height: 24,
+		width: 120,
+		backgroundColor: '#F0F0F0',
+		borderRadius: 4,
+		marginLeft: 16,
+		marginVertical: 12,
+	},
+	showMoreButtonSkeleton: {
+		marginHorizontal: 16,
+		marginTop: 12,
+		height: 48,
+		backgroundColor: '#F0F0F0',
+		borderRadius: 8,
 	},
 });
