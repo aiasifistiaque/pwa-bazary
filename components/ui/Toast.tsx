@@ -2,7 +2,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import React, { useEffect } from 'react';
 import {
 	Dimensions,
-	Modal,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -14,7 +13,6 @@ import Animated, {
 	useSharedValue,
 	withDelay,
 	withSequence,
-	withSpring,
 	withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -72,45 +70,42 @@ export const Toast = ({
 
 	if (!visible) return null;
 
+	// Use pointerEvents="box-none" to allow touches to pass through the container
+	// but catch touches on the toast itself.
 	return (
-		<Modal
-			transparent
-			visible={visible}
-			animationType='none'
-			onRequestClose={onDismiss}
+		<View
+			style={[styles.container, { top: insets.top + 20 }]}
+			pointerEvents='box-none'
 		>
-			<View style={styles.modalOverlay} pointerEvents='box-none'>
-				<Animated.View
-					style={[styles.container, { top: insets.top }, animatedStyle]}
-				>
-					<View style={styles.content}>
-						<Text style={styles.message}>{message}</Text>
-						<TouchableOpacity
-							style={styles.closeButton}
-							onPress={onDismiss}
-							activeOpacity={0.7}
-						>
-							<IconSymbol name='xmark' size={14} color='#65451D' />
-						</TouchableOpacity>
-					</View>
-				</Animated.View>
-			</View>
-		</Modal>
+			<Animated.View style={[styles.animatedContainer, animatedStyle]}>
+				<View style={styles.content}>
+					<Text style={styles.message}>{message}</Text>
+					<TouchableOpacity
+						style={styles.closeButton}
+						onPress={onDismiss}
+						activeOpacity={0.7}
+					>
+						<IconSymbol name='xmark' size={14} color='#65451D' />
+					</TouchableOpacity>
+				</View>
+			</Animated.View>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
-	modalOverlay: {
-		flex: 1,
-		// No background color to be transparent
-	},
 	container: {
 		position: 'absolute',
-		left: 20,
-		right: 20,
-		// top is handled dynamically
-		alignItems: 'center',
+		left: 0,
+		right: 0,
 		zIndex: 9999,
+		alignItems: 'center',
+		justifyContent: 'flex-start',
+	},
+	animatedContainer: {
+		width: '100%',
+		paddingHorizontal: 20,
+		alignItems: 'center',
 	},
 	content: {
 		backgroundColor: '#E1C28B', // Subtle brown background
@@ -128,6 +123,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 8,
 		elevation: 6,
 		minWidth: 200,
+		maxWidth: width - 40,
 	},
 	message: {
 		color: '#65451D',

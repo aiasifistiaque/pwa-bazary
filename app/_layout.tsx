@@ -6,6 +6,7 @@ import ReduxProvider from '@/store/provider/ReduxProvider';
 import { useEffect } from 'react';
 import { hydrateAuth, loadStoredToken } from '@/store/slices/authSlice';
 import { loadFavorites, setFavorites } from '@/store/slices/favoritesSlice';
+import { ToastProvider } from '@/contexts/ToastContext';
 
 function AuthHydrator({ children }: { children: React.ReactNode }) {
 	const dispatch = useDispatch();
@@ -35,9 +36,11 @@ export default function RootLayout() {
 		<Provider store={store}>
 			<ReduxProvider>
 				<PaperProvider>
-					<AuthHydrator>
-						<Slot />
-					</AuthHydrator>
+					<ToastProvider>
+						<AuthHydrator>
+							<Slot />
+						</AuthHydrator>
+					</ToastProvider>
 				</PaperProvider>
 			</ReduxProvider>
 		</Provider>
