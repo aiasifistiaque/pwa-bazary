@@ -1,12 +1,10 @@
 import { BannerCarousel } from '@/components/banner-carousel';
 import { CategoryCard } from '@/components/category-card';
-import { DeliveryTimeButton } from '@/components/delivery-time-button';
-import { ProductCard } from '@/components/product-card';
+import { FeaturedCategorySection } from '@/components/featured-category-section';
 import { SectionHeader } from '@/components/section-header';
 import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
 import { useGetAllQuery } from '@/store/services/commonApi';
-import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
 import React from 'react';
 import {
@@ -18,93 +16,28 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
-
-const FeaturedCategorySection = ({ category }: { category: any }) => {
-	const dispatch = useDispatch();
-	const { data: productsData, isLoading } = useGetAllQuery({
-		path: '/products',
-		filters: { category: category.id },
-	});
-
-	const handleProductPress = (productId: string) => {
-		router.push(`/product/${productId}`);
-	};
-
-	const handleAddPress = (product: any) => {
-		dispatch(
-			addToCart({
-				item: {
-					id: product.id,
-					_id: product.id,
-					name: product.name,
-					price: product.sellPrice,
-					image: product.image,
-					vat: 0,
-				},
-				qty: 1,
-			})
-		);
-	};
-
-	const handleSeeAllPress = () => {
-		router.push(`/category/${category.id}`);
-	};
-
-	if (isLoading || !productsData?.doc?.length) return null;
-
-	return (
-		<View style={styles.section}>
-			<SectionHeader title={category.name} onSeeAllPress={handleSeeAllPress} />
-			<FlatList
-				horizontal
-				data={productsData.doc}
-				renderItem={({ item }) => (
-					<ProductCard
-						id={item.id}
-						name={item.name}
-						price={item.sellPrice.toString()}
-						image={item.image}
-						unit={item.unit}
-						unitPrice={item.unitPrice}
-						onPress={() => handleProductPress(item.id)}
-						onAddPress={() => handleAddPress(item)}
-					/>
-				)}
-				keyExtractor={item => item.id}
-				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={styles.productList}
-			/>
-		</View>
-	);
-};
 
 export default function DiscoverScreen() {
 	// data fetching
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
 		filters: { displayInHomePage: true },
-	});
+	}) as any;
 
 	const { data: featuredCategoriesData } = useGetAllQuery({
 		path: '/categorys',
 		filters: { isFeatured: true },
-	});
+	}) as any;
 
 	const { data: combosData, isLoading: combosLoading } = useGetAllQuery({
 		path: '/combos',
 		filters: { isFeatured: true },
-	});
+	}) as any;
 
 	const { data: bannersData, isLoading: bannersLoading } = useGetAllQuery({
 		path: '/banners',
 		filters: { isActive: true },
-	});
-
-	console.log('bannersData', bannersData);
-	const handleDeliveryTimePress = () => {
-		console.log('Delivery time pressed');
-	};
+	}) as any;
 
 	const handleBannerPress = (bannerId: string) => {
 		console.log('Banner pressed:', bannerId);
@@ -124,12 +57,6 @@ export default function DiscoverScreen() {
 
 	return (
 		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-			{/* Delivery Time Selector */}
-			{/* <DeliveryTimeButton
-				text='Choose your delivery time'
-				onPress={handleDeliveryTimePress}
-			/> */}
-
 			{/* Banner Carousel */}
 			<BannerCarousel
 				banners={bannersData?.doc}
@@ -234,7 +161,7 @@ const styles = StyleSheet.create({
 	},
 	showMoreButton: {
 		marginHorizontal: 16,
-		marginTop: 8,
+		marginTop: 12,
 		paddingVertical: 12,
 		backgroundColor: '#F8F8F8',
 		borderRadius: 8,
