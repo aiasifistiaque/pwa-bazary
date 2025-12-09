@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+	ImageBackground,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View,
+} from 'react-native';
+
 const fallbackImg = require('../assets/images/fallback-fruit.png');
+
 type CategoryCardProps = {
 	id: string;
 	name: string;
@@ -9,37 +17,26 @@ type CategoryCardProps = {
 	onPress?: () => void;
 };
 
-export function CategoryCard({
-	name,
-	icon,
-	image,
-	onPress,
-}: CategoryCardProps) {
+export function CategoryCard({ name, image, onPress }: CategoryCardProps) {
 	const [imgErr, setImgErr] = useState(false);
 	const hasImg = image && !imgErr;
+	console.log('image', image);
 
 	return (
 		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-			{hasImg ? (
-				<Image
-					source={{ uri: image }}
-					style={styles.image}
-					resizeMode='cover'
-					onError={() => setImgErr(true)}
-				/>
-			) : (
-				<Image
-					source={fallbackImg}
-					style={styles.image}
-					resizeMode='cover'
-					onError={() => setImgErr(true)}
-				/>
-			)}
-			<View style={styles.overlay}>
-				<Text style={styles.name} numberOfLines={2}>
-					{name}
-				</Text>
-			</View>
+			<ImageBackground
+				source={hasImg ? { uri: image } : fallbackImg}
+				style={styles.imageBackground}
+				imageStyle={styles.imageStyle}
+				resizeMode='cover'
+				onError={() => setImgErr(true)}
+			>
+				<View style={styles.overlay}>
+					<Text style={styles.name} numberOfLines={2}>
+						{name}
+					</Text>
+				</View>
+			</ImageBackground>
 		</TouchableOpacity>
 	);
 }
@@ -48,40 +45,44 @@ const styles = StyleSheet.create({
 	card: {
 		width: '23%',
 		aspectRatio: 1,
-		backgroundColor: '#F5F5F5',
+		backgroundColor: '#FFFFFF',
 		borderRadius: 12,
 		marginBottom: 12,
-		overflow: 'hidden',
-		position: 'relative',
-		borderWidth: 0,
-		elevation: 2,
+		borderWidth: 1,
+		borderColor: '#E5E5E5',
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.1,
+		shadowOpacity: 0.05,
 		shadowRadius: 2,
+		elevation: 1,
+		overflow: 'hidden',
+		padding: 0,
 	},
-	image: {
+	imageBackground: {
 		width: '100%',
 		height: '100%',
-		position: 'absolute',
+		justifyContent: 'flex-end',
+	},
+	imageStyle: {
+		borderRadius: 12,
 	},
 	overlay: {
-		position: 'absolute',
-		bottom: 0,
-		left: 0,
-		right: 0,
-		backgroundColor: 'rgba(0,0,0,0.4)',
-		paddingVertical: 4,
-		paddingHorizontal: 2,
+		backgroundColor: 'rgba(0, 0, 0, 0.4)',
+		paddingVertical: 6,
+		paddingHorizontal: 4,
+		width: '100%',
 		alignItems: 'center',
 		justifyContent: 'center',
-		minHeight: 28,
+		borderBottomLeftRadius: 12,
+		borderBottomRightRadius: 12,
 	},
 	name: {
-		fontSize: 10,
+		fontSize: 11,
 		fontWeight: '600',
 		color: '#FFFFFF',
 		textAlign: 'center',
-		lineHeight: 12,
+		lineHeight: 14,
+		minHeight: 28, // Reserve space for 2 lines
+		textAlignVertical: 'center', // For Android vertical centering if needed, though mostly for Input
 	},
 });
