@@ -16,6 +16,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { useCreateOrderMutation } from '@/store/services/checkoutApi';
 import { useGetAllQuery } from '@/store/services/commonApi';
+import { useGetSelfQuery } from '@/store/services/authApi';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -61,9 +62,6 @@ export default function CheckoutScreen() {
 		(state: RootState) => state.cart
 	);
 
-	const savedAddresses = useSelector(
-		(state: RootState) => state.address.addresses
-	);
 	const selectedCheckoutAddr = useSelector(
 		(state: RootState) => state.address.selectedCheckoutAddress
 	);
@@ -81,6 +79,16 @@ export default function CheckoutScreen() {
 		text: string;
 	} | null>(null);
 	const userId = useSelector((state: RootState) => state.auth.user?._id);
+
+	// Fetch user data and addresses
+	const { data: userData } = useGetSelfQuery({});
+	const customerId = userData?._id || userId;
+
+	const { data: addressesData } = useGetAllQuery({
+		path: 'addresses',
+		filters: { customer: customerId },
+	});
+	const savedAddresses = (addressesData?.doc as Address[]) || [];
 
 	// Fetch coupons
 	const { data: couponsData } = useGetAllQuery({
@@ -373,49 +381,59 @@ export default function CheckoutScreen() {
 					{/* Saved Addresses List */}
 					{showSavedAddresses && (
 						<View style={styles.savedAddressesList}>
-							{savedAddresses.map(addr => (
-								<Pressable
-									key={addr.id}
-									style={[
-										styles.savedAddressCard,
-										selectedCheckoutAddr?.id === addr.id &&
-											styles.selectedSavedAddress,
-									]}
-									onPress={() => handleSelectSavedAddress(addr)}
-								>
-									<View style={styles.savedAddressHeader}>
-										<View style={styles.addressLabelRow}>
-											<IconSymbol
-												name={
-													addr.label === 'Home'
-														? 'house.fill'
-														: 'building.2.fill'
-												}
-												size={18}
-												color='#E63946'
-											/>
-											<Text style={styles.savedAddressLabel}>{addr.label}</Text>
-											{addr.isDefault && (
-												<View style={styles.miniDefaultBadge}>
-													<Text style={styles.miniDefaultText}>Default</Text>
-												</View>
+							{savedAddresses.map(addr => {
+								const addrId = (addr as any)._id || addr.id;
+								const selectedId =
+									(selectedCheckoutAddr as any)?._id ||
+									selectedCheckoutAddr?.id;
+								const isSelected = selectedId === addrId;
+
+								return (
+									<Pressable
+										key={addrId}
+										style={[
+											styles.savedAddressCard,
+											isSelected && styles.selectedSavedAddress,
+										]}
+										onPress={() => handleSelectSavedAddress(addr)}
+									>
+										<View style={styles.savedAddressHeader}>
+											<View style={styles.addressLabelRow}>
+												<IconSymbol
+													name={
+														addr.label === 'Home'
+															? 'house.fill'
+															: 'building.2.fill'
+													}
+													size={18}
+													color='#E63946'
+												/>
+												<Text style={styles.savedAddressLabel}>
+													{addr.label}
+												</Text>
+												{addr.isDefault && (
+													<View style={styles.miniDefaultBadge}>
+														<Text style={styles.miniDefaultText}>Default</Text>
+													</View>
+												)}
+											</View>
+											{isSelected && (
+												<IconSymbol
+													name='checkmark.circle.fill'
+													size={24}
+													color='#10B981'
+												/>
 											)}
 										</View>
-										{selectedCheckoutAddr?.id === addr.id && (
-											<IconSymbol
-												name='checkmark.circle.fill'
-												size={24}
-												color='#10B981'
-											/>
-										)}
-									</View>
-									<Text style={styles.savedAddressName}>{addr.name}</Text>
-									<Text style={styles.savedAddressText}>{addr.phone}</Text>
-									<Text style={styles.savedAddressText}>
-										{addr.street}, {addr.area}, {addr.city} - {addr.postalCode}
-									</Text>
-								</Pressable>
-							))}
+										<Text style={styles.savedAddressName}>{addr.name}</Text>
+										<Text style={styles.savedAddressText}>{addr.phone}</Text>
+										<Text style={styles.savedAddressText}>
+											{addr.street}, {addr.area}, {addr.city} -{' '}
+											{addr.postalCode}
+										</Text>
+									</Pressable>
+								);
+							})}
 						</View>
 					)}
 
