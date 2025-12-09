@@ -7,6 +7,7 @@ const CARD_WIDTH = SCREEN_WIDTH * 0.8;
 const SPACING = 12;
 
 import { BannerSkeleton } from './skeleton/BannerSkeleton';
+import { CustomColors } from '@/constants/theme';
 
 type BannerCarouselProps = {
 	banners: Array<{
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
 	},
 	activeDot: {
 		width: 20,
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.darkGreen,
 	},
 	inactiveDot: {
 		width: 6,

@@ -4,6 +4,7 @@ import { FeaturedCategorySection } from '@/components/featured-category-section'
 import { SectionHeader } from '@/components/section-header';
 import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
+import { CustomColors } from '@/constants/theme';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
 import React from 'react';
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
 	showMoreText: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#E63946',
+		color: CustomColors.darkGreen,
 	},
 	section: {
 		marginBottom: 16,
