@@ -17,7 +17,10 @@ type BannerCarouselProps = {
 	onBannerPress?: (id: string) => void;
 };
 
-export function BannerCarousel({ banners, onBannerPress }: BannerCarouselProps) {
+export function BannerCarousel({
+	banners,
+	onBannerPress,
+}: BannerCarouselProps) {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const flatListRef = useRef<FlatList>(null);
 
@@ -60,9 +63,9 @@ export function BannerCarousel({ banners, onBannerPress }: BannerCarouselProps) 
 
 			{/* Pagination Dots */}
 			<View style={styles.pagination}>
-				{banners?.map((_, index) => (
+				{banners?.map((banner, index) => (
 					<View
-						key={index}
+						key={banner.id}
 						style={[
 							styles.dot,
 							index === activeIndex ? styles.activeDot : styles.inactiveDot,

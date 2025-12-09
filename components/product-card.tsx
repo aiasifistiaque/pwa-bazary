@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
 	card: {
 		width: '100%',
 		minWidth: 180,
+		maxWidth: 220,
 		backgroundColor: '#FFF',
 		borderRadius: 12,
 		overflow: 'hidden',
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		color: '#333',
 		lineHeight: 18,
+		minHeight: 36
 	},
 	price: {
 		fontSize: 16,
