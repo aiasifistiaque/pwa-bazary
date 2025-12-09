@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
+import { Toast } from './ui/Toast';
 
 const fallback = require('../assets/images/fallback-fruit.png');
 
@@ -31,44 +32,62 @@ export function ProductCard({
 	// Determine if image is a URI or local require
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
 
+	const [showToast, setShowToast] = useState(false);
+
+	const handleAdd = () => {
+		onAddPress?.();
+		setShowToast(true);
+	};
+
 	return (
-		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-			<View style={styles.imageContainer}>
-				<Image
-					source={imageSource || fallback}
-					style={styles.image}
-					resizeMode='contain'
-				/>
-				<TouchableOpacity
-					style={styles.addButton}
-					onPress={onAddPress}
-					activeOpacity={0.8}
-				>
-					<IconSymbol name='plus' size={20} color='#E63946' />
-				</TouchableOpacity>
-			</View>
-
-			{badge && (
-				<View style={styles.badgeContainer}>
-					{badgeIcon && (
-						<IconSymbol name={badgeIcon as any} size={12} color='#E63946' />
-					)}
-					<Text style={styles.badgeText}>{badge}</Text>
+		<>
+			<TouchableOpacity
+				style={styles.card}
+				onPress={onPress}
+				activeOpacity={0.7}
+			>
+				<View style={styles.imageContainer}>
+					<Image
+						source={imageSource || fallback}
+						style={styles.image}
+						resizeMode='contain'
+					/>
+					<TouchableOpacity
+						style={styles.addButton}
+						onPress={handleAdd}
+						activeOpacity={0.8}
+					>
+						<IconSymbol name='plus' size={20} color='#E63946' />
+					</TouchableOpacity>
 				</View>
-			)}
 
-			<View style={styles.info}>
-				<Text style={styles.name} numberOfLines={2}>
-					{name}
-				</Text>
-				<Text style={styles.price}>৳{price}</Text>
-				{unit && unitPrice && (
-					<Text style={styles.unitPrice}>
-						{unit} · {unitPrice}
-					</Text>
+				{badge && (
+					<View style={styles.badgeContainer}>
+						{badgeIcon && (
+							<IconSymbol name={badgeIcon as any} size={12} color='#E63946' />
+						)}
+						<Text style={styles.badgeText}>{badge}</Text>
+					</View>
 				)}
-			</View>
-		</TouchableOpacity>
+
+				<View style={styles.info}>
+					<Text style={styles.name} numberOfLines={2}>
+						{name}
+					</Text>
+					<Text style={styles.price}>৳{price}</Text>
+					{unit && unitPrice && (
+						<Text style={styles.unitPrice}>
+							{unit} · {unitPrice}
+						</Text>
+					)}
+				</View>
+			</TouchableOpacity>
+			<Toast
+				message='Added to cart'
+				visible={showToast}
+				onDismiss={() => setShowToast(false)}
+			/>
+		</>
 	);
 }
 
@@ -133,7 +152,7 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		color: '#333',
 		lineHeight: 18,
-		minHeight: 36
+		minHeight: 36,
 	},
 	price: {
 		fontSize: 16,
