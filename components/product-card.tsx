@@ -45,7 +45,7 @@ export function ProductCard({
 				<Image
 					source={imageSource || fallback}
 					style={styles.image}
-					resizeMode='contain'
+					resizeMode='cover'
 				/>
 				<TouchableOpacity
 					style={styles.addButton}
@@ -95,10 +95,9 @@ const styles = StyleSheet.create({
 	},
 	imageContainer: {
 		width: '100%',
-		height: 140,
+		aspectRatio: 1,
 		backgroundColor: '#F5F5F5',
 		position: 'relative',
-		padding: 10,
 	},
 	image: {
 		width: '100%',
