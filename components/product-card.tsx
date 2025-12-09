@@ -74,7 +74,6 @@ export function ProductCard({
 
 const styles = StyleSheet.create({
 	card: {
-		width: '100%',
 		minWidth: 180,
 		maxWidth: 220,
 		backgroundColor: '#FFF',

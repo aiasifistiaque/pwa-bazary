@@ -20,32 +20,6 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 
-// Banner data
-const banners = [
-	{
-		id: 'banner1',
-		title: 'Welcome to bazarey!',
-		subtitle: 'Extra for you: 25 € benefit',
-		couponCode: 'NEUKUNDE',
-		image:
-			'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=800&h=400&fit=crop',
-	},
-	{
-		id: 'banner2',
-		title: 'Fresh Daily Deals',
-		subtitle: 'Save up to 30% on fresh produce',
-		image:
-			'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&h=400&fit=crop',
-	},
-	{
-		id: 'banner3',
-		title: 'Free Delivery',
-		subtitle: 'On orders over 50 €',
-		image:
-			'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=400&fit=crop',
-	},
-];
-
 const FeaturedCategorySection = ({ category }: { category: any }) => {
 	const dispatch = useDispatch();
 	const { data: productsData, isLoading } = useGetAllQuery({

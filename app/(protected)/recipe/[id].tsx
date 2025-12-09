@@ -17,6 +17,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
+const fallback = require('../../../assets/images/fallback-fruit.png');
+
 // Component to fetch and display individual product
 const IngredientWithProduct = ({
 	item,
@@ -85,7 +87,10 @@ const IngredientWithProduct = ({
 					<ActivityIndicator size='small' color='#E63946' />
 				</View>
 			) : (
-				<Image source={{ uri: productImage }} style={styles.ingredientImage} />
+				<Image
+					source={{ uri: productImage || fallback }}
+					style={styles.ingredientImage}
+				/>
 			)}
 
 			{/* Ingredient Info */}
