@@ -17,6 +17,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 
+const fallback = require('../../../assets/images/fallback-fruit.png');
+
 // Component to fetch and display individual product
 const IngredientWithProduct = ({
 	item,
@@ -85,7 +87,10 @@ const IngredientWithProduct = ({
 					<ActivityIndicator size='small' color='#E63946' />
 				</View>
 			) : (
-				<Image source={{ uri: productImage }} style={styles.ingredientImage} />
+				<Image
+					source={productImage ? { uri: productImage } : fallback}
+					style={styles.ingredientImage}
+				/>
 			)}
 
 			{/* Ingredient Info */}
@@ -324,6 +329,26 @@ export default function RecipeDetailScreen() {
 					)}
 				</View>
 
+				{/* Show removed items info if any */}
+				{removedCount > 0 && (
+					<View style={styles.removedInfoContainer}>
+						<IconSymbol
+							name='info.circle'
+							size={18}
+							color='#856404'
+							style={styles.infoIcon}
+						/>
+						<View style={styles.removedInfoTextContainer}>
+							<Text style={styles.removedInfoText}>
+								{removedCount} ingredient{removedCount > 1 ? 's' : ''} removed
+							</Text>
+							<Text style={styles.removedInfoSubtext}>
+								Price adjusted by ৳{totalDeduction}
+							</Text>
+						</View>
+					</View>
+				)}
+
 				{/* Ingredients Section */}
 				<View style={styles.ingredientsSection}>
 					<Text style={styles.sectionTitle}>
@@ -345,26 +370,6 @@ export default function RecipeDetailScreen() {
 						);
 					})}
 				</View>
-
-				{/* Show removed items info if any */}
-				{removedCount > 0 && (
-					<View style={styles.removedInfoContainer}>
-						<IconSymbol
-							name='info.circle'
-							size={18}
-							color='#856404'
-							style={styles.infoIcon}
-						/>
-						<View style={styles.removedInfoTextContainer}>
-							<Text style={styles.removedInfoText}>
-								{removedCount} ingredient{removedCount > 1 ? 's' : ''} removed
-							</Text>
-							<Text style={styles.removedInfoSubtext}>
-								Price adjusted by ৳{totalDeduction}
-							</Text>
-						</View>
-					</View>
-				)}
 
 				{/* Bottom spacing for fixed button */}
 				<View style={{ height: 124 }} />
@@ -543,7 +548,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'flex-start',
 		marginHorizontal: 20,
-		marginBottom: 16,
+		marginVertical: 16,
 		padding: 14,
 		backgroundColor: '#FFF3CD',
 		borderRadius: 10,

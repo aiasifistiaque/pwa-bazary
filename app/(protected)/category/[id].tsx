@@ -1,5 +1,7 @@
 import { ProductCard } from '@/components/product-card';
-import { Loader } from '@/components/Loader';
+import { ProductCardSkeleton } from '@/components/skeleton/ProductCardSkeleton';
+import { SubCategorySkeleton } from '@/components/skeleton/SubCategorySkeleton';
+import { SubCategoryCard } from '@/components/SubCategoryCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery, useGetByIdQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
@@ -34,7 +36,7 @@ export default function CategoryScreen() {
 		filters: { parentCategory: id },
 	});
 
-	const hasSubcategories = childCategories?.doc?.length > 0;
+	const hasSubcategories = childCategories?.doc?.length > 0 || childCatLoading;
 
 	const { data: productsData, isLoading: productsDataLoading } = useGetAllQuery(
 		{
@@ -73,9 +75,7 @@ export default function CategoryScreen() {
 		);
 	};
 
-	if (childCatLoading || productsDataLoading) {
-		return <Loader />;
-	}
+	// Removed explicit return Loader here to show skeletons inline
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
@@ -101,36 +101,34 @@ export default function CategoryScreen() {
 					{hasSubcategories ? (
 						<View style={styles.section}>
 							<View style={styles.categoriesGrid}>
-								{childCategories?.doc?.map((subcategory: any) => (
-									<TouchableOpacity
-										key={subcategory.id}
-										style={styles.subcategoryCard}
-										onPress={() => handleSubcategoryPress(subcategory.id)}
-										activeOpacity={0.7}
-									>
-										{subcategory.image ? (
-											<Image
-												source={{ uri: subcategory.image }}
-												style={styles.subcategoryImage}
+								{childCatLoading
+									? Array.from({ length: 10 }).map((_, index) => (
+											<SubCategorySkeleton key={`sub-skeleton-${index}`} />
+									  ))
+									: childCategories?.doc?.map((subcategory: any) => (
+											<SubCategoryCard
+												key={subcategory.id}
+												id={subcategory.id}
+												name={subcategory.name}
+												image={subcategory.image}
+												onPress={() => handleSubcategoryPress(subcategory.id)}
 											/>
-										) : (
-											<Image
-												source={fallback}
-												style={styles.subcategoryImage}
-											/>
-										)}
-										<Text style={styles.subcategoryName}>
-											{subcategory.name}
-										</Text>
-										<IconSymbol name='chevron.right' size={20} color='#333' />
-									</TouchableOpacity>
-								))}
+									  ))}
 							</View>
 						</View>
 					) : (
 						<View style={styles.section}>
 							<View style={styles.productsGrid}>
-								{productsData?.doc?.length > 0 ? (
+								{productsDataLoading ? (
+									Array.from({ length: 6 }).map((_, index) => (
+										<View
+											key={`skeleton-${index}`}
+											style={styles.productCardWrapper}
+										>
+											<ProductCardSkeleton />
+										</View>
+									))
+								) : productsData?.doc?.length > 0 ? (
 									productsData?.doc?.map((product: any) => (
 										<View key={product.id} style={styles.productCardWrapper}>
 											<ProductCard

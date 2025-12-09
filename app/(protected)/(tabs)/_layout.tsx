@@ -9,6 +9,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { RootState } from '@/store';
 import ReduxProvider from '@/store/provider/ReduxProvider';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CustomColors } from '@/constants/theme';
 
 export default function TabLayout() {
 	const colorScheme = useColorScheme();
@@ -20,7 +21,7 @@ export default function TabLayout() {
 			<SafeAreaView style={styles.safeArea}>
 				<Tabs
 					screenOptions={{
-						tabBarActiveTintColor: '#E63946',
+						tabBarActiveTintColor: CustomColors.darkGreen,
 						tabBarInactiveTintColor: '#666666',
 						headerShown: false,
 						tabBarButton: HapticTab,

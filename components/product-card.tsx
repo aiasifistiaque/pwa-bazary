@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { IconSymbol } from './ui/icon-symbol';
+import { useToast } from '@/contexts/ToastContext';
 
 const fallback = require('../assets/images/fallback-fruit.png');
 
@@ -31,17 +32,24 @@ export function ProductCard({
 	// Determine if image is a URI or local require
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
 
+	const { showToast } = useToast();
+
+	const handleAdd = () => {
+		onAddPress?.();
+		showToast('Added to cart');
+	};
+
 	return (
 		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
 			<View style={styles.imageContainer}>
 				<Image
 					source={imageSource || fallback}
 					style={styles.image}
-					resizeMode='contain'
+					resizeMode='cover'
 				/>
 				<TouchableOpacity
 					style={styles.addButton}
-					onPress={onAddPress}
+					onPress={handleAdd}
 					activeOpacity={0.8}
 				>
 					<IconSymbol name='plus' size={20} color='#E63946' />
@@ -74,8 +82,8 @@ export function ProductCard({
 
 const styles = StyleSheet.create({
 	card: {
-		width: '100%',
 		minWidth: 180,
+		maxWidth: 220,
 		backgroundColor: '#FFF',
 		borderRadius: 12,
 		overflow: 'hidden',
@@ -87,10 +95,9 @@ const styles = StyleSheet.create({
 	},
 	imageContainer: {
 		width: '100%',
-		height: 140,
+		aspectRatio: 1,
 		backgroundColor: '#F5F5F5',
 		position: 'relative',
-		padding: 10,
 	},
 	image: {
 		width: '100%',
@@ -133,6 +140,7 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		color: '#333',
 		lineHeight: 18,
+		minHeight: 36,
 	},
 	price: {
 		fontSize: 16,

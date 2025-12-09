@@ -12,7 +12,7 @@ export const userApi = mainApi.injectEndpoints({
 			providesTags: (_result, _error, { path }) => [path],
 		}),
 
-		getAll: builder.query({
+		getAll: builder.query<any, any>({
 			query: ({
 				sort = '-createdAt',
 				page = 1,

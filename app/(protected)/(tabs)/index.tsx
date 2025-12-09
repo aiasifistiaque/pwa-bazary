@@ -1,12 +1,11 @@
 import { BannerCarousel } from '@/components/banner-carousel';
 import { CategoryCard } from '@/components/category-card';
-import { DeliveryTimeButton } from '@/components/delivery-time-button';
-import { ProductCard } from '@/components/product-card';
+import { FeaturedCategorySection } from '@/components/featured-category-section';
 import { SectionHeader } from '@/components/section-header';
 import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
+import { CustomColors } from '@/constants/theme';
 import { useGetAllQuery } from '@/store/services/commonApi';
-import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
 import React from 'react';
 import {
@@ -18,119 +17,28 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
-
-// Banner data
-const banners = [
-	{
-		id: 'banner1',
-		title: 'Welcome to bazarey!',
-		subtitle: 'Extra for you: 25 € benefit',
-		couponCode: 'NEUKUNDE',
-		image:
-			'https://images.unsplash.com/photo-1576201836106-db1758fd1c97?w=800&h=400&fit=crop',
-	},
-	{
-		id: 'banner2',
-		title: 'Fresh Daily Deals',
-		subtitle: 'Save up to 30% on fresh produce',
-		image:
-			'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&h=400&fit=crop',
-	},
-	{
-		id: 'banner3',
-		title: 'Free Delivery',
-		subtitle: 'On orders over 50 €',
-		image:
-			'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=400&fit=crop',
-	},
-];
-
-const FeaturedCategorySection = ({ category }: { category: any }) => {
-	const dispatch = useDispatch();
-	const { data: productsData, isLoading } = useGetAllQuery({
-		path: '/products',
-		filters: { category: category.id },
-	});
-
-	const handleProductPress = (productId: string) => {
-		router.push(`/product/${productId}`);
-	};
-
-	const handleAddPress = (product: any) => {
-		dispatch(
-			addToCart({
-				item: {
-					id: product.id,
-					_id: product.id,
-					name: product.name,
-					price: product.sellPrice,
-					image: product.image,
-					vat: 0,
-				},
-				qty: 1,
-			})
-		);
-	};
-
-	const handleSeeAllPress = () => {
-		router.push(`/category/${category.id}`);
-	};
-
-	if (isLoading || !productsData?.doc?.length) return null;
-
-	return (
-		<View style={styles.section}>
-			<SectionHeader title={category.name} onSeeAllPress={handleSeeAllPress} />
-			<FlatList
-				horizontal
-				data={productsData.doc}
-				renderItem={({ item }) => (
-					<ProductCard
-						id={item.id}
-						name={item.name}
-						price={item.sellPrice.toString()}
-						image={item.image}
-						unit={item.unit}
-						unitPrice={item.unitPrice}
-						onPress={() => handleProductPress(item.id)}
-						onAddPress={() => handleAddPress(item)}
-					/>
-				)}
-				keyExtractor={item => item.id}
-				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={styles.productList}
-			/>
-		</View>
-	);
-};
 
 export default function DiscoverScreen() {
 	// data fetching
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
 		filters: { displayInHomePage: true },
-	});
+	}) as any;
 
 	const { data: featuredCategoriesData } = useGetAllQuery({
 		path: '/categorys',
 		filters: { isFeatured: true },
-	});
+	}) as any;
 
 	const { data: combosData, isLoading: combosLoading } = useGetAllQuery({
 		path: '/combos',
 		filters: { isFeatured: true },
-	});
+	}) as any;
 
 	const { data: bannersData, isLoading: bannersLoading } = useGetAllQuery({
 		path: '/banners',
 		filters: { isActive: true },
-	});
-
-	console.log('bannersData', bannersData);
-	const handleDeliveryTimePress = () => {
-		console.log('Delivery time pressed');
-	};
+	}) as any;
 
 	const handleBannerPress = (bannerId: string) => {
 		console.log('Banner pressed:', bannerId);
@@ -150,21 +58,20 @@ export default function DiscoverScreen() {
 
 	return (
 		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-			{/* Delivery Time Selector */}
-			{/* <DeliveryTimeButton
-				text='Choose your delivery time'
-				onPress={handleDeliveryTimePress}
-			/> */}
-
 			{/* Banner Carousel */}
 			<BannerCarousel
 				banners={bannersData?.doc}
 				onBannerPress={handleBannerPress}
+				isLoading={bannersLoading}
 			/>
 
 			{/* Categories Section */}
 			<View style={styles.categoriesSection}>
-				<SectionHeader title='Categories' />
+				{isLoading ? (
+					<View style={styles.sectionHeaderSkeleton} />
+				) : (
+					<SectionHeader title='Categories' />
+				)}
 				{isLoading ? (
 					<View style={styles.categoriesGrid}>
 						{Array.from({ length: 8 }).map((_, i) => (
@@ -182,19 +89,26 @@ export default function DiscoverScreen() {
 						))}
 					</View>
 				)}
-
-				<TouchableOpacity
-					style={styles.showMoreButton}
-					onPress={handleShowMoreCategories}
-					activeOpacity={0.7}
-				>
-					<Text style={styles.showMoreText}>Show more categories</Text>
-				</TouchableOpacity>
+				{isLoading ? (
+					<View style={styles.showMoreButtonSkeleton} />
+				) : (
+					<TouchableOpacity
+						style={styles.showMoreButton}
+						onPress={handleShowMoreCategories}
+						activeOpacity={0.7}
+					>
+						<Text style={styles.showMoreText}>Show more categories</Text>
+					</TouchableOpacity>
+				)}
 			</View>
 
 			{/* Recipe Combos Section */}
 			<View style={styles.section}>
-				<SectionHeader title='Combo Recipes' />
+				{combosLoading ? (
+					<View style={styles.sectionHeaderSkeleton} />
+				) : (
+					<SectionHeader title='Combo Recipes' />
+				)}
 				{combosLoading ? (
 					<FlatList
 						horizontal
@@ -259,7 +173,7 @@ const styles = StyleSheet.create({
 	},
 	showMoreButton: {
 		marginHorizontal: 16,
-		marginTop: 8,
+		marginTop: 12,
 		paddingVertical: 12,
 		backgroundColor: '#F8F8F8',
 		borderRadius: 8,
@@ -270,7 +184,7 @@ const styles = StyleSheet.create({
 	showMoreText: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#E63946',
+		color: CustomColors.darkGreen,
 	},
 	section: {
 		marginBottom: 16,
@@ -318,5 +232,20 @@ const styles = StyleSheet.create({
 	recipeDescription: {
 		fontSize: 13,
 		color: '#666666',
+	},
+	sectionHeaderSkeleton: {
+		height: 24,
+		width: 120,
+		backgroundColor: '#F0F0F0',
+		borderRadius: 4,
+		marginLeft: 16,
+		marginVertical: 12,
+	},
+	showMoreButtonSkeleton: {
+		marginHorizontal: 16,
+		marginTop: 12,
+		height: 48,
+		backgroundColor: '#F0F0F0',
+		borderRadius: 8,
 	},
 });

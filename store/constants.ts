@@ -1,5 +1,7 @@
-export const TOKEN_NAME: string = process.env.NEXT_PUBLIC_TOKEN_NAME || 'bazarey';
-export const REFRESH_TOKEN: string = process.env.NEXT_PUBLIC_REFRESH || 'TEST_REFRESH_ECOM_ONE';
+export const TOKEN_NAME: string =
+	process.env.NEXT_PUBLIC_TOKEN_NAME || 'bazarey';
+export const REFRESH_TOKEN: string =
+	process.env.NEXT_PUBLIC_REFRESH || 'TEST_REFRESH_ECOM_ONE';
 
 export const BASE_LIMIT: number = 10;
 

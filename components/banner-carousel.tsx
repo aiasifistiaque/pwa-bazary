@@ -6,6 +6,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = SCREEN_WIDTH * 0.8;
 const SPACING = 12;
 
+import { BannerSkeleton } from './skeleton/BannerSkeleton';
+import { CustomColors } from '@/constants/theme';
+
 type BannerCarouselProps = {
 	banners: Array<{
 		id: string;
@@ -15,9 +18,14 @@ type BannerCarouselProps = {
 		image: string;
 	}>;
 	onBannerPress?: (id: string) => void;
+	isLoading?: boolean;
 };
 
-export function BannerCarousel({ banners, onBannerPress }: BannerCarouselProps) {
+export function BannerCarousel({
+	banners,
+	onBannerPress,
+	isLoading = false,
+}: BannerCarouselProps) {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const flatListRef = useRef<FlatList>(null);
 
@@ -31,11 +39,13 @@ export function BannerCarousel({ banners, onBannerPress }: BannerCarouselProps) 
 		itemVisiblePercentThreshold: 50,
 	}).current;
 
+	const data = isLoading ? ([1, 2, 3] as any) : banners;
+
 	return (
 		<View style={styles.container}>
 			<FlatList
 				ref={flatListRef}
-				data={banners}
+				data={data}
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				pagingEnabled={false}
@@ -46,23 +56,27 @@ export function BannerCarousel({ banners, onBannerPress }: BannerCarouselProps) 
 				viewabilityConfig={viewabilityConfig}
 				renderItem={({ item }) => (
 					<View style={[styles.cardContainer, { width: CARD_WIDTH }]}>
-						<PromoBanner
-							title={item.title}
-							description={item.description}
-							couponCode={item.couponCode}
-							image={item.image}
-							onPress={() => onBannerPress?.(item.id)}
-						/>
+						{isLoading ? (
+							<BannerSkeleton />
+						) : (
+							<PromoBanner
+								title={item.title}
+								description={item.description}
+								couponCode={item.couponCode}
+								image={item.image}
+								onPress={() => onBannerPress?.(item.id)}
+							/>
+						)}
 					</View>
 				)}
-				keyExtractor={item => item.id}
+				keyExtractor={item => (isLoading ? `skeleton-${item}` : item.id)}
 			/>
 
 			{/* Pagination Dots */}
 			<View style={styles.pagination}>
-				{banners?.map((_, index) => (
+				{(isLoading ? [1, 2, 3] : banners)?.map((banner, index) => (
 					<View
-						key={index}
+						key={typeof banner !== 'number' ? banner.id : `dot-${index}`}
 						style={[
 							styles.dot,
 							index === activeIndex ? styles.activeDot : styles.inactiveDot,
@@ -98,7 +112,7 @@ const styles = StyleSheet.create({
 	},
 	activeDot: {
 		width: 20,
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.darkGreen,
 	},
 	inactiveDot: {
 		width: 6,

@@ -36,6 +36,8 @@ const tags = [
 	'order',
 	'/combos',
 	'addresses',
+	'/banners',
+	'/coupons',
 ];
 
 // src/store/types.ts

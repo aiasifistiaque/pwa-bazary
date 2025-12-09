@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCreateOrderMutation } from '@/store/services/checkoutApi';
+import { useGetAllQuery } from '@/store/services/commonApi';
+import { useGetSelfQuery } from '@/store/services/authApi';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -60,9 +62,6 @@ export default function CheckoutScreen() {
 		(state: RootState) => state.cart
 	);
 
-	const savedAddresses = useSelector(
-		(state: RootState) => state.address.addresses
-	);
 	const selectedCheckoutAddr = useSelector(
 		(state: RootState) => state.address.selectedCheckoutAddress
 	);
@@ -71,7 +70,30 @@ export default function CheckoutScreen() {
 	const [selectedPayment, setSelectedPayment] = useState<string>('');
 	const [couponCode, setCouponCode] = useState<string>('');
 	const [showSavedAddresses, setShowSavedAddresses] = useState<boolean>(false);
+
+	// Coupon state
+	const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+	const [couponDiscount, setCouponDiscount] = useState<number>(0);
+	const [couponMessage, setCouponMessage] = useState<{
+		type: 'success' | 'error';
+		text: string;
+	} | null>(null);
 	const userId = useSelector((state: RootState) => state.auth.user?._id);
+
+	// Fetch user data and addresses
+	const { data: userData } = useGetSelfQuery({});
+	const customerId = userData?._id || userId;
+
+	const { data: addressesData } = useGetAllQuery({
+		path: 'addresses',
+		filters: { customer: customerId },
+	});
+	const savedAddresses = (addressesData?.doc as Address[]) || [];
+
+	// Fetch coupons
+	const { data: couponsData } = useGetAllQuery({
+		path: '/coupons',
+	});
 
 	const [address, setAddress] = useState({
 		name: '',
@@ -112,8 +134,85 @@ export default function CheckoutScreen() {
 	};
 
 	const handleApplyCoupon = () => {
-		// Implement coupon logic here
-		Alert.alert('Coupon', 'Coupon applied successfully!');
+		// Clear previous messages
+		setCouponMessage(null);
+
+		if (!couponCode.trim()) {
+			setCouponMessage({ type: 'error', text: 'Please enter a coupon code' });
+			return;
+		}
+
+		const coupons = couponsData?.doc || [];
+
+		// Find coupon by code (case-sensitive)
+		const coupon = coupons.find((c: any) => c.code === couponCode.trim());
+
+		if (!coupon) {
+			setCouponMessage({ type: 'error', text: 'Invalid coupon code' });
+			return;
+		}
+
+		// Validate coupon is active
+		if (!coupon.isActive) {
+			setCouponMessage({
+				type: 'error',
+				text: 'This coupon is no longer active',
+			});
+			return;
+		}
+
+		// Validate date range
+		const now = new Date();
+		const validFrom = new Date(coupon.validFrom);
+		const validTill = new Date(coupon.validTill);
+
+		if (now < validFrom) {
+			setCouponMessage({ type: 'error', text: 'This coupon is not yet valid' });
+			return;
+		}
+
+		if (now > validTill) {
+			setCouponMessage({ type: 'error', text: 'This coupon has expired' });
+			return;
+		}
+
+		// Validate minimum order value
+		if (subTotal < coupon.minOrderValue) {
+			setCouponMessage({
+				type: 'error',
+				text: `Minimum order value of ৳${coupon.minOrderValue} required`,
+			});
+			return;
+		}
+
+		// Calculate discount
+		let discountAmount = 0;
+		if (coupon.isFlat) {
+			// Flat discount
+			discountAmount = coupon.maxAmount;
+		} else {
+			// Percentage discount
+			discountAmount = (subTotal * coupon.percentage) / 100;
+			// Cap at maxAmount if specified
+			if (coupon.maxAmount > 0 && discountAmount > coupon.maxAmount) {
+				discountAmount = coupon.maxAmount;
+			}
+		}
+
+		// Apply coupon
+		setAppliedCoupon(coupon);
+		setCouponDiscount(discountAmount);
+		setCouponMessage({
+			type: 'success',
+			text: `Coupon applied! You saved ৳${discountAmount}`,
+		});
+	};
+
+	const handleRemoveCoupon = () => {
+		setAppliedCoupon(null);
+		setCouponDiscount(0);
+		setCouponCode('');
+		setCouponMessage(null);
 	};
 	const setError = (msg: string) => {
 		setErrorMsg(msg);
@@ -145,6 +244,10 @@ export default function CheckoutScreen() {
 		}
 
 		try {
+			// Calculate final total with coupon discount
+			const finalTotal = total - couponDiscount;
+			const finalDiscount = discount + couponDiscount;
+
 			const payload = {
 				cart: {
 					items: cartItems.map((item: any) => ({
@@ -156,20 +259,20 @@ export default function CheckoutScreen() {
 						image: item.image,
 						uniqueId: item.uniqueId,
 						unitVat: item.vat,
-						...(item.note && { note: item.note }), 
-						...(item.variantName && { variantName: item.variantName }), 
+						...(item.note && { note: item.note }),
+						...(item.variantName && { variantName: item.variantName }),
 					})),
-					total,
+					total: finalTotal,
 					subTotal,
 					vat,
 					shipping,
-					discount,
-					couponId: null,
-					dueAmount: total,
+					discount: finalDiscount,
+					couponId: appliedCoupon?._id || null,
+					dueAmount: finalTotal,
 				},
 				address,
 				paymentMethod: selectedPayment,
-				paymentAmount: total,
+				paymentAmount: finalTotal,
 				status: 'pending',
 				origin: 'app',
 				orderDate: new Date(),
@@ -278,49 +381,59 @@ export default function CheckoutScreen() {
 					{/* Saved Addresses List */}
 					{showSavedAddresses && (
 						<View style={styles.savedAddressesList}>
-							{savedAddresses.map(addr => (
-								<Pressable
-									key={addr.id}
-									style={[
-										styles.savedAddressCard,
-										selectedCheckoutAddr?.id === addr.id &&
-											styles.selectedSavedAddress,
-									]}
-									onPress={() => handleSelectSavedAddress(addr)}
-								>
-									<View style={styles.savedAddressHeader}>
-										<View style={styles.addressLabelRow}>
-											<IconSymbol
-												name={
-													addr.label === 'Home'
-														? 'house.fill'
-														: 'building.2.fill'
-												}
-												size={18}
-												color='#E63946'
-											/>
-											<Text style={styles.savedAddressLabel}>{addr.label}</Text>
-											{addr.isDefault && (
-												<View style={styles.miniDefaultBadge}>
-													<Text style={styles.miniDefaultText}>Default</Text>
-												</View>
+							{savedAddresses.map(addr => {
+								const addrId = (addr as any)._id || addr.id;
+								const selectedId =
+									(selectedCheckoutAddr as any)?._id ||
+									selectedCheckoutAddr?.id;
+								const isSelected = selectedId === addrId;
+
+								return (
+									<Pressable
+										key={addrId}
+										style={[
+											styles.savedAddressCard,
+											isSelected && styles.selectedSavedAddress,
+										]}
+										onPress={() => handleSelectSavedAddress(addr)}
+									>
+										<View style={styles.savedAddressHeader}>
+											<View style={styles.addressLabelRow}>
+												<IconSymbol
+													name={
+														addr.label === 'Home'
+															? 'house.fill'
+															: 'building.2.fill'
+													}
+													size={18}
+													color='#E63946'
+												/>
+												<Text style={styles.savedAddressLabel}>
+													{addr.label}
+												</Text>
+												{addr.isDefault && (
+													<View style={styles.miniDefaultBadge}>
+														<Text style={styles.miniDefaultText}>Default</Text>
+													</View>
+												)}
+											</View>
+											{isSelected && (
+												<IconSymbol
+													name='checkmark.circle.fill'
+													size={24}
+													color='#10B981'
+												/>
 											)}
 										</View>
-										{selectedCheckoutAddr?.id === addr.id && (
-											<IconSymbol
-												name='checkmark.circle.fill'
-												size={24}
-												color='#10B981'
-											/>
-										)}
-									</View>
-									<Text style={styles.savedAddressName}>{addr.name}</Text>
-									<Text style={styles.savedAddressText}>{addr.phone}</Text>
-									<Text style={styles.savedAddressText}>
-										{addr.street}, {addr.area}, {addr.city} - {addr.postalCode}
-									</Text>
-								</Pressable>
-							))}
+										<Text style={styles.savedAddressName}>{addr.name}</Text>
+										<Text style={styles.savedAddressText}>{addr.phone}</Text>
+										<Text style={styles.savedAddressText}>
+											{addr.street}, {addr.area}, {addr.city} -{' '}
+											{addr.postalCode}
+										</Text>
+									</Pressable>
+								);
+							})}
 						</View>
 					)}
 
@@ -444,14 +557,66 @@ export default function CheckoutScreen() {
 							placeholder='Enter coupon code'
 							value={couponCode}
 							onChangeText={setCouponCode}
+							editable={!appliedCoupon}
 						/>
-						<Pressable
-							style={styles.applyCouponButton}
-							onPress={handleApplyCoupon}
-						>
-							<Text style={styles.applyCouponText}>Apply</Text>
-						</Pressable>
+						{!appliedCoupon ? (
+							<Pressable
+								style={styles.applyCouponButton}
+								onPress={handleApplyCoupon}
+							>
+								<Text style={styles.applyCouponText}>Apply</Text>
+							</Pressable>
+						) : (
+							<Pressable
+								style={styles.removeCouponButton}
+								onPress={handleRemoveCoupon}
+							>
+								<Text style={styles.removeCouponText}>Remove</Text>
+							</Pressable>
+						)}
 					</View>
+
+					{/* Coupon Message */}
+					{couponMessage && (
+						<View
+							style={[
+								styles.couponMessageContainer,
+								couponMessage.type === 'success'
+									? styles.couponMessageSuccess
+									: styles.couponMessageError,
+							]}
+						>
+							<IconSymbol
+								name={
+									couponMessage.type === 'success'
+										? 'checkmark.circle.fill'
+										: 'exclamationmark.triangle.fill'
+								}
+								size={16}
+								color={couponMessage.type === 'success' ? '#10B981' : '#DC2626'}
+							/>
+							<Text
+								style={[
+									styles.couponMessageText,
+									couponMessage.type === 'success'
+										? styles.couponMessageTextSuccess
+										: styles.couponMessageTextError,
+								]}
+							>
+								{couponMessage.text}
+							</Text>
+						</View>
+					)}
+
+					{/* Applied Coupon Display */}
+					{appliedCoupon && (
+						<View style={styles.appliedCouponBadge}>
+							<IconSymbol name='tag.fill' size={16} color='#10B981' />
+							<Text style={styles.appliedCouponText}>
+								{appliedCoupon.code} - {appliedCoupon.description}
+							</Text>
+						</View>
+					)}
 				</View>
 
 				{/* Order Summary */}
@@ -483,9 +648,21 @@ export default function CheckoutScreen() {
 							</Text>
 						</View>
 					)}
+					{couponDiscount > 0 && (
+						<View style={styles.summaryRow}>
+							<Text style={[styles.summaryLabel, { color: '#10B981' }]}>
+								Coupon Discount ({appliedCoupon?.code})
+							</Text>
+							<Text style={[styles.summaryValue, { color: '#10B981' }]}>
+								-৳{couponDiscount.toLocaleString()}
+							</Text>
+						</View>
+					)}
 					<View style={[styles.summaryRow, styles.totalRow]}>
 						<Text style={styles.totalLabel}>Total</Text>
-						<Text style={styles.totalValue}>৳{total.toLocaleString()}</Text>
+						<Text style={styles.totalValue}>
+							৳{(total - couponDiscount).toLocaleString()}
+						</Text>
 					</View>
 				</View>
 
@@ -507,7 +684,9 @@ export default function CheckoutScreen() {
 			<View style={styles.bottomContainer}>
 				<Pressable style={styles.placeOrderButton} onPress={handlePlaceOrder}>
 					<Text style={styles.placeOrderText}>Place Order</Text>
-					<Text style={styles.placeOrderPrice}>৳{total.toLocaleString()}</Text>
+					<Text style={styles.placeOrderPrice}>
+						৳{(total - couponDiscount).toLocaleString()}
+					</Text>
 				</Pressable>
 			</View>
 		</SafeAreaView>
@@ -822,5 +1001,63 @@ const styles = StyleSheet.create({
 		width: 24,
 		height: 24,
 		resizeMode: 'contain',
+	},
+	removeCouponButton: {
+		backgroundColor: '#DC2626',
+		paddingHorizontal: 20,
+		borderRadius: 8,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	removeCouponText: {
+		fontSize: 16,
+		fontWeight: '600',
+		color: '#FFFFFF',
+	},
+	couponMessageContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+		padding: 12,
+		borderRadius: 8,
+		marginTop: 12,
+	},
+	couponMessageSuccess: {
+		backgroundColor: '#ECFDF5',
+		borderWidth: 1,
+		borderColor: '#10B981',
+	},
+	couponMessageError: {
+		backgroundColor: '#FEF2F2',
+		borderWidth: 1,
+		borderColor: '#DC2626',
+	},
+	couponMessageText: {
+		flex: 1,
+		fontSize: 14,
+		fontWeight: '500',
+	},
+	couponMessageTextSuccess: {
+		color: '#10B981',
+	},
+	couponMessageTextError: {
+		color: '#DC2626',
+	},
+	appliedCouponBadge: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+		padding: 12,
+		backgroundColor: '#ECFDF5',
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: '#10B981',
+		marginTop: 12,
+	},
+	appliedCouponText: {
+		flex: 1,
+		fontSize: 13,
+		color: '#059669',
+		fontWeight: '500',
 	},
 });

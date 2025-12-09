@@ -1,15 +1,9 @@
 import { CategoryCard } from '@/components/category-card';
-import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
-import {
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AllCategoriesScreen() {
@@ -33,37 +27,37 @@ export default function AllCategoriesScreen() {
 
 	return (
 		<>
-			{isLoading ? (
-				<Loader />
-			) : (
-				<SafeAreaView style={styles.container}>
-					<View style={styles.safeArea}>
-						{/* Header */}
-						<View style={styles.header}>
-							<Pressable onPress={handleBack} style={styles.backButton}>
-								<IconSymbol name='chevron.left' size={24} color='#000000' />
-							</Pressable>
-							<Text style={styles.headerTitle}>All Categories</Text>
-							<View style={{ width: 40 }} />
-						</View>
+			<SafeAreaView style={styles.container}>
+				<View style={styles.safeArea}>
+					{/* Header */}
+					<View style={styles.header}>
+						<Pressable onPress={handleBack} style={styles.backButton}>
+							<IconSymbol name='chevron.left' size={24} color='#000000' />
+						</Pressable>
+						<Text style={styles.headerTitle}>All Categories</Text>
+						<View style={{ width: 40 }} />
 					</View>
+				</View>
 
-					<ScrollView
-						style={styles.scrollView}
-						showsVerticalScrollIndicator={false}
-					>
-						<View style={styles.categoriesGrid}>
-							{parentCategories?.map((category: any) => (
-								<CategoryCard
-									key={category.id}
-									{...category}
-									onPress={() => handleCategoryPress(category.id)}
-								/>
-							))}
-						</View>
-					</ScrollView>
-				</SafeAreaView>
-			)}
+				<ScrollView
+					style={styles.scrollView}
+					showsVerticalScrollIndicator={false}
+				>
+					<View style={styles.categoriesGrid}>
+						{isLoading
+							? Array.from({ length: 20 }).map((_, index) => (
+									<CategorySkeleton key={`skeleton-${index}`} />
+							  ))
+							: parentCategories?.map((category: any) => (
+									<CategoryCard
+										key={category.id}
+										{...category}
+										onPress={() => handleCategoryPress(category.id)}
+									/>
+							  ))}
+					</View>
+				</ScrollView>
+			</SafeAreaView>
 		</>
 	);
 }

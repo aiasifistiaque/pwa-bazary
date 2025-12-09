@@ -8,7 +8,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 
 import {
-	Alert,
 	Image,
 	Platform,
 	ScrollView,
@@ -21,9 +20,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 const fallback = require('../../../assets/images/fallback-fruit.png');
 
+import { useToast } from '@/contexts/ToastContext';
+
 export default function ProductDetailScreen() {
 	const dispatch = useDispatch();
 	const { id } = useLocalSearchParams<{ id: string }>();
+	const { showToast } = useToast();
 
 	const { data: productD, isLoading } = useGetByIdQuery({
 		path: 'products',
@@ -61,7 +63,7 @@ export default function ProductDetailScreen() {
 				qty: quantity,
 			})
 		);
-		Alert.alert('Success', 'Added to cart');
+		showToast('Added to cart');
 	};
 
 	const handleFavoritePress = () => {
@@ -76,10 +78,7 @@ export default function ProductDetailScreen() {
 				unitPrice: product.unitPrice,
 			})
 		);
-		Alert.alert(
-			'Success',
-			willBeFavorite ? 'Added to favorites' : 'Removed from favorites'
-		);
+		showToast(willBeFavorite ? 'Added to favorites' : 'Removed from favorites');
 	};
 
 	// Ensure product.price is parsed safely (handles numbers or strings with commas)
