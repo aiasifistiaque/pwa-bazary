@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
 		padding: 12,
 		borderRadius: 12,
 		gap: 12,
-		marginBottom: 12,
 	},
 	imageSkeleton: {
 		width: 60,
