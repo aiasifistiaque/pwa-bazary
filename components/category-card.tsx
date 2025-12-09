@@ -17,28 +17,29 @@ export function CategoryCard({
 }: CategoryCardProps) {
 	const [imgErr, setImgErr] = useState(false);
 	const hasImg = image && !imgErr;
+
 	return (
 		<TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-			<View style={styles.iconContainer}>
-				{hasImg ? (
-					<Image
-						source={{ uri: image }}
-						style={styles.image}
-						resizeMode='cover'
-						onError={() => setImgErr(true)}
-					/>
-				) : (
-					<Image
-						source={fallbackImg}
-						style={styles.image}
-						resizeMode='cover'
-						onError={() => setImgErr(true)}
-					/>
-				)}
+			{hasImg ? (
+				<Image
+					source={{ uri: image }}
+					style={styles.image}
+					resizeMode='cover'
+					onError={() => setImgErr(true)}
+				/>
+			) : (
+				<Image
+					source={fallbackImg}
+					style={styles.image}
+					resizeMode='cover'
+					onError={() => setImgErr(true)}
+				/>
+			)}
+			<View style={styles.overlay}>
+				<Text style={styles.name} numberOfLines={2}>
+					{name}
+				</Text>
 			</View>
-			<Text style={styles.name} numberOfLines={2}>
-				{name}
-			</Text>
 		</TouchableOpacity>
 	);
 }
@@ -47,39 +48,40 @@ const styles = StyleSheet.create({
 	card: {
 		width: '23%',
 		aspectRatio: 1,
-		backgroundColor: '#FFFFFF',
+		backgroundColor: '#F5F5F5',
 		borderRadius: 12,
-		padding: 8,
 		marginBottom: 12,
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
+		overflow: 'hidden',
+		position: 'relative',
+		borderWidth: 0,
+		elevation: 2,
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.05,
+		shadowOpacity: 0.1,
 		shadowRadius: 2,
-		elevation: 1,
-	},
-	iconContainer: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
-		backgroundColor: '#FFF5F5',
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginBottom: 8,
 	},
 	image: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
+		width: '100%',
+		height: '100%',
+		position: 'absolute',
+	},
+	overlay: {
+		position: 'absolute',
+		bottom: 0,
+		left: 0,
+		right: 0,
+		backgroundColor: 'rgba(0,0,0,0.4)',
+		paddingVertical: 4,
+		paddingHorizontal: 2,
+		alignItems: 'center',
+		justifyContent: 'center',
+		minHeight: 28,
 	},
 	name: {
-		fontSize: 11,
+		fontSize: 10,
 		fontWeight: '600',
-		color: '#333',
+		color: '#FFFFFF',
 		textAlign: 'center',
-		lineHeight: 14,
+		lineHeight: 12,
 	},
 });

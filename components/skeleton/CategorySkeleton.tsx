@@ -3,8 +3,8 @@ import { StyleSheet, View } from 'react-native';
 function CategorySkeleton() {
 	return (
 		<View style={styles.card}>
-			<View style={styles.skelImg} />
-			<View style={styles.skelText} />
+			<View style={styles.skelContent} />
+			<View style={styles.skelOverlay} />
 		</View>
 	);
 }
@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
 		aspectRatio: 1,
 		backgroundColor: '#FFFFFF',
 		borderRadius: 12,
-		padding: 8,
+		padding: 0,
 		marginBottom: 12,
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -27,17 +27,16 @@ const styles = StyleSheet.create({
 		shadowRadius: 2,
 		elevation: 1,
 	},
-	skelImg: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
+	skelContent: {
+		flex: 1,
 		backgroundColor: '#EEE',
-		marginBottom: 8,
 	},
-	skelText: {
-		width: 40,
-		height: 10,
-		borderRadius: 4,
-		backgroundColor: '#EEE',
+	skelOverlay: {
+		position: 'absolute',
+		bottom: 0,
+		left: 0,
+		right: 0,
+		height: 28,
+		backgroundColor: 'rgba(0,0,0,0.1)',
 	},
 });
