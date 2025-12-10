@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { useGetOrdersQuery } from '@/store/services/checkoutApi';
+import { useGetSelfQuery } from '@/store/services/authApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomColors } from '@/constants/theme';
 import { Toast } from '@/components/ui/Toast';
@@ -195,6 +196,10 @@ export default function OrdersScreen() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [allOrders, setAllOrders] = useState<Order[]>([]);
 
+	// Get logged-in user
+	const { data: userData } = useGetSelfQuery({});
+	const loggedInUserId = userData?._id;
+
 	const { data, isLoading, isFetching } = useGetOrdersQuery({
 		storeId: 'default',
 		page: currentPage,
@@ -203,8 +208,17 @@ export default function OrdersScreen() {
 
 	// Update allOrders when new data arrives
 	useEffect(() => {
-		if (data?.doc) {
-			const newOrders: Order[] = data.doc.map((order: any) => ({
+		if (data?.doc && loggedInUserId) {
+			// Filter orders to only show logged-in user's orders
+			const userOrders = data.doc.filter((order: any) => {
+				const customerId =
+					typeof order.customer === 'object'
+						? order.customer?._id
+						: order.customer;
+				return customerId === loggedInUserId;
+			});
+
+			const newOrders: Order[] = userOrders.map((order: any) => ({
 				id: order._id,
 				orderNumber: order.invoice
 					? `#${order.invoice}`
@@ -232,9 +246,14 @@ export default function OrdersScreen() {
 				setAllOrders(prev => [...prev, ...newOrders]);
 			}
 		}
-	}, [data, currentPage]);
+	}, [data, currentPage, loggedInUserId]);
 
-	const hasMore = data ? currentPage < data.totalPages : false;
+	// Show Load More button only if:
+	// 1. We have loaded at least 10 orders (meaning there might be more)
+	// 2. Current page is less than total pages (there are more pages to fetch)
+	const hasMore = data
+		? allOrders.length >= 10 && currentPage < data.totalPages
+		: false;
 
 	const ongoingOrders = allOrders.filter(order =>
 		[
