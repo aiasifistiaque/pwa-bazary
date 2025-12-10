@@ -190,30 +190,53 @@ export default function OrdersScreen() {
 	const [toastVisible, setToastVisible] = useState(false);
 	const [toastMessage, setToastMessage] = useState('');
 	const [activeTab, setActiveTab] = useState<'ongoing' | 'past'>('ongoing');
-	const { data, isLoading } = useGetOrdersQuery({ storeId: 'default' });
 
-	const orders: Order[] =
-		data?.doc?.map((order: any) => ({
-			id: order._id,
-			orderNumber: order.invoice
-				? `#${order.invoice}`
-				: `#${order._id.slice(-6)}`,
-			date: new Date(order.orderDate).toISOString().split('T')[0],
-			status: order.status,
-			items: order.items.map((item: any) => ({
-				id: item.product?._id || item.product || item.productId || item._id,
-				name: item.name,
-				quantity: item.qty,
-				price: item.unitPrice,
-				image: item.image,
-			})),
-			total: order.total,
-			deliveryAddress: order.address
-				? `${order.address.street || ''}, ${order.address.city || ''}`
-				: 'N/A',
-		})) || [];
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [allOrders, setAllOrders] = useState<Order[]>([]);
 
-	const ongoingOrders = orders.filter(order =>
+	const { data, isLoading, isFetching } = useGetOrdersQuery({
+		storeId: 'default',
+		page: currentPage,
+		limit: 10,
+	});
+
+	// Update allOrders when new data arrives
+	useEffect(() => {
+		if (data?.doc) {
+			const newOrders: Order[] = data.doc.map((order: any) => ({
+				id: order._id,
+				orderNumber: order.invoice
+					? `#${order.invoice}`
+					: `#${order._id.slice(-6)}`,
+				date: new Date(order.orderDate).toISOString().split('T')[0],
+				status: order.status,
+				items: order.items.map((item: any) => ({
+					id: item.product?._id || item.product || item.productId || item._id,
+					name: item.name,
+					quantity: item.qty,
+					price: item.unitPrice,
+					image: item.image,
+				})),
+				total: order.total,
+				deliveryAddress: order.address
+					? `${order.address.street || ''}, ${order.address.city || ''}`
+					: 'N/A',
+			}));
+
+			if (currentPage === 1) {
+				// First page - replace all orders
+				setAllOrders(newOrders);
+			} else {
+				// Subsequent pages - append to existing orders
+				setAllOrders(prev => [...prev, ...newOrders]);
+			}
+		}
+	}, [data, currentPage]);
+
+	const hasMore = data ? currentPage < data.totalPages : false;
+
+	const ongoingOrders = allOrders.filter(order =>
 		[
 			'pending',
 			'confirmed',
@@ -223,11 +246,24 @@ export default function OrdersScreen() {
 			'out-for-delivery',
 		].includes(order.status)
 	);
-	const pastOrders = orders.filter(order =>
+	const pastOrders = allOrders.filter(order =>
 		['delivered', 'cancelled', 'completed', 'refunded', 'failed'].includes(
 			order.status
 		)
 	);
+
+	// Reset pagination when switching tabs
+	const handleTabChange = (tab: 'ongoing' | 'past') => {
+		setActiveTab(tab);
+		setCurrentPage(1);
+		setAllOrders([]);
+	};
+
+	const handleLoadMore = () => {
+		if (!isFetching && hasMore) {
+			setCurrentPage(prev => prev + 1);
+		}
+	};
 
 	const handleOrderPress = (orderId: string) => {
 		// router.push(`/order-detail/${orderId}`);
@@ -283,7 +319,7 @@ export default function OrdersScreen() {
 			<View style={styles.tabContainer}>
 				<Pressable
 					style={[styles.tab, activeTab === 'ongoing' && styles.activeTab]}
-					onPress={() => setActiveTab('ongoing')}
+					onPress={() => handleTabChange('ongoing')}
 				>
 					<Text
 						style={[
@@ -296,7 +332,7 @@ export default function OrdersScreen() {
 				</Pressable>
 				<Pressable
 					style={[styles.tab, activeTab === 'past' && styles.activeTab]}
-					onPress={() => setActiveTab('past')}
+					onPress={() => handleTabChange('past')}
 				>
 					<Text
 						style={[
@@ -335,6 +371,24 @@ export default function OrdersScreen() {
 								/>
 							))
 						)}
+
+						{/* Load More Button */}
+						{hasMore && ongoingOrders.length > 0 && (
+							<Pressable
+								style={styles.loadMoreButton}
+								onPress={handleLoadMore}
+								disabled={isFetching}
+							>
+								{isFetching ? (
+									<ActivityIndicator
+										size='small'
+										color={CustomColors.darkBrown}
+									/>
+								) : (
+									<Text style={styles.loadMoreText}>Load More</Text>
+								)}
+							</Pressable>
+						)}
 					</View>
 				) : (
 					<View style={styles.ordersContainer}>
@@ -353,6 +407,24 @@ export default function OrdersScreen() {
 									onPress={handleOrderPress}
 								/>
 							))
+						)}
+
+						{/* Load More Button */}
+						{hasMore && pastOrders.length > 0 && (
+							<Pressable
+								style={styles.loadMoreButton}
+								onPress={handleLoadMore}
+								disabled={isFetching}
+							>
+								{isFetching ? (
+									<ActivityIndicator
+										size='small'
+										color={CustomColors.darkBrown}
+									/>
+								) : (
+									<Text style={styles.loadMoreText}>Load More</Text>
+								)}
+							</Pressable>
 						)}
 					</View>
 				)}
@@ -551,7 +623,7 @@ const styles = StyleSheet.create({
 		gap: 6,
 		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 16,
-		paddingVertical: 10,
+		paddingVertical: 8,
 		borderRadius: 8,
 		borderWidth: 1,
 		borderColor: CustomColors.darkBrown,
@@ -570,6 +642,24 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#999999',
 		marginTop: 16,
+	},
+	loadMoreButton: {
+		marginHorizontal: 16,
+		marginTop: 16,
+		marginBottom: 8,
+		paddingVertical: 12,
+		backgroundColor: CustomColors.lightBrown,
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: CustomColors.darkBrown,
+		alignItems: 'center',
+		justifyContent: 'center',
+		minHeight: 48,
+	},
+	loadMoreText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: CustomColors.darkBrown,
 	},
 	loadingContainer: {
 		flex: 1,

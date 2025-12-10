@@ -31,8 +31,8 @@ export const checkoutAPi = mainApi.injectEndpoints({
 			invalidatesTags: ['cart'],
 		}),
 		getOrders: builder.query({
-			query: ({ storeId }) => ({
-				url: `orders?storeId=${storeId}`,
+			query: ({ storeId, page = 1, limit = 10 }) => ({
+				url: `orders?storeId=${storeId}&page=${page}&limit=${limit}`,
 				method: 'GET',
 			}),
 			providesTags: ['order'],
