@@ -64,7 +64,7 @@ export function BannerCarousel({
 								description={item.description}
 								couponCode={item.couponCode}
 								image={item.image}
-								onPress={() => onBannerPress?.(item.id)}
+								onPress={() => onBannerPress?.(item.link)}
 							/>
 						)}
 					</View>

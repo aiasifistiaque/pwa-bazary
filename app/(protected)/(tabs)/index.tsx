@@ -40,8 +40,8 @@ export default function DiscoverScreen() {
 		filters: { isActive: true },
 	}) as any;
 
-	const handleBannerPress = (bannerId: string) => {
-		console.log('Banner pressed:', bannerId);
+	const handleBannerPress = (link: string) => {
+		router.push(link as any);
 	};
 
 	const handleCategoryPress = (categoryId: string) => {
