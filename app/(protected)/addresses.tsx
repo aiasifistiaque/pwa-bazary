@@ -218,8 +218,9 @@ export default function AddressesScreen() {
 				>
 					{/* Saved Addresses */}
 					<View style={styles.addressesContainer}>
-						{addresses?.map(address => (
+						{addresses?.map((address, index) => (
 							<AddressCard
+								key={index}
 								address={address}
 								handleEdit={handleEdit}
 								handleDelete={handleDelete}

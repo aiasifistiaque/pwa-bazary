@@ -8,6 +8,9 @@ import {
 	ActivityIndicator,
 } from 'react-native';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Address } from '@/store/slices/addressSlice';
+import { CustomColors } from '@/constants/theme';
+import IconButton from '../buttons/IconButton';
 
 /**
  * @description
@@ -16,9 +19,6 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
  * @gitHub https://github.com/arefin-aareef
  * @linkedIn https://linkedin.com/in/arefin-aareef
  * */
-
-import { Address } from '@/store/slices/addressSlice';
-import { CustomColors } from '@/constants/theme';
 
 type AddressCardProps = {
 	address: Address;
@@ -58,22 +58,11 @@ const AddressCard: FC<AddressCardProps> = ({
 					)}
 				</View>
 				<View style={styles.addressActions}>
-					<Pressable
-						onPress={() => handleEdit(address)}
-						style={styles.actionButton}
-					>
-						<IconSymbol
-							name='pencil'
-							size={18}
-							color={CustomColors.darkBrown}
-						/>
-					</Pressable>
-					<Pressable
+					<IconButton onPress={() => handleEdit(address)} icon='pencil' />
+					<IconButton
 						onPress={() => handleDelete(address.id || (address as any)._id)}
-						style={styles.actionButton}
-					>
-						<IconSymbol name='trash' size={18} color={CustomColors.darkBrown} />
-					</Pressable>
+						icon='trash'
+					/>
 				</View>
 			</View>
 
