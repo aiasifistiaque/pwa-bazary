@@ -19,7 +19,6 @@ import {
 	View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useGetSelfQuery } from '@/store/services/authApi';
 import { Loader } from '@/components/Loader';
 import AddressCard from '@/components/cards/AddressCard';
@@ -271,7 +270,7 @@ export default function AddressesScreen() {
 								style={styles.locationButton}
 								onPress={handleGetCurrentLocation}
 							>
-								<IconSymbol name='location.fill' size={20} color='#E63946' />
+								<IconSymbol name='location.fill' size={20} color={CustomColors.darkBrown} />
 								<Text style={styles.locationButtonText}>
 									Use Current Location
 								</Text>
@@ -451,6 +450,7 @@ const styles = StyleSheet.create({
 	},
 	addressesContainer: {
 		padding: 16,
+		gap: 16,
 	},
 	addressCard: {
 		backgroundColor: '#FFFFFF',
@@ -586,17 +586,17 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		gap: 8,
-		backgroundColor: '#FEF2F2',
+		backgroundColor: CustomColors.lightBrown,
 		paddingVertical: 12,
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: '#E63946',
+		borderColor: CustomColors.darkBrown,
 		marginBottom: 20,
 	},
 	locationButtonText: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	formField: {
 		marginBottom: 16,
@@ -626,16 +626,16 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	labelOptionActive: {
-		backgroundColor: '#E63946',
-		borderColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
+		borderColor: CustomColors.darkBrown,
 	},
 	labelOptionText: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#666666',
+		color: CustomColors.darkBrown,
 	},
 	labelOptionTextActive: {
-		color: '#FFFFFF',
+		color: CustomColors.darkBrown,
 	},
 	input: {
 		borderWidth: 1,
@@ -648,16 +648,18 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F5F5F5',
 	},
 	saveButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingVertical: 16,
 		borderRadius: 8,
 		alignItems: 'center',
 		marginTop: 8,
+		borderWidth: 1,
+		borderColor: CustomColors.darkBrown,
 	},
 	saveButtonText: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: '#FFFFFF',
+		color: CustomColors.darkBrown,
 	},
 	saveButtonDisabled: {
 		opacity: 0.6,

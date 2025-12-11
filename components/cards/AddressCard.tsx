@@ -13,7 +13,7 @@ import { CustomColors } from '@/constants/theme';
 import IconButton from '../buttons/IconButton';
 
 /**
- * @description
+ * @description Address card component
  * @version 1.0.0
  * @author arefin-aareef
  * @gitHub https://github.com/arefin-aareef
@@ -105,7 +105,6 @@ const styles = StyleSheet.create({
 		backgroundColor: CustomColors.cardBgColor,
 		borderRadius: 12,
 		padding: 16,
-		marginBottom: 16,
 		borderWidth: 1,
 		borderColor: CustomColors.lightBrown,
 		shadowColor: '#000',
