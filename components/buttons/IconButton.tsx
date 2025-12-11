@@ -1,6 +1,6 @@
 'use client';
 import { FC } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { IconSymbol } from '../ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
 
@@ -15,12 +15,17 @@ import { CustomColors } from '@/constants/theme';
 type IconButtonProps = {
 	onPress: () => any;
 	icon: any;
+	loading?: boolean;
 };
 
-const IconButton: FC<IconButtonProps> = ({ onPress, icon }) => {
+const IconButton: FC<IconButtonProps> = ({ onPress, icon, loading }) => {
 	return (
-		<Pressable onPress={onPress} style={styles.actionButton}>
-			<IconSymbol name={icon} size={18} color={CustomColors.darkBrown} />
+		<Pressable onPress={onPress} style={styles.actionButton} disabled={loading}>
+			{loading ? (
+				<ActivityIndicator size='small' color='#FFFFFF' />
+			) : (
+				<IconSymbol name={icon} size={18} color={CustomColors.darkBrown} />
+			)}
 		</Pressable>
 	);
 };

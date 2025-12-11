@@ -79,9 +79,9 @@ export default function MenuScreen() {
 					<Text style={styles.headerTitle}>
 						{isLoading ? 'Loading...' : headerTitle}
 					</Text>
-					<Pressable style={styles.settingsButton}>
+					{/* <Pressable style={styles.settingsButton}>
 						<IconSymbol name='gearshape' size={24} color='#000000' />
-					</Pressable>
+					</Pressable> */}
 				</View>
 			</View>
 

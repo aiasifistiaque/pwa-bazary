@@ -10,7 +10,6 @@ import {
 	Alert,
 	Platform,
 	TextInput,
-	ActivityIndicator,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/store/slices/authSlice';
@@ -21,6 +20,7 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomColors } from '@/constants/theme';
+import IconButton from '@/components/buttons/IconButton';
 
 export default function ProfileScreen() {
 	const dispatch = useDispatch();
@@ -205,36 +205,18 @@ export default function ProfileScreen() {
 						<Text style={styles.sectionTitle}>Personal details</Text>
 						<View style={styles.actionButtons}>
 							{!isEditMode ? (
-								<Pressable
-									style={styles.editButtonTop}
-									onPress={handleEdit}
-									disabled={isProfileLoading}
-								>
-									<IconSymbol name='pencil' size={18} color='#666666' />
-								</Pressable>
+								<IconButton icon='pencil' onPress={handleEdit} />
 							) : (
 								<>
-									<Pressable
-										style={styles.cancelButton}
+									<IconButton
+										icon='xmark'
 										onPress={handleCancel}
-										disabled={isUpdating}
-									>
-										<Text style={styles.cancelButtonText}>Cancel</Text>
-									</Pressable>
-									<Pressable
-										style={[
-											styles.saveButton,
-											isUpdating && styles.saveButtonDisabled,
-										]}
+									/>
+									<IconButton
+										icon='checkmark'
 										onPress={handleSave}
-										disabled={isUpdating}
-									>
-										{isUpdating ? (
-											<ActivityIndicator size='small' color='#FFFFFF' />
-										) : (
-											<Text style={styles.saveButtonText}>Save</Text>
-										)}
-									</Pressable>
+										loading={isUpdating}
+									/>
 								</>
 							)}
 						</View>
