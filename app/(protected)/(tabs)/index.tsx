@@ -173,7 +173,6 @@ const styles = StyleSheet.create({
 	},
 	showMoreButton: {
 		marginHorizontal: 16,
-		marginTop: 12,
 		paddingVertical: 12,
 		backgroundColor: '#F8F8F8',
 		borderRadius: 8,
