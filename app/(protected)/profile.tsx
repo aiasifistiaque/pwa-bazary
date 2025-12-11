@@ -10,7 +10,6 @@ import {
 	Alert,
 	Platform,
 	TextInput,
-	ActivityIndicator,
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { logout } from '@/store/slices/authSlice';
@@ -19,6 +18,9 @@ import {
 	useUpdateUserSelfMutation,
 } from '@/store/services/authApi';
 import { FontAwesome } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { CustomColors } from '@/constants/theme';
+import IconButton from '@/components/buttons/IconButton';
 
 export default function ProfileScreen() {
 	const dispatch = useDispatch();
@@ -181,7 +183,7 @@ export default function ProfileScreen() {
 	};
 
 	return (
-		<View style={styles.container}>
+		<SafeAreaView style={styles.container}>
 			<View style={styles.safeArea}>
 				{/* Header */}
 				<View style={styles.header}>
@@ -203,36 +205,18 @@ export default function ProfileScreen() {
 						<Text style={styles.sectionTitle}>Personal details</Text>
 						<View style={styles.actionButtons}>
 							{!isEditMode ? (
-								<Pressable
-									style={styles.editButtonTop}
-									onPress={handleEdit}
-									disabled={isProfileLoading}
-								>
-									<Text style={styles.editButtonText}>Edit</Text>
-								</Pressable>
+								<IconButton icon='pencil' onPress={handleEdit} />
 							) : (
 								<>
-									<Pressable
-										style={styles.cancelButton}
+									<IconButton
+										icon='xmark'
 										onPress={handleCancel}
-										disabled={isUpdating}
-									>
-										<Text style={styles.cancelButtonText}>Cancel</Text>
-									</Pressable>
-									<Pressable
-										style={[
-											styles.saveButton,
-											isUpdating && styles.saveButtonDisabled,
-										]}
+									/>
+									<IconButton
+										icon='checkmark'
 										onPress={handleSave}
-										disabled={isUpdating}
-									>
-										{isUpdating ? (
-											<ActivityIndicator size='small' color='#FFFFFF' />
-										) : (
-											<Text style={styles.saveButtonText}>Save</Text>
-										)}
-									</Pressable>
+										loading={isUpdating}
+									/>
 								</>
 							)}
 						</View>
@@ -261,11 +245,11 @@ export default function ProfileScreen() {
 						<View style={styles.fieldContent}>
 							<Text style={styles.fieldLabel}>Email</Text>
 							<Text style={styles.fieldValue}>{displayEmail}</Text>
-							{!emailVerified && !isProfileLoading && (
+							{/* {!emailVerified && !isProfileLoading && (
 								<Pressable style={styles.verifyButton}>
 									<Text style={styles.verifyButtonText}>Verify email</Text>
 								</Pressable>
-							)}
+							)} */}
 						</View>
 					</View>
 
@@ -353,7 +337,11 @@ export default function ProfileScreen() {
 				{/* Logout Button */}
 				<View style={styles.logoutContainer}>
 					<Pressable style={styles.logoutButton} onPress={handleLogout}>
-						<IconSymbol name='arrow.right.square' size={20} color='#E63946' />
+						<IconSymbol
+							name='arrow.right.square'
+							size={20}
+							color={CustomColors.darkBrown}
+						/>
 						<Text style={styles.logoutText}>Logout</Text>
 					</Pressable>
 				</View>
@@ -361,7 +349,7 @@ export default function ProfileScreen() {
 				{/* Bottom Spacing */}
 				<View style={{ height: 40 }} />
 			</ScrollView>
-		</View>
+		</SafeAreaView>
 	);
 }
 
@@ -417,10 +405,12 @@ const styles = StyleSheet.create({
 		gap: 8,
 	},
 	editButtonTop: {
-		paddingHorizontal: 16,
-		paddingVertical: 8,
-		backgroundColor: '#000000',
+		width: 36,
+		height: 36,
+		alignItems: 'center',
+		justifyContent: 'center',
 		borderRadius: 8,
+		backgroundColor: '#ffffff',
 	},
 	editButtonText: {
 		color: '#FFFFFF',
@@ -543,22 +533,21 @@ const styles = StyleSheet.create({
 	},
 	logoutContainer: {
 		paddingHorizontal: 16,
-		// marginTop: 32,
 	},
 	logoutButton: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: '#FFFFFF',
+		backgroundColor: CustomColors.lightBrown,
 		borderRadius: 12,
 		padding: 16,
 		borderWidth: 2,
-		borderColor: '#E63946',
+		borderColor: CustomColors.darkBrown,
 		gap: 12,
 	},
 	logoutText: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 });

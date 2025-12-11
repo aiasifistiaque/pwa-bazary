@@ -15,6 +15,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { FavoriteProductCard } from '@/components/favorite-product-card';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CustomColors } from '@/constants/theme';
 
 export default function FavoritesScreen() {
 	const dispatch = useDispatch();
@@ -127,13 +128,15 @@ const styles = StyleSheet.create({
 		marginBottom: 24,
 	},
 	browseButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 24,
 		paddingVertical: 12,
 		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: CustomColors.darkBrown,
 	},
 	browseButtonText: {
-		color: '#FFF',
+		color: CustomColors.darkBrown,
 		fontSize: 16,
 		fontWeight: 'bold',
 	},

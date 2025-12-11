@@ -19,9 +19,10 @@ import {
 	View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { useGetSelfQuery } from '@/store/services/authApi';
 import { Loader } from '@/components/Loader';
+import AddressCard from '@/components/cards/AddressCard';
+import { CustomColors } from '@/constants/theme';
 
 export default function AddressesScreen() {
 	const { data: userData } = useGetSelfQuery({});
@@ -216,83 +217,15 @@ export default function AddressesScreen() {
 				>
 					{/* Saved Addresses */}
 					<View style={styles.addressesContainer}>
-						{addresses.map(address => (
-							<View
-								key={address.id || (address as any)._id}
-								style={[
-									styles.addressCard,
-									address.isDefault && styles.defaultAddressCard,
-								]}
-							>
-								<View style={styles.addressHeader}>
-									<View style={styles.addressLabelContainer}>
-										<IconSymbol
-											name={
-												address.label === 'Home'
-													? 'house.fill'
-													: 'building.2.fill'
-											}
-											size={20}
-											color='#E63946'
-										/>
-										<Text style={styles.addressLabel}>{address.label}</Text>
-										{address.isDefault && (
-											<View style={styles.defaultBadge}>
-												<Text style={styles.defaultBadgeText}>Default</Text>
-											</View>
-										)}
-									</View>
-									<View style={styles.addressActions}>
-										<Pressable
-											onPress={() => handleEdit(address)}
-											style={styles.actionButton}
-										>
-											<IconSymbol name='pencil' size={18} color='#666666' />
-										</Pressable>
-										<Pressable
-											onPress={() =>
-												handleDelete(address.id || (address as any)._id)
-											}
-											style={styles.actionButton}
-										>
-											<IconSymbol name='trash' size={18} color='#EF4444' />
-										</Pressable>
-									</View>
-								</View>
-
-								<View style={styles.addressContent}>
-									<Text style={styles.addressName}>{address.name}</Text>
-									<Text style={styles.addressText}>{address.phone}</Text>
-									<Text style={styles.addressText}>
-										{address.street}, {address.area}
-									</Text>
-									<Text style={styles.addressText}>
-										{address.city} - {address.postalCode}
-									</Text>
-								</View>
-
-								{!address.isDefault && (
-									<Pressable
-										style={[
-											styles.setDefaultButton,
-											settingDefaultId ===
-												(address.id || (address as any)._id) &&
-												styles.setDefaultButtonDisabled,
-										]}
-										onPress={() =>
-											handleSetDefault(address.id || (address as any)._id)
-										}
-										disabled={settingDefaultId !== null}
-									>
-										{settingDefaultId ===
-										(address.id || (address as any)._id) ? (
-											<ActivityIndicator size='small' color='#E63946' />
-										) : (
-											<Text style={styles.setDefaultText}>Set as Default</Text>
-										)}
-									</Pressable>
-								)}
-							</View>
+						{addresses?.map((address, index) => (
+							<AddressCard
+								key={index}
+								address={address}
+								handleEdit={handleEdit}
+								handleDelete={handleDelete}
+								handleSetDefault={handleSetDefault}
+								settingDefaultId={settingDefaultId}
+							/>
 						))}
 
 						{addresses.length === 0 && (
@@ -337,7 +270,7 @@ export default function AddressesScreen() {
 								style={styles.locationButton}
 								onPress={handleGetCurrentLocation}
 							>
-								<IconSymbol name='location.fill' size={20} color='#E63946' />
+								<IconSymbol name='location.fill' size={20} color={CustomColors.darkBrown} />
 								<Text style={styles.locationButtonText}>
 									Use Current Location
 								</Text>
@@ -466,7 +399,7 @@ export default function AddressesScreen() {
 					)}
 
 					{/* Bottom Spacing */}
-					<View style={{ height: 100 }} />
+					<View style={{ height: 60 }} />
 				</ScrollView>
 			)}
 
@@ -477,7 +410,7 @@ export default function AddressesScreen() {
 						style={styles.addButton}
 						onPress={() => setShowAddForm(true)}
 					>
-						<IconSymbol name='plus' size={20} color='#FFFFFF' />
+						<IconSymbol name='plus' size={20} color={CustomColors.darkBrown} />
 						<Text style={styles.addButtonText}>Add New Address</Text>
 					</Pressable>
 				</View>
@@ -517,6 +450,7 @@ const styles = StyleSheet.create({
 	},
 	addressesContainer: {
 		padding: 16,
+		gap: 16,
 	},
 	addressCard: {
 		backgroundColor: '#FFFFFF',
@@ -652,17 +586,17 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		gap: 8,
-		backgroundColor: '#FEF2F2',
+		backgroundColor: CustomColors.lightBrown,
 		paddingVertical: 12,
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: '#E63946',
+		borderColor: CustomColors.darkBrown,
 		marginBottom: 20,
 	},
 	locationButtonText: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	formField: {
 		marginBottom: 16,
@@ -692,16 +626,16 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	labelOptionActive: {
-		backgroundColor: '#E63946',
-		borderColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
+		borderColor: CustomColors.darkBrown,
 	},
 	labelOptionText: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#666666',
+		color: CustomColors.darkBrown,
 	},
 	labelOptionTextActive: {
-		color: '#FFFFFF',
+		color: CustomColors.darkBrown,
 	},
 	input: {
 		borderWidth: 1,
@@ -714,16 +648,18 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F5F5F5',
 	},
 	saveButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingVertical: 16,
 		borderRadius: 8,
 		alignItems: 'center',
 		marginTop: 8,
+		borderWidth: 1,
+		borderColor: CustomColors.darkBrown,
 	},
 	saveButtonText: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: '#FFFFFF',
+		color: CustomColors.darkBrown,
 	},
 	saveButtonDisabled: {
 		opacity: 0.6,
@@ -749,13 +685,15 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		gap: 8,
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingVertical: 16,
 		borderRadius: 12,
+		borderWidth: 1,
+		borderColor: CustomColors.darkBrown,
 	},
 	addButtonText: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: '#FFFFFF',
+		color: CustomColors.darkBrown,
 	},
 });

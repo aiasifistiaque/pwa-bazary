@@ -1,9 +1,10 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
 	ActivityIndicator,
+	Animated,
 	Image,
 	Pressable,
 	ScrollView,
@@ -13,7 +14,10 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { useGetOrdersQuery } from '@/store/services/checkoutApi';
+import { useGetSelfQuery } from '@/store/services/authApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CustomColors } from '@/constants/theme';
+import { Toast } from '@/components/ui/Toast';
 
 type OrderItem = {
 	id: string;
@@ -76,13 +80,32 @@ type OrderCardProps = {
 
 const OrderCard = ({
 	order,
-	showReorderButton = false,
+	showReorderButton = true,
 	onReorder,
 	onPress,
 }: OrderCardProps) => {
 	const statusColor = getStatusColor(order.status);
 	const statusText = getStatusText(order.status);
 	const fallbackImage = 'https://via.placeholder.com/200'; // Fallback image
+
+	const [isExpanded, setIsExpanded] = useState(false);
+	const animatedHeight = useRef(new Animated.Value(0)).current;
+	const hasMoreItems = order.items.length > 3;
+
+	useEffect(() => {
+		Animated.timing(animatedHeight, {
+			toValue: isExpanded ? 1 : 0,
+			duration: 300,
+			useNativeDriver: false,
+		}).start();
+	}, [isExpanded]);
+
+	const toggleExpand = (e: any) => {
+		e.stopPropagation();
+		setIsExpanded(!isExpanded);
+	};
+
+	const displayedItems = isExpanded ? order.items : order.items.slice(0, 3);
 
 	return (
 		<Pressable style={styles.orderCard} onPress={() => onPress?.(order.id)}>
@@ -103,7 +126,7 @@ const OrderCard = ({
 
 			{/* Order Items Preview */}
 			<View style={styles.itemsPreview}>
-				{order.items.slice(0, 3).map((item, index) => (
+				{displayedItems?.map((item, index) => (
 					<View key={index} style={styles.itemRow}>
 						<Image
 							source={{ uri: item.image || fallbackImage }}
@@ -118,10 +141,20 @@ const OrderCard = ({
 						<Text style={styles.itemPrice}>৳{item.price * item.quantity}</Text>
 					</View>
 				))}
-				{order.items.length > 3 && (
-					<Text style={styles.moreItems}>
-						+{order.items.length - 3} more items
-					</Text>
+
+				{hasMoreItems && (
+					<Pressable onPress={toggleExpand} style={styles.expandButton}>
+						<Text style={styles.expandButtonText}>
+							{isExpanded
+								? 'Show less'
+								: `+${order.items.length - 3} more items`}
+						</Text>
+						<IconSymbol
+							name={isExpanded ? 'chevron.up' : 'chevron.down'}
+							size={16}
+							color={CustomColors.darkBrown}
+						/>
+					</Pressable>
 				)}
 			</View>
 
@@ -140,7 +173,11 @@ const OrderCard = ({
 							onReorder?.(order);
 						}}
 					>
-						<IconSymbol name='arrow.clockwise' size={16} color='#E63946' />
+						<IconSymbol
+							name='arrow.clockwise'
+							size={16}
+							color={CustomColors.darkBrown}
+						/>
 						<Text style={styles.reorderButtonText}>Reorder</Text>
 					</Pressable>
 				)}
@@ -151,31 +188,74 @@ const OrderCard = ({
 
 export default function OrdersScreen() {
 	const dispatch = useDispatch();
+	const [toastVisible, setToastVisible] = useState(false);
+	const [toastMessage, setToastMessage] = useState('');
 	const [activeTab, setActiveTab] = useState<'ongoing' | 'past'>('ongoing');
-	const { data, isLoading } = useGetOrdersQuery({ storeId: 'default' });
 
-	const orders: Order[] =
-		data?.doc?.map((order: any) => ({
-			id: order._id,
-			orderNumber: order.invoice
-				? `#${order.invoice}`
-				: `#${order._id.slice(-6)}`,
-			date: new Date(order.orderDate).toISOString().split('T')[0],
-			status: order.status,
-			items: order.items.map((item: any) => ({
-				id: item._id,
-				name: item.name,
-				quantity: item.qty,
-				price: item.unitPrice,
-				image: item.image,
-			})),
-			total: order.total,
-			deliveryAddress: order.address
-				? `${order.address.street || ''}, ${order.address.city || ''}`
-				: 'N/A',
-		})) || [];
+	// Pagination state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [allOrders, setAllOrders] = useState<Order[]>([]);
 
-	const ongoingOrders = orders.filter(order =>
+	// Get logged-in user
+	const { data: userData } = useGetSelfQuery({});
+	const loggedInUserId = userData?._id;
+
+	const { data, isLoading, isFetching } = useGetOrdersQuery({
+		storeId: 'default',
+		page: currentPage,
+		limit: 10,
+	});
+
+	// Update allOrders when new data arrives
+	useEffect(() => {
+		if (data?.doc && loggedInUserId) {
+			// Filter orders to only show logged-in user's orders
+			const userOrders = data.doc.filter((order: any) => {
+				const customerId =
+					typeof order.customer === 'object'
+						? order.customer?._id
+						: order.customer;
+				return customerId === loggedInUserId;
+			});
+
+			const newOrders: Order[] = userOrders.map((order: any) => ({
+				id: order._id,
+				orderNumber: order.invoice
+					? `#${order.invoice}`
+					: `#${order._id.slice(-6)}`,
+				date: new Date(order.orderDate).toISOString().split('T')[0],
+				status: order.status,
+				items: order.items.map((item: any) => ({
+					id: item.product?._id || item.product || item.productId || item._id,
+					name: item.name,
+					quantity: item.qty,
+					price: item.unitPrice,
+					image: item.image,
+				})),
+				total: order.total,
+				deliveryAddress: order.address
+					? `${order.address.street || ''}, ${order.address.city || ''}`
+					: 'N/A',
+			}));
+
+			if (currentPage === 1) {
+				// First page - replace all orders
+				setAllOrders(newOrders);
+			} else {
+				// Subsequent pages - append to existing orders
+				setAllOrders(prev => [...prev, ...newOrders]);
+			}
+		}
+	}, [data, currentPage, loggedInUserId]);
+
+	// Show Load More button only if:
+	// 1. We have loaded at least 10 orders (meaning there might be more)
+	// 2. Current page is less than total pages (there are more pages to fetch)
+	const hasMore = data
+		? allOrders.length >= 10 && currentPage < data.totalPages
+		: false;
+
+	const ongoingOrders = allOrders.filter(order =>
 		[
 			'pending',
 			'confirmed',
@@ -185,24 +265,45 @@ export default function OrdersScreen() {
 			'out-for-delivery',
 		].includes(order.status)
 	);
-	const pastOrders = orders.filter(order =>
+	const pastOrders = allOrders.filter(order =>
 		['delivered', 'cancelled', 'completed', 'refunded', 'failed'].includes(
 			order.status
 		)
 	);
+
+	// Reset pagination when switching tabs
+	const handleTabChange = (tab: 'ongoing' | 'past') => {
+		setActiveTab(tab);
+		setCurrentPage(1);
+		setAllOrders([]);
+	};
+
+	const handleLoadMore = () => {
+		if (!isFetching && hasMore) {
+			setCurrentPage(prev => prev + 1);
+		}
+	};
 
 	const handleOrderPress = (orderId: string) => {
 		// router.push(`/order-detail/${orderId}`);
 	};
 
 	const handleReorder = (order: Order) => {
+		console.log('Reordering items:', order.items); // Debug log
+
 		// Add all items from the order to cart
 		order.items.forEach(item => {
+			console.log('Adding item to cart:', item); // Debug log
+
+			// Extract the actual product ID from the object
+			const productId =
+				typeof item.id === 'object' ? (item.id as any)._id : item.id;
+
 			dispatch(
 				addToCart({
 					item: {
-						id: item.id,
-						_id: item.id,
+						id: productId,
+						_id: productId,
 						name: item.name,
 						price: item.price,
 						image: item.image,
@@ -213,8 +314,13 @@ export default function OrdersScreen() {
 			);
 		});
 
-		// Navigate to cart
-		router.push('/(protected)/(tabs)/cart');
+		// Show toast notification
+		setToastMessage(
+			`${order.items.length} item${
+				order.items.length > 1 ? 's' : ''
+			} added to cart!`
+		);
+		setToastVisible(true);
 	};
 
 	return (
@@ -232,7 +338,7 @@ export default function OrdersScreen() {
 			<View style={styles.tabContainer}>
 				<Pressable
 					style={[styles.tab, activeTab === 'ongoing' && styles.activeTab]}
-					onPress={() => setActiveTab('ongoing')}
+					onPress={() => handleTabChange('ongoing')}
 				>
 					<Text
 						style={[
@@ -245,7 +351,7 @@ export default function OrdersScreen() {
 				</Pressable>
 				<Pressable
 					style={[styles.tab, activeTab === 'past' && styles.activeTab]}
-					onPress={() => setActiveTab('past')}
+					onPress={() => handleTabChange('past')}
 				>
 					<Text
 						style={[
@@ -265,7 +371,7 @@ export default function OrdersScreen() {
 			>
 				{isLoading ? (
 					<View style={styles.loadingContainer}>
-						<ActivityIndicator size='large' color='#E63946' />
+						<ActivityIndicator size='large' color={CustomColors.darkBrown} />
 					</View>
 				) : activeTab === 'ongoing' ? (
 					<View style={styles.ordersContainer}>
@@ -279,9 +385,28 @@ export default function OrdersScreen() {
 								<OrderCard
 									key={order.id}
 									order={order}
+									onReorder={handleReorder}
 									onPress={handleOrderPress}
 								/>
 							))
+						)}
+
+						{/* Load More Button */}
+						{hasMore && ongoingOrders.length > 0 && (
+							<Pressable
+								style={styles.loadMoreButton}
+								onPress={handleLoadMore}
+								disabled={isFetching}
+							>
+								{isFetching ? (
+									<ActivityIndicator
+										size='small'
+										color={CustomColors.darkBrown}
+									/>
+								) : (
+									<Text style={styles.loadMoreText}>Load More</Text>
+								)}
+							</Pressable>
 						)}
 					</View>
 				) : (
@@ -302,12 +427,37 @@ export default function OrdersScreen() {
 								/>
 							))
 						)}
+
+						{/* Load More Button */}
+						{hasMore && pastOrders.length > 0 && (
+							<Pressable
+								style={styles.loadMoreButton}
+								onPress={handleLoadMore}
+								disabled={isFetching}
+							>
+								{isFetching ? (
+									<ActivityIndicator
+										size='small'
+										color={CustomColors.darkBrown}
+									/>
+								) : (
+									<Text style={styles.loadMoreText}>Load More</Text>
+								)}
+							</Pressable>
+						)}
 					</View>
 				)}
 
 				{/* Bottom Spacing */}
 				<View style={{ height: 40 }} />
 			</ScrollView>
+
+			{/* Toast Notification */}
+			<Toast
+				message={toastMessage}
+				visible={toastVisible}
+				onDismiss={() => setToastVisible(false)}
+			/>
 		</SafeAreaView>
 	);
 }
@@ -445,13 +595,25 @@ const styles = StyleSheet.create({
 	itemPrice: {
 		fontSize: 14,
 		fontWeight: 'bold',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
-	moreItems: {
+	expandButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 6,
+		marginTop: 8,
+		paddingVertical: 8,
+		paddingHorizontal: 12,
+		backgroundColor: CustomColors.lightBrown,
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: CustomColors.darkBrown,
+	},
+	expandButtonText: {
 		fontSize: 13,
-		color: '#666666',
-		fontStyle: 'italic',
-		marginTop: 4,
+		color: CustomColors.darkBrown,
+		fontWeight: '600',
 	},
 	orderFooter: {
 		flexDirection: 'row',
@@ -459,36 +621,36 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		paddingTop: 12,
 		borderTopWidth: 1,
-		borderTopColor: '#F0F0F0',
+		borderTopColor: CustomColors.lightBrown,
 	},
 	totalSection: {
 		flex: 1,
 	},
 	totalLabel: {
 		fontSize: 13,
-		color: '#666666',
+		color: CustomColors.darkBrown,
 		marginBottom: 4,
 	},
 	totalAmount: {
 		fontSize: 18,
 		fontWeight: 'bold',
-		color: '#000000',
+		color: CustomColors.darkBrown,
 	},
 	reorderButton: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 6,
-		backgroundColor: '#FEF2F2',
+		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 16,
-		paddingVertical: 10,
+		paddingVertical: 8,
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: '#E63946',
+		borderColor: CustomColors.darkBrown,
 	},
 	reorderButtonText: {
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	emptyState: {
 		alignItems: 'center',
@@ -499,6 +661,24 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#999999',
 		marginTop: 16,
+	},
+	loadMoreButton: {
+		marginHorizontal: 16,
+		marginTop: 16,
+		marginBottom: 8,
+		paddingVertical: 12,
+		backgroundColor: CustomColors.lightBrown,
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: CustomColors.darkBrown,
+		alignItems: 'center',
+		justifyContent: 'center',
+		minHeight: 48,
+	},
+	loadMoreText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: CustomColors.darkBrown,
 	},
 	loadingContainer: {
 		flex: 1,

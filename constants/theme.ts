@@ -55,7 +55,7 @@ export const Fonts = Platform.select({
 
 export const CustomColors = {
 	bodyColor: '#ffffff',
-	cardColor: '#fff',
+	cardBgColor: '#ffffff',
 
 	textColor: '#333333',
 	subTextColor: '#666666',
@@ -80,7 +80,7 @@ export const CustomColors = {
 	failedColor: '#FF5252',
 
 	optionBgColor: '#e7e7e7',
-	lightBrown: '#e0c795',
+	lightBrown: '#ebd7b0ff',
 	darkBrown: '#604724',
 	darkGreen: '#2c451a',
 	greySkeleton: '#E5E5E5',

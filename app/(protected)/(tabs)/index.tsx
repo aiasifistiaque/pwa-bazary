@@ -40,8 +40,8 @@ export default function DiscoverScreen() {
 		filters: { isActive: true },
 	}) as any;
 
-	const handleBannerPress = (bannerId: string) => {
-		console.log('Banner pressed:', bannerId);
+	const handleBannerPress = (link: string) => {
+		router.push(link as any);
 	};
 
 	const handleCategoryPress = (categoryId: string) => {
@@ -173,7 +173,6 @@ const styles = StyleSheet.create({
 	},
 	showMoreButton: {
 		marginHorizontal: 16,
-		marginTop: 12,
 		paddingVertical: 12,
 		backgroundColor: '#F8F8F8',
 		borderRadius: 8,

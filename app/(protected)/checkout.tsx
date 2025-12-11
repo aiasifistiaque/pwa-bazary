@@ -271,6 +271,7 @@ export default function CheckoutScreen() {
 					dueAmount: finalTotal,
 				},
 				address,
+				customer: customerId, // Add logged-in user ID
 				paymentMethod: selectedPayment,
 				paymentAmount: finalTotal,
 				status: 'pending',

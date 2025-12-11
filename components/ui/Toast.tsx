@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.15,
 		shadowRadius: 8,
 		elevation: 6,
-		minWidth: 200,
+		minWidth: 240,
 		maxWidth: width - 40,
 	},
 	message: {
