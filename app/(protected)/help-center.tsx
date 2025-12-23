@@ -1,4 +1,8 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import {
+	useCreateChatMutation,
+	useGetChatsByCustomerQuery,
+} from '@/store/services/chatApi';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -10,241 +14,126 @@ import {
 	Text,
 	TextInput,
 	View,
+	ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useGetSelfQuery } from '@/store/services/authApi';
 
-type Message = {
-	id: string;
-	text: string;
-	sender: 'user' | 'agent';
-	timestamp: string;
-	status?: 'sending' | 'sent' | 'failed';
+type Chat = {
+	_id: string;
+	subject: string;
+	status: string;
+	createdAt: string;
+	lastMessageAt: string;
+	messageCount: number;
 };
 
-const initialMessages: Message[] = [
-	{
-		id: '1',
-		text: 'Hello! Welcome to bazarey customer support. How can I help you today?',
-		sender: 'agent',
-		timestamp: '10:30 AM',
-		status: 'sent',
-	},
-];
-
-const quickReplies = [
-	{ id: '1', text: 'Track my order' },
-	{ id: '2', text: 'Payment issue' },
-	{ id: '3', text: 'Refund request' },
-	{ id: '4', text: 'Product inquiry' },
-];
-
 export default function HelpCenterScreen() {
-	const [messages, setMessages] = useState<Message[]>(initialMessages);
-	const [inputText, setInputText] = useState('');
-	const [isTyping, setIsTyping] = useState(false);
+	const { data: user } = useGetSelfQuery({});
+	const {
+		data: chatsData,
+		isLoading,
+		refetch,
+	} = useGetChatsByCustomerQuery(user?._id, { skip: !user?._id });
 
-	const handleSend = () => {
-		if (inputText.trim() === '') return;
-
-		const newMessage: Message = {
-			id: Date.now().toString(),
-			text: inputText.trim(),
-			sender: 'user',
-			timestamp: new Date().toLocaleTimeString('en-US', {
-				hour: 'numeric',
-				minute: '2-digit',
-			}),
-			status: 'sent',
-		};
-
-		setMessages(prev => [...prev, newMessage]);
-		setInputText('');
-
-		// Simulate agent typing
-		setIsTyping(true);
-		setTimeout(() => {
-			simulateAgentResponse(inputText.trim());
-		}, 1500);
+	const handleCreateChat = () => {
+		router.push('/new-chat');
 	};
 
-	const simulateAgentResponse = (userMessage: string) => {
-		const lowerMessage = userMessage.toLowerCase();
-		let responseText =
-			'I understand your concern. Let me help you with that. Could you provide more details?';
-
-		if (lowerMessage.includes('track') || lowerMessage.includes('order')) {
-			responseText =
-				'I can help you track your order. Please provide your order number (e.g., #12345) so I can check the status for you.';
-		} else if (lowerMessage.includes('payment') || lowerMessage.includes('pay')) {
-			responseText =
-				'I see you have a payment-related question. Are you facing issues with payment processing, or do you need help with payment methods?';
-		} else if (lowerMessage.includes('refund') || lowerMessage.includes('return')) {
-			responseText =
-				'I can assist with refund requests. Refunds are typically processed within 5-7 business days. Do you have a specific order you need a refund for?';
-		} else if (lowerMessage.includes('delivery') || lowerMessage.includes('deliver')) {
-			responseText =
-				'Our standard delivery time is 1-2 hours for nearby areas. Is there a specific delivery issue you are experiencing?';
-		} else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-			responseText = 'Hello! How can I assist you today?';
-		} else if (lowerMessage.includes('thank')) {
-			responseText = "You're welcome! Is there anything else I can help you with?";
-		}
-
-		const agentMessage: Message = {
-			id: Date.now().toString(),
-			text: responseText,
-			sender: 'agent',
-			timestamp: new Date().toLocaleTimeString('en-US', {
-				hour: 'numeric',
-				minute: '2-digit',
-			}),
-			status: 'sent',
-		};
-
-		setIsTyping(false);
-		setMessages(prev => [...prev, agentMessage]);
-	};
-
-	const handleQuickReply = (text: string) => {
-		setInputText(text);
-	};
-
-	const renderMessage = ({ item }: { item: Message }) => {
-		const isUser = item.sender === 'user';
-
-		return (
-			<View style={[styles.messageContainer, isUser ? styles.userMessage : styles.agentMessage]}>
-				{!isUser && (
-					<View style={styles.agentAvatar}>
-						<IconSymbol
-							name='person.fill'
-							size={20}
-							color='#FFFFFF'
-						/>
-					</View>
-				)}
-				<View style={[styles.messageBubble, isUser ? styles.userBubble : styles.agentBubble]}>
-					<Text style={[styles.messageText, isUser ? styles.userText : styles.agentText]}>
-						{item.text}
+	const renderChatCard = ({ item }: { item: Chat }) => (
+		<Pressable
+			style={styles.chatCard}
+			onPress={() => router.push(`/conversation/${item._id}`)}
+		>
+			<View style={styles.chatCardHeader}>
+				<View style={styles.chatAvatar}>
+					<IconSymbol name='message.fill' size={24} color='#FFFFFF' />
+				</View>
+				<View style={styles.chatInfo}>
+					<Text style={styles.chatSubject} numberOfLines={1}>
+						{item.subject}
 					</Text>
-					<Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.agentTimestamp]}>
-						{item.timestamp}
+					<Text style={styles.chatDate}>
+						{new Date(
+							item.lastMessageAt || item.createdAt
+						).toLocaleDateString()}
 					</Text>
 				</View>
+				<View style={[styles.statusBadge, getStatusStyle(item.status)]}>
+					<Text style={styles.statusText}>{item.status}</Text>
+				</View>
 			</View>
-		);
+			<View style={styles.chatCardFooter}>
+				<Text style={styles.messageCount}>
+					{item.messageCount || 0} messages
+				</Text>
+				<IconSymbol name='chevron.right' size={16} color='#9CA3AF' />
+			</View>
+		</Pressable>
+	);
+
+	const getStatusStyle = (status: string) => {
+		switch (status) {
+			case 'unresolved':
+				return { backgroundColor: '#FEE2E2', color: '#B91C1C' };
+			case 'ongoing':
+				return { backgroundColor: '#DBEAFE', color: '#1E40AF' };
+			case 'resolved':
+				return { backgroundColor: '#D1FAE5', color: '#065F46' };
+			default:
+				return { backgroundColor: '#F3F4F6', color: '#374151' };
+		}
 	};
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
-			<KeyboardAvoidingView
-				style={styles.container}
-				behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-				keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
-				{/* Header */}
-				<View style={styles.header}>
-					<Pressable
-						onPress={() => router.back()}
-						style={styles.backButton}>
-						<IconSymbol
-							name='chevron.left'
-							size={24}
-							color='#000000'
-						/>
+			<View style={styles.header}>
+				<Pressable onPress={() => router.back()} style={styles.backButton}>
+					<IconSymbol name='chevron.left' size={24} color='#000000' />
+				</Pressable>
+				<Text style={styles.headerTitle}>Help Center</Text>
+				<View style={{ width: 40 }} />
+			</View>
+
+			<View style={styles.container}>
+				<View style={styles.topSection}>
+					<Text style={styles.sectionTitle}>Your Conversations</Text>
+					<Pressable style={styles.createButton} onPress={handleCreateChat}>
+						<IconSymbol name='plus' size={20} color='#FFFFFF' />
+						<Text style={styles.createButtonText}>New Message</Text>
 					</Pressable>
-					<View style={styles.headerCenter}>
-						<View style={styles.agentInfo}>
-							<View style={styles.agentAvatarHeader}>
+				</View>
+
+				{isLoading ? (
+					<ActivityIndicator
+						size='large'
+						color='#E63946'
+						style={{ marginTop: 50 }}
+					/>
+				) : (
+					<FlatList
+						data={chatsData?.data || []}
+						renderItem={renderChatCard}
+						keyExtractor={item => item._id}
+						contentContainerStyle={styles.listContainer}
+						ListEmptyComponent={
+							<View style={styles.emptyState}>
 								<IconSymbol
-									name='person.fill'
-									size={20}
-									color='#FFFFFF'
+									name='bubble.left.and.bubble.right.fill'
+									size={64}
+									color='#D1D5DB'
 								/>
+								<Text style={styles.emptyStateText}>No conversations yet</Text>
+								<Text style={styles.emptyStateSubtext}>
+									Start a new chat to get help from our support team
+								</Text>
 							</View>
-							<View>
-								<Text style={styles.headerTitle}>Customer Support</Text>
-								<View style={styles.onlineStatus}>
-									<View style={styles.onlineDot} />
-									<Text style={styles.onlineText}>Online</Text>
-								</View>
-							</View>
-						</View>
-					</View>
-					<View style={{ width: 40 }} />
-				</View>
-
-				{/* Messages List */}
-				<FlatList
-					data={messages}
-					renderItem={renderMessage}
-					keyExtractor={item => item.id}
-					contentContainerStyle={styles.messagesList}
-					showsVerticalScrollIndicator={false}
-					inverted={false}
-					ListFooterComponent={
-						isTyping ? (
-							<View style={styles.typingContainer}>
-								<View style={styles.agentAvatar}>
-									<IconSymbol
-										name='person.fill'
-										size={20}
-										color='#FFFFFF'
-									/>
-								</View>
-								<View style={styles.typingBubble}>
-									<View style={styles.typingDots}>
-										<View style={[styles.dot, styles.dot1]} />
-										<View style={[styles.dot, styles.dot2]} />
-										<View style={[styles.dot, styles.dot3]} />
-									</View>
-								</View>
-							</View>
-						) : null
-					}
-				/>
-
-				{/* Quick Replies */}
-				{messages.length <= 2 && (
-					<View style={styles.quickRepliesContainer}>
-						<Text style={styles.quickRepliesTitle}>Quick replies</Text>
-						<View style={styles.quickReplies}>
-							{quickReplies.map(reply => (
-								<Pressable
-									key={reply.id}
-									style={styles.quickReplyButton}
-									onPress={() => handleQuickReply(reply.text)}>
-									<Text style={styles.quickReplyText}>{reply.text}</Text>
-								</Pressable>
-							))}
-						</View>
-					</View>
+						}
+						onRefresh={refetch}
+						refreshing={isLoading}
+					/>
 				)}
-
-				{/* Input Area */}
-				<View style={styles.inputContainer}>
-					<View style={styles.inputWrapper}>
-						<TextInput
-							style={styles.input}
-							placeholder='Type your message...'
-							placeholderTextColor='#999999'
-							value={inputText}
-							onChangeText={setInputText}
-							multiline
-							maxLength={500}
-						/>
-						<Pressable
-							style={[styles.sendButton, inputText.trim() === '' && styles.sendButtonDisabled]}
-							onPress={handleSend}
-							disabled={inputText.trim() === ''}>
-							<IconSymbol
-								name='arrow.up.circle.fill'
-								size={32}
-								color={inputText.trim() === '' ? '#D0D0D0' : '#E63946'}
-							/>
-						</Pressable>
-					</View>
-				</View>
-			</KeyboardAvoidingView>
+			</View>
 		</SafeAreaView>
 	);
 }
@@ -254,17 +143,12 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#FFFFFF',
 	},
-	container: {
-		flex: 1,
-		backgroundColor: '#F5F5F5',
-	},
 	header: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'space-between',
 		paddingHorizontal: 16,
 		paddingVertical: 12,
-		backgroundColor: '#FFFFFF',
 		borderBottomWidth: 1,
 		borderBottomColor: '#F0F0F0',
 	},
@@ -274,16 +158,62 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	headerCenter: {
-		flex: 1,
-		alignItems: 'center',
+	headerTitle: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		color: '#000000',
 	},
-	agentInfo: {
+	container: {
+		flex: 1,
+		backgroundColor: '#F9FAFB',
+	},
+	topSection: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		padding: 16,
+	},
+	sectionTitle: {
+		fontSize: 16,
+		fontWeight: '600',
+		color: '#374151',
+	},
+	createButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		backgroundColor: '#E63946',
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+		borderRadius: 20,
+		gap: 6,
+	},
+	createButtonText: {
+		color: '#FFFFFF',
+		fontSize: 14,
+		fontWeight: '600',
+	},
+	listContainer: {
+		padding: 16,
+		gap: 12,
+	},
+	chatCard: {
+		backgroundColor: '#FFFFFF',
+		borderRadius: 12,
+		padding: 16,
+		borderWidth: 1,
+		borderColor: '#E5E7EB',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.05,
+		shadowRadius: 2,
+		elevation: 2,
+	},
+	chatCardHeader: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 12,
 	},
-	agentAvatarHeader: {
+	chatAvatar: {
 		width: 40,
 		height: 40,
 		borderRadius: 20,
@@ -291,180 +221,118 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	headerTitle: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		color: '#000000',
+	chatInfo: {
+		flex: 1,
 	},
-	onlineStatus: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 4,
+	chatSubject: {
+		fontSize: 15,
+		fontWeight: 'bold',
+		color: '#111827',
+	},
+	chatDate: {
+		fontSize: 12,
+		color: '#6B7280',
 		marginTop: 2,
 	},
-	onlineDot: {
-		width: 8,
-		height: 8,
-		borderRadius: 4,
-		backgroundColor: '#10B981',
+	statusBadge: {
+		paddingHorizontal: 8,
+		paddingVertical: 2,
+		borderRadius: 12,
 	},
-	onlineText: {
-		fontSize: 12,
-		color: '#10B981',
+	statusText: {
+		fontSize: 10,
+		fontWeight: 'bold',
+		textTransform: 'uppercase',
 	},
-	messagesList: {
-		paddingHorizontal: 16,
-		paddingVertical: 20,
-	},
-	messageContainer: {
+	chatCardFooter: {
 		flexDirection: 'row',
-		marginBottom: 16,
-		alignItems: 'flex-end',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		marginTop: 12,
+		paddingTop: 12,
+		borderTopWidth: 1,
+		borderTopColor: '#F3F4F6',
 	},
-	userMessage: {
-		justifyContent: 'flex-end',
+	messageCount: {
+		fontSize: 13,
+		color: '#6B7280',
 	},
-	agentMessage: {
-		justifyContent: 'flex-start',
-	},
-	agentAvatar: {
-		width: 32,
-		height: 32,
-		borderRadius: 16,
-		backgroundColor: '#E63946',
+	emptyState: {
 		alignItems: 'center',
 		justifyContent: 'center',
-		marginRight: 8,
+		marginTop: 80,
+		paddingHorizontal: 40,
 	},
-	messageBubble: {
-		maxWidth: '75%',
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		borderRadius: 16,
+	emptyStateText: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		color: '#374151',
+		marginTop: 16,
 	},
-	userBubble: {
-		backgroundColor: '#E63946',
-		borderBottomRightRadius: 4,
-		marginLeft: 'auto',
+	emptyStateSubtext: {
+		fontSize: 14,
+		color: '#6B7280',
+		textAlign: 'center',
+		marginTop: 8,
 	},
-	agentBubble: {
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+		justifyContent: 'flex-end',
+	},
+	modalContent: {
 		backgroundColor: '#FFFFFF',
-		borderBottomLeftRadius: 4,
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
+		borderTopLeftRadius: 24,
+		borderTopRightRadius: 24,
+		paddingTop: 20,
+		paddingHorizontal: 20,
+		paddingBottom: Platform.OS === 'ios' ? 40 : 20,
 	},
-	messageText: {
-		fontSize: 15,
-		lineHeight: 20,
+	modalHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		marginBottom: 20,
+	},
+	modalTitle: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#111827',
+	},
+	modalBody: {
+		gap: 16,
+	},
+	inputLabel: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: '#374151',
 		marginBottom: 4,
 	},
-	userText: {
-		color: '#FFFFFF',
-	},
-	agentText: {
-		color: '#000000',
-	},
-	timestamp: {
-		fontSize: 11,
-	},
-	userTimestamp: {
-		color: '#FFFFFF',
-		opacity: 0.8,
-		textAlign: 'right',
-	},
-	agentTimestamp: {
-		color: '#666666',
-	},
-	typingContainer: {
-		flexDirection: 'row',
-		marginBottom: 16,
-		alignItems: 'flex-end',
-	},
-	typingBubble: {
-		backgroundColor: '#FFFFFF',
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		borderRadius: 16,
-		borderBottomLeftRadius: 4,
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
-	},
-	typingDots: {
-		flexDirection: 'row',
-		gap: 4,
-	},
-	dot: {
-		width: 8,
-		height: 8,
-		borderRadius: 4,
-		backgroundColor: '#D0D0D0',
-	},
-	dot1: {
-		opacity: 0.4,
-	},
-	dot2: {
-		opacity: 0.7,
-	},
-	dot3: {
-		opacity: 1,
-	},
-	quickRepliesContainer: {
-		backgroundColor: '#FFFFFF',
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		borderTopWidth: 1,
-		borderTopColor: '#E5E5E5',
-	},
-	quickRepliesTitle: {
-		fontSize: 13,
-		color: '#666666',
-		marginBottom: 8,
-		fontWeight: '600',
-	},
-	quickReplies: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		gap: 8,
-	},
-	quickReplyButton: {
-		backgroundColor: '#F5F5F5',
-		paddingHorizontal: 16,
-		paddingVertical: 8,
-		borderRadius: 20,
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
-	},
-	quickReplyText: {
-		fontSize: 13,
-		color: '#E63946',
-		fontWeight: '600',
-	},
-	inputContainer: {
-		backgroundColor: '#FFFFFF',
-		borderTopWidth: 1,
-		borderTopColor: '#E5E5E5',
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-	},
-	inputWrapper: {
-		flexDirection: 'row',
-		alignItems: 'flex-end',
-		gap: 8,
-	},
-	input: {
-		flex: 1,
-		backgroundColor: '#F5F5F5',
-		borderRadius: 20,
-		paddingHorizontal: 16,
-		paddingVertical: 10,
+	modalInput: {
+		backgroundColor: '#F3F4F6',
+		borderRadius: 12,
+		padding: 12,
 		fontSize: 15,
-		maxHeight: 100,
-		color: '#000000',
+		borderWidth: 1,
+		borderColor: '#E5E7EB',
 	},
-	sendButton: {
-		marginBottom: 2,
+	textArea: {
+		height: 100,
+		textAlignVertical: 'top',
 	},
-	sendButtonDisabled: {
-		opacity: 0.5,
+	modalSubmitButton: {
+		backgroundColor: '#E63946',
+		borderRadius: 12,
+		padding: 16,
+		alignItems: 'center',
+		marginTop: 8,
+	},
+	modalSubmitButtonText: {
+		color: '#FFFFFF',
+		fontSize: 16,
+		fontWeight: 'bold',
+	},
+	disabledButton: {
+		backgroundColor: '#FCA5A5',
 	},
 });

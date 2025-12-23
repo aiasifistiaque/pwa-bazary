@@ -1,64 +1,64 @@
 {
-	"cli": {
-		"version": ">= 16.27.0",
-		"appVersionSource": "remote"
-	},
-	"build": {
-		"development": {
-			"developmentClient": true,
-			"distribution": "internal",
-			"android": {
-				"image": "latest",
-				"buildType": "apk"
-			},
-			"ios": {
-				"image": "latest"
-			},
-			"env": {
-				"EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
-			},
-			"channel": "development"
-		},
-		"development-simulator": {
-			"extends": "development",
-			"ios": {
-				"simulator": true
-			},
-			"env": {
-				"EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
-			},
-			"channel": "development-simulator"
-		},
-		"preview": {
-			"distribution": "internal",
-			"channel": "main",
-			"android": {
-				"image": "latest",
-				"buildType": "apk"
-			},
-			"ios": {
-				"image": "latest"
-			},
-			"env": {
-				"EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
-			}
-		},
-		"production": {
-			"channel": "production",
-			"autoIncrement": true,
-			"android": {
-				"image": "latest",
-				"buildType": "app-bundle"
-			},
-			"ios": {
-				"image": "latest"
-			},
-			"env": {
-				"EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
-			}
-		}
-	},
-	"submit": {
-		"production": {}
-	}
+  "cli": {
+    "version": ">= 16.27.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "image": "latest",
+        "buildType": "apk"
+      },
+      "ios": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
+      },
+      "channel": "development"
+    },
+    "development-simulator": {
+      "extends": "development",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
+      },
+      "channel": "development-simulator"
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "main",
+      "android": {
+        "image": "latest",
+        "buildType": "apk"
+      },
+      "ios": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "autoIncrement": true,
+      "android": {
+        "image": "latest",
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "image": "latest"
+      },
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://bazarey-1c3a6b62cdef.herokuapp.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
 }

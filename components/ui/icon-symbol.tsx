@@ -58,6 +58,8 @@ const MAPPING = {
 	'note.text': 'notes',
 	'chevron.up': 'keyboard-arrow-up',
 	'chevron.down': 'keyboard-arrow-down',
+	'message.fill': 'message',
+	'bubble.left.and.bubble.right.fill': 'chat',
 } as const;
 
 type IconSymbolName = keyof typeof MAPPING;
