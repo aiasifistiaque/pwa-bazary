@@ -18,6 +18,8 @@ import {
 } from 'react-native-safe-area-context';
 import { RootState } from '@/store';
 import { useGetSelfQuery } from '@/store/services/authApi';
+import { useGetAllFaqsQuery } from '@/store/services/faqApi';
+import { ScrollView, TouchableOpacity } from 'react-native';
 
 export default function NewChatScreen() {
 	const { data: user } = useGetSelfQuery({});
@@ -49,6 +51,22 @@ export default function NewChatScreen() {
 			console.error('Failed to start chat:', error);
 		}
 	};
+
+	const { data: faqsData, isLoading: isFaqsLoading } = useGetAllFaqsQuery({
+		limit: 6,
+		filters: { isActive: true },
+	});
+
+	const handleFaqPress = (question: string) => {
+		setInputText(question);
+	};
+
+	// Handle various potential response structures
+	const faqs =
+		faqsData?.data?.doc || // Nested data.doc
+		faqsData?.doc || // Direct doc
+		faqsData?.data || // Direct data array
+		[];
 
 	return (
 		<SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -83,6 +101,27 @@ export default function NewChatScreen() {
 						</Text>
 					</View>
 				</View>
+
+				{/* FAQ Bubbles */}
+				{faqs.length > 0 && (
+					<View style={styles.faqContainer}>
+						<ScrollView
+							horizontal
+							showsHorizontalScrollIndicator={false}
+							contentContainerStyle={styles.faqContentContainer}
+						>
+							{faqs.map((faq: any, index: number) => (
+								<TouchableOpacity
+									key={faq._id || index}
+									style={styles.faqBubble}
+									onPress={() => handleFaqPress(faq.question)}
+								>
+									<Text style={styles.faqText}>{faq.question}</Text>
+								</TouchableOpacity>
+							))}
+						</ScrollView>
+					</View>
+				)}
 
 				{/* Input Area */}
 				<View
@@ -225,5 +264,25 @@ const styles = StyleSheet.create({
 	},
 	sendButtonDisabled: {
 		opacity: 0.5,
+	},
+	faqContainer: {
+		paddingVertical: 10,
+		backgroundColor: '#FFFFFF', //Or transparent if needed
+	},
+	faqContentContainer: {
+		paddingHorizontal: 16,
+		gap: 8,
+	},
+	faqBubble: {
+		backgroundColor: '#F3F4F6',
+		paddingHorizontal: 12,
+		paddingVertical: 8,
+		borderRadius: 20,
+		borderWidth: 1,
+		borderColor: '#E5E7EB',
+	},
+	faqText: {
+		fontSize: 13,
+		color: '#1F2937',
 	},
 });
