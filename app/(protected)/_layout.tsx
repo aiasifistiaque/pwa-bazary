@@ -71,6 +71,11 @@ export default function RootLayout() {
 							options={{ headerShown: false }}
 						/>
 						<Stack.Screen name='help-center' options={{ headerShown: false }} />
+						<Stack.Screen name='new-chat' options={{ headerShown: false }} />
+						<Stack.Screen
+							name='conversation/[id]'
+							options={{ headerShown: false }}
+						/>
 						<Stack.Screen name='addresses' options={{ headerShown: false }} />
 						<Stack.Screen
 							name='modal'

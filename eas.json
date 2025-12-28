@@ -48,7 +48,7 @@
       "autoIncrement": true,
       "android": {
         "image": "latest",
-        "buildType": "apk"
+        "buildType": "app-bundle"
       },
       "ios": {
         "image": "latest"

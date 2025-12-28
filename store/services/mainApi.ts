@@ -38,6 +38,8 @@ const tags = [
 	'addresses',
 	'/banners',
 	'/coupons',
+	'chats',
+	'messages',
 ];
 
 // src/store/types.ts
