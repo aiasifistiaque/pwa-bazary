@@ -19,6 +19,7 @@ import { useGetAllQuery } from '@/store/services/commonApi';
 import { useGetSelfQuery } from '@/store/services/authApi';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as WebBrowser from 'expo-web-browser';
 
 type DeliveryTimeSlot = {
 	id: string;
@@ -31,7 +32,7 @@ type IconName = React.ComponentProps<typeof IconSymbol>['name'];
 type PaymentMethod = {
 	id: string;
 	name: string;
-	icon: IconName | 'bkash' | 'nagad' | 'card' | 'cod';
+	icon: IconName | 'online' | 'cod';
 	type: 'image' | 'icon';
 };
 
@@ -43,9 +44,7 @@ const deliverySlots: DeliveryTimeSlot[] = [
 ];
 
 const paymentMethods: PaymentMethod[] = [
-	{ id: 'bkash', name: 'bKash', icon: 'bkash', type: 'image' },
-	{ id: 'nagad', name: 'Nagad', icon: 'nagad', type: 'image' },
-	{ id: 'card', name: 'Credit/Debit Card', icon: 'card', type: 'image' },
+	{ id: 'online', name: 'Pay Online', icon: 'online', type: 'image' },
 	{
 		id: 'cod',
 		name: 'Cash on Delivery',
@@ -286,6 +285,14 @@ export default function CheckoutScreen() {
 
 			if (res) {
 				dispatch(resetCart());
+
+				// Check if paymentUrl is present (Moneybag integration)
+				if (res.paymentUrl) {
+					await WebBrowser.openBrowserAsync(res.paymentUrl);
+					// Note: Redirect handling would typically happen via deep linking or user manually returning.
+					// For now, we assume the user completes payment in the browser.
+				}
+
 				Alert.alert(
 					'Success',
 					'Your order has been placed successfully!',
@@ -524,13 +531,9 @@ export default function CheckoutScreen() {
 							{method.type === 'image' ? (
 								<Image
 									source={
-										method.id === 'bkash'
-											? require('@/assets/images/bkash-logo.png')
-											: method.id === 'nagad'
-											? require('@/assets/images/nagad-logo.png')
-											: method.id === 'cod'
-											? require('@/assets/images/cod-logo.png')
-											: require('@/assets/images/card-logo.png')
+										method.id === 'online'
+											? require('@/assets/images/card-logo.png') // You can use a generic online payment logo here if available, or keep card-logo
+											: require('@/assets/images/cod-logo.png')
 									}
 									style={styles.paymentLogo}
 								/>
