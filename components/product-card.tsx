@@ -1,9 +1,28 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+	Image,
+	LayoutAnimation,
+	Platform,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	UIManager,
+	View,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { IconSymbol } from './ui/icon-symbol';
 import { useToast } from '@/contexts/ToastContext';
+import { RootState } from '@/store';
+import { addToCart, deleteOneFromCart } from '@/store/slices/cartSlice';
 
 const fallback = require('../assets/images/fallback-fruit.png');
+
+if (
+	Platform.OS === 'android' &&
+	UIManager.setLayoutAnimationEnabledExperimental
+) {
+	UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 type ProductCardProps = {
 	id: string;
@@ -15,10 +34,15 @@ type ProductCardProps = {
 	badgeIcon?: string;
 	image: string | number; // Can be URI string or require() number
 	onPress?: () => void;
+	/**
+	 * @deprecated onAddPress is now handled internally via Redux,
+	 * but kept for compatibility or additional side effects if needed.
+	 */
 	onAddPress?: () => void;
 };
 
 export function ProductCard({
+	id,
 	name,
 	price,
 	unit,
@@ -33,10 +57,43 @@ export function ProductCard({
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
 
 	const { showToast } = useToast();
+	const dispatch = useDispatch();
 
-	const handleAdd = () => {
-		onAddPress?.();
+	const cartItems = useSelector((state: RootState) => state.cart.cartItems);
+
+	// Construct uniqueId assuming default variant (no-size-no-color)
+	// This matches the logic in cartSlice for items without variationId or selected options
+	const uniqueId = `${id}-no-size-no-color`;
+	const cartItem = cartItems.find((item: any) => item.uniqueId === uniqueId);
+	const quantity = cartItem ? cartItem.qty : 0;
+
+	const handleIncrement = () => {
+		LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+		if (onAddPress) {
+			onAddPress();
+		} else {
+			dispatch(
+				addToCart({
+					item: {
+						id,
+						_id: id,
+						name,
+						price: parseFloat(price.replace(/[^0-9.]/g, '')), // Ensure price is number
+						image,
+						vat: 0,
+					},
+					qty: 1,
+				})
+			);
+		}
+
 		showToast('Added to cart');
+	};
+
+	const handleDecrement = () => {
+		LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+		dispatch(deleteOneFromCart(uniqueId));
 	};
 
 	return (
@@ -47,13 +104,36 @@ export function ProductCard({
 					style={styles.image}
 					resizeMode='cover'
 				/>
-				<TouchableOpacity
-					style={styles.addButton}
-					onPress={handleAdd}
-					activeOpacity={0.8}
+
+				{/* Expanding Button Container */}
+				<View
+					style={[
+						styles.buttonContainer,
+						quantity > 0 && styles.buttonContainerExpanded,
+					]}
 				>
-					<IconSymbol name='plus' size={20} color='#E63946' />
-				</TouchableOpacity>
+					{quantity > 0 && (
+						<>
+							<TouchableOpacity
+								onPress={handleDecrement}
+								style={styles.iconButton}
+								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+							>
+								<IconSymbol name='minus' size={18} color='#E63946' />
+							</TouchableOpacity>
+
+							<Text style={styles.quantityText}>{quantity}</Text>
+						</>
+					)}
+
+					<TouchableOpacity
+						onPress={handleIncrement}
+						style={styles.iconButton}
+						hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+					>
+						<IconSymbol name='plus' size={20} color='#E63946' />
+					</TouchableOpacity>
+				</View>
 			</View>
 
 			{badge && (
@@ -103,21 +183,43 @@ const styles = StyleSheet.create({
 		width: '100%',
 		height: '100%',
 	},
-	addButton: {
+	// New Button Styles
+	buttonContainer: {
 		position: 'absolute',
 		bottom: 8,
 		right: 8,
-		width: 32,
 		height: 32,
+		minWidth: 32,
 		borderRadius: 16,
 		backgroundColor: '#FFF',
-		justifyContent: 'center',
+		flexDirection: 'row',
 		alignItems: 'center',
+		justifyContent: 'center',
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 1 },
 		shadowOpacity: 0.2,
 		shadowRadius: 2,
 		elevation: 2,
+		paddingHorizontal: 0,
+	},
+	buttonContainerExpanded: {
+		paddingHorizontal: 4,
+		minWidth: 90, // Minimum width when expanded
+		justifyContent: 'space-between',
+	},
+	iconButton: {
+		width: 32,
+		height: 32,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	quantityText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: '#333',
+		marginHorizontal: 4,
+		minWidth: 16,
+		textAlign: 'center',
 	},
 	badgeContainer: {
 		flexDirection: 'row',
