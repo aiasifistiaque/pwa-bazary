@@ -27,7 +27,7 @@ if (
 type ProductCardProps = {
 	id: string;
 	name: string;
-	price: string;
+	price: string | number;
 	unit?: string;
 	unitPrice?: string;
 	badge?: string;
@@ -79,7 +79,10 @@ export function ProductCard({
 						id,
 						_id: id,
 						name,
-						price: parseFloat(price.replace(/[^0-9.]/g, '')), // Ensure price is number
+						price:
+							typeof price === 'string'
+								? parseFloat(price.replace(/[^0-9.]/g, ''))
+								: price, // Ensure price is number
 						image,
 						vat: 0,
 					},

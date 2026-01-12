@@ -1,5 +1,7 @@
+import { ProductCard } from '@/components/product-card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import type { RootState } from '@/store';
+import { useGetAllQuery } from '@/store/services/commonApi';
 import {
 	addToCart,
 	deleteOneFromCart,
@@ -17,36 +19,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
-// Mock data for popular items
-const popularItems = [
-	{
-		id: '507f1f77bcf86cd799439025',
-		name: 'Classic Burger',
-		image:
-			'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop',
-		price: 450,
-	},
-	{
-		id: '507f1f77bcf86cd799439026',
-		name: 'Cheese Burger',
-		image:
-			'https://images.unsplash.com/photo-1550547660-d9450f859349?w=400&h=300&fit=crop',
-		price: 550,
-	},
-	{
-		id: '507f1f77bcf86cd799439027',
-		name: 'Chicken Burger',
-		image:
-			'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&h=300&fit=crop',
-		price: 500,
-	},
-];
 const fallback = require('../../../assets/images/fallback-fruit.png');
 export default function CartScreen() {
 	const dispatch = useDispatch();
 	const { cartItems, total, subTotal } = useSelector(
 		(state: RootState) => state.cart
 	);
+
+	const { data: latestProducts } = useGetAllQuery({
+		path: '/products',
+		limit: 5,
+		sort: '-createdAt',
+	}) as any;
+
+	const handleProductPress = (id: string) => {
+		router.push(`/product/${id}` as any);
+	};
 
 	const handleIncrement = (uniqueId: string) => {
 		const item = cartItems.find((item: any) => item.uniqueId === uniqueId);
@@ -217,25 +205,23 @@ export default function CartScreen() {
 
 				{/* Popular with your order */}
 				<View style={styles.popularSection}>
-					<Text style={styles.popularTitle}>Popular with your order</Text>
-					<Text style={styles.popularSubtitle}>
-						Other customers also bought these
-					</Text>
+					<Text style={styles.popularTitle}>What's new on Bazarey</Text>
 					<ScrollView
 						horizontal
 						showsHorizontalScrollIndicator={false}
 						contentContainerStyle={styles.popularScroll}
 					>
-						{popularItems.map(item => (
-							<View key={item.id} style={styles.popularCard}>
-								<Image
-									source={{ uri: item.image }}
-									style={styles.popularImage}
-									resizeMode='cover'
+						{latestProducts?.doc?.map((item: any) => (
+							<View key={item.id} style={styles.popularCardContainer}>
+								<ProductCard
+									id={item.id}
+									name={item.name}
+									image={item.image}
+									price={item.salePrice || item.price}
+									unit={item.unit}
+									unitPrice={item.price}
+									onPress={() => handleProductPress(item.id)}
 								/>
-								<Pressable style={styles.popularAddButton}>
-									<IconSymbol name='plus' size={20} color='#000000' />
-								</Pressable>
 							</View>
 						))}
 					</ScrollView>
@@ -498,7 +484,7 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		color: '#000000',
 		paddingHorizontal: 16,
-		marginBottom: 4,
+		marginBottom: 12,
 	},
 	popularSubtitle: {
 		fontSize: 14,
@@ -510,31 +496,9 @@ const styles = StyleSheet.create({
 		paddingLeft: 16,
 		gap: 12,
 	},
-	popularCard: {
-		width: 200,
-		marginRight: 12,
-		position: 'relative',
-	},
-	popularImage: {
-		width: 200,
-		height: 150,
-		borderRadius: 12,
-	},
-	popularAddButton: {
-		position: 'absolute',
-		bottom: 12,
-		right: 12,
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		backgroundColor: '#FFFFFF',
-		alignItems: 'center',
-		justifyContent: 'center',
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.15,
-		shadowRadius: 4,
-		elevation: 3,
+	popularCardContainer: {
+		marginRight: 4,
+		marginBottom: 4,
 	},
 	totalSection: {
 		paddingHorizontal: 16,
