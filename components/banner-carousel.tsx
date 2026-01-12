@@ -12,10 +12,12 @@ import { CustomColors } from '@/constants/theme';
 type BannerCarouselProps = {
 	banners: Array<{
 		id: string;
+		_id?: string;
 		title: string;
 		description: string;
 		couponCode?: string;
 		image: string;
+		link: string;
 	}>;
 	onBannerPress?: (id: string) => void;
 	isLoading?: boolean;
@@ -69,14 +71,18 @@ export function BannerCarousel({
 						)}
 					</View>
 				)}
-				keyExtractor={item => (isLoading ? `skeleton-${item}` : item.id)}
+				keyExtractor={(item, index) =>
+					isLoading
+						? `skeleton-${index}`
+						: item.id || item._id || `banner-${index}`
+				}
 			/>
 
 			{/* Pagination Dots */}
 			<View style={styles.pagination}>
-				{(isLoading ? [1, 2, 3] : banners)?.map((banner, index) => (
+				{(isLoading ? [1, 2, 3] : banners)?.map((_, index) => (
 					<View
-						key={typeof banner !== 'number' ? banner.id : `dot-${index}`}
+						key={`dot-${index}`}
 						style={[
 							styles.dot,
 							index === activeIndex ? styles.activeDot : styles.inactiveDot,

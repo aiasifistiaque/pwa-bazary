@@ -1,3 +1,4 @@
+import PrimaryButton from '@/components/buttons/PrimaryButton';
 import { ProductCard } from '@/components/product-card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
@@ -257,11 +258,11 @@ export default function CartScreen() {
 			{/* Review Button */}
 			{cartItems.length > 0 && (
 				<View style={styles.checkoutContainer}>
-					<Pressable style={styles.checkoutButton} onPress={handleCheckout}>
-						<Text style={styles.checkoutButtonText}>
-							Review payment and address
-						</Text>
-					</Pressable>
+					<PrimaryButton
+						// icon='info.circle'
+						title='Review payment and address'
+						onPress={handleCheckout}
+					/>
 				</View>
 			)}
 		</View>

@@ -20,6 +20,8 @@ import { useGetSelfQuery } from '@/store/services/authApi';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
+import PrimaryButton from '@/components/buttons/PrimaryButton';
+import { CustomColors } from '@/constants/theme';
 
 type DeliveryTimeSlot = {
 	id: string;
@@ -334,7 +336,11 @@ export default function CheckoutScreen() {
 				{/* Delivery Time Section */}
 				<View style={styles.section}>
 					<View style={styles.sectionHeader}>
-						<IconSymbol name='clock.fill' size={24} color='#E63946' />
+						<IconSymbol
+							name='clock.fill'
+							size={24}
+							color={CustomColors.darkBrown}
+						/>
 						<Text style={styles.sectionTitle}>Choose Delivery Time</Text>
 					</View>
 					{deliverySlots.map(slot => (
@@ -362,7 +368,11 @@ export default function CheckoutScreen() {
 				{/* Delivery Address Section */}
 				<View style={styles.section}>
 					<View style={styles.sectionHeader}>
-						<IconSymbol name='location.fill' size={24} color='#E63946' />
+						<IconSymbol
+							name='location.fill'
+							size={24}
+							color={CustomColors.darkBrown}
+						/>
 						<Text style={styles.sectionTitle}>Delivery Address</Text>
 					</View>
 
@@ -372,7 +382,11 @@ export default function CheckoutScreen() {
 							style={styles.savedAddressesButton}
 							onPress={() => setShowSavedAddresses(!showSavedAddresses)}
 						>
-							<IconSymbol name='mappin.circle.fill' size={20} color='#E63946' />
+							<IconSymbol
+								name='mappin.circle.fill'
+								size={20}
+								color={CustomColors.darkBrown}
+							/>
 							<Text style={styles.savedAddressesButtonText}>
 								{showSavedAddresses
 									? 'Hide Saved Addresses'
@@ -414,7 +428,7 @@ export default function CheckoutScreen() {
 															: 'building.2.fill'
 													}
 													size={18}
-													color='#E63946'
+													color={CustomColors.darkBrown}
 												/>
 												<Text style={styles.savedAddressLabel}>
 													{addr.label}
@@ -511,7 +525,11 @@ export default function CheckoutScreen() {
 				{/* Payment Method Section */}
 				<View style={styles.section}>
 					<View style={styles.sectionHeader}>
-						<IconSymbol name='creditcard.fill' size={24} color='#E63946' />
+						<IconSymbol
+							name='creditcard.fill'
+							size={24}
+							color={CustomColors.darkBrown}
+						/>
 						<Text style={styles.sectionTitle}>Payment Method</Text>
 					</View>
 					{paymentMethods.map(method => (
@@ -552,7 +570,11 @@ export default function CheckoutScreen() {
 				{/* Coupon Code Section */}
 				<View style={styles.section}>
 					<View style={styles.sectionHeader}>
-						<IconSymbol name='tag.fill' size={24} color='#E63946' />
+						<IconSymbol
+							name='tag.fill'
+							size={24}
+							color={CustomColors.darkBrown}
+						/>
 						<Text style={styles.sectionTitle}>Coupon Code</Text>
 					</View>
 					<View style={styles.couponContainer}>
@@ -597,7 +619,11 @@ export default function CheckoutScreen() {
 										: 'exclamationmark.triangle.fill'
 								}
 								size={16}
-								color={couponMessage.type === 'success' ? '#10B981' : '#DC2626'}
+								color={
+									couponMessage.type === 'success'
+										? '#10B981'
+										: CustomColors.darkBrown
+								}
 							/>
 							<Text
 								style={[
@@ -679,19 +705,19 @@ export default function CheckoutScreen() {
 					<IconSymbol
 						name='exclamationmark.triangle.fill'
 						size={18}
-						color='#B91C1C'
+						color={CustomColors.darkBrown}
 					/>
 					<Text style={styles.errorText}>{errorMsg}</Text>
 				</View>
 			) : null}
 			{/* Place Order Button */}
 			<View style={styles.bottomContainer}>
-				<Pressable style={styles.placeOrderButton} onPress={handlePlaceOrder}>
-					<Text style={styles.placeOrderText}>Place Order</Text>
-					<Text style={styles.placeOrderPrice}>
-						৳{(total - couponDiscount).toLocaleString()}
-					</Text>
-				</Pressable>
+				<PrimaryButton
+					title={`Place Order - ৳${(total - couponDiscount).toLocaleString()}`}
+					onPress={handlePlaceOrder}
+					loading={isLoading}
+					disabled={isLoading}
+				/>
 			</View>
 		</SafeAreaView>
 	);
@@ -758,8 +784,8 @@ const styles = StyleSheet.create({
 		gap: 12,
 	},
 	selectedOption: {
-		borderColor: '#E63946',
-		backgroundColor: '#FFF5F5',
+		// borderColor: CustomColors.darkBrown,
+		backgroundColor: CustomColors.lightBrown,
 	},
 	radioCircle: {
 		width: 20,
@@ -774,7 +800,7 @@ const styles = StyleSheet.create({
 		width: 12,
 		height: 12,
 		borderRadius: 6,
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.darkBrown,
 	},
 	optionInfo: {
 		flex: 1,
@@ -821,9 +847,9 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 8,
-		backgroundColor: '#FEF2F2',
+		backgroundColor: CustomColors.lightBrown,
 		borderWidth: 1,
-		borderColor: '#FCA5A5',
+		borderColor: CustomColors.darkBrown,
 		paddingVertical: 10,
 		paddingHorizontal: 12,
 		marginHorizontal: 16,
@@ -832,7 +858,7 @@ const styles = StyleSheet.create({
 	},
 	errorText: {
 		flex: 1,
-		color: '#B91C1C',
+		color: CustomColors.darkBrown,
 		fontSize: 14,
 		fontWeight: '600',
 	},
@@ -851,7 +877,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 	},
 	applyCouponButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 24,
 		borderRadius: 8,
 		alignItems: 'center',
@@ -860,7 +886,7 @@ const styles = StyleSheet.create({
 	applyCouponText: {
 		fontSize: 16,
 		fontWeight: '600',
-		color: '#FFFFFF',
+		color: CustomColors.darkBrown,
 	},
 	summaryRow: {
 		flexDirection: 'row',
@@ -891,7 +917,7 @@ const styles = StyleSheet.create({
 	totalValue: {
 		fontSize: 20,
 		fontWeight: 'bold',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	bottomContainer: {
 		backgroundColor: '#FFFFFF',
@@ -907,7 +933,7 @@ const styles = StyleSheet.create({
 		elevation: 5,
 	},
 	placeOrderButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.darkBrown,
 		borderRadius: 8,
 		paddingVertical: 16,
 		paddingHorizontal: 20,
@@ -931,17 +957,17 @@ const styles = StyleSheet.create({
 		gap: 8,
 		paddingVertical: 12,
 		paddingHorizontal: 16,
-		backgroundColor: '#FFF5F5',
+		backgroundColor: CustomColors.lightBrown,
 		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: '#E63946',
+		// borderWidth: 1,
+		// borderColor: CustomColors.darkBrown,
 		marginBottom: 16,
 	},
 	savedAddressesButtonText: {
 		flex: 1,
 		fontSize: 14,
 		fontWeight: '600',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	savedAddressesList: {
 		marginBottom: 16,
@@ -978,17 +1004,17 @@ const styles = StyleSheet.create({
 		color: '#000000',
 	},
 	miniDefaultBadge: {
-		backgroundColor: '#FEF2F2',
+		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 6,
 		paddingVertical: 2,
 		borderRadius: 4,
-		borderWidth: 1,
-		borderColor: '#E63946',
+		// borderWidth: 1,
+		// borderColor: CustomColors.darkBrown,
 	},
 	miniDefaultText: {
 		fontSize: 10,
 		fontWeight: '600',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	savedAddressName: {
 		fontSize: 14,
@@ -1032,9 +1058,9 @@ const styles = StyleSheet.create({
 		borderColor: '#10B981',
 	},
 	couponMessageError: {
-		backgroundColor: '#FEF2F2',
+		backgroundColor: CustomColors.lightBrown,
 		borderWidth: 1,
-		borderColor: '#DC2626',
+		borderColor: CustomColors.darkBrown,
 	},
 	couponMessageText: {
 		flex: 1,
@@ -1045,7 +1071,7 @@ const styles = StyleSheet.create({
 		color: '#10B981',
 	},
 	couponMessageTextError: {
-		color: '#DC2626',
+		color: CustomColors.darkBrown,
 	},
 	appliedCouponBadge: {
 		flexDirection: 'row',
