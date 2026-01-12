@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		borderRadius: 8,
 		backgroundColor: CustomColors.lightBrown,
-		borderColor: CustomColors.darkBrown,
-		borderWidth: 1,
+		// borderColor: CustomColors.darkBrown,
+		// borderWidth: 1,
 	},
 });

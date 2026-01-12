@@ -1,3 +1,4 @@
+import PrimaryButton from '@/components/buttons/PrimaryButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import {
 	useDeleteMutation,
@@ -266,15 +267,12 @@ export default function AddressesScreen() {
 							</View>
 
 							{/* Location Button */}
-							<Pressable
-								style={styles.locationButton}
+							<PrimaryButton
+								icon='location.fill'
+								title='Use Current Location'
 								onPress={handleGetCurrentLocation}
-							>
-								<IconSymbol name='location.fill' size={20} color={CustomColors.darkBrown} />
-								<Text style={styles.locationButtonText}>
-									Use Current Location
-								</Text>
-							</Pressable>
+								style={{ marginBottom: 20 }}
+							/>
 
 							{/* Form Fields */}
 							<View style={styles.formField}>
@@ -379,22 +377,14 @@ export default function AddressesScreen() {
 								</View>
 							</View>
 
-							<Pressable
-								style={[
-									styles.saveButton,
-									isSaving && styles.saveButtonDisabled,
-								]}
+							<PrimaryButton
+								icon={editingId ? 'pencil' : 'checkmark'}
+								title={editingId ? 'Update Address' : 'Save Address'}
 								onPress={handleSaveAddress}
+								loading={isSaving}
 								disabled={isSaving}
-							>
-								{isSaving ? (
-									<ActivityIndicator size='small' color='#FFFFFF' />
-								) : (
-									<Text style={styles.saveButtonText}>
-										{editingId ? 'Update Address' : 'Save Address'}
-									</Text>
-								)}
-							</Pressable>
+								style={{ marginTop: 8 }}
+							/>
 						</View>
 					)}
 
@@ -406,13 +396,11 @@ export default function AddressesScreen() {
 			{/* Add Address Button */}
 			{!showAddForm && (
 				<View style={styles.bottomContainer}>
-					<Pressable
-						style={styles.addButton}
+					<PrimaryButton
+						icon='plus'
+						title='Add New Address'
 						onPress={() => setShowAddForm(true)}
-					>
-						<IconSymbol name='plus' size={20} color={CustomColors.darkBrown} />
-						<Text style={styles.addButtonText}>Add New Address</Text>
-					</Pressable>
+					/>
 				</View>
 			)}
 		</SafeAreaView>
@@ -581,23 +569,6 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		color: '#000000',
 	},
-	locationButton: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		gap: 8,
-		backgroundColor: CustomColors.lightBrown,
-		paddingVertical: 12,
-		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: CustomColors.darkBrown,
-		marginBottom: 20,
-	},
-	locationButtonText: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: CustomColors.darkBrown,
-	},
 	formField: {
 		marginBottom: 16,
 	},
@@ -620,14 +591,14 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		paddingHorizontal: 16,
 		borderRadius: 8,
-		borderWidth: 1,
+		// borderWidth: 1,
 		borderColor: '#E5E5E5',
 		backgroundColor: '#F5F5F5',
 		alignItems: 'center',
 	},
 	labelOptionActive: {
 		backgroundColor: CustomColors.lightBrown,
-		borderColor: CustomColors.darkBrown,
+		// borderColor: CustomColors.darkBrown,
 	},
 	labelOptionText: {
 		fontSize: 14,
@@ -646,23 +617,6 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		color: '#000000',
 		backgroundColor: '#F5F5F5',
-	},
-	saveButton: {
-		backgroundColor: CustomColors.lightBrown,
-		paddingVertical: 16,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginTop: 8,
-		borderWidth: 1,
-		borderColor: CustomColors.darkBrown,
-	},
-	saveButtonText: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		color: CustomColors.darkBrown,
-	},
-	saveButtonDisabled: {
-		opacity: 0.6,
 	},
 	bottomContainer: {
 		position: 'absolute',
