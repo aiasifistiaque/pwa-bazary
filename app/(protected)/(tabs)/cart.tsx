@@ -1,5 +1,6 @@
 import { ProductCard } from '@/components/product-card';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { CustomColors } from '@/constants/theme';
 import type { RootState } from '@/store';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import {
@@ -119,7 +120,7 @@ export default function CartScreen() {
 				showsVerticalScrollIndicator={false}
 			>
 				{/* Delivery Time Section */}
-				<View style={styles.deliverySection}>
+				{/* <View style={styles.deliverySection}>
 					<Image
 						source={{ uri: 'https://via.placeholder.com/100x100' }}
 						style={styles.deliveryImage}
@@ -131,7 +132,7 @@ export default function CartScreen() {
 							<Text style={styles.changeText}>Change</Text>
 						</Pressable>
 					</View>
-				</View>
+				</View> */}
 
 				{/* Cart Items */}
 				<View style={styles.itemsList}>
@@ -197,7 +198,7 @@ export default function CartScreen() {
 				{/* Add More Items */}
 				<Pressable
 					style={styles.addMoreButton}
-					onPress={() => router.push('/(protected)/(tabs)')}
+					onPress={() => router.push('/(protected)/(tabs)/search')}
 				>
 					<IconSymbol name='plus' size={20} color='#000000' />
 					<Text style={styles.addMoreText}>Add more items</Text>
@@ -243,9 +244,9 @@ export default function CartScreen() {
 								)}
 							</View>
 						</View>
-						<Pressable onPress={handleCheckout}>
+						{/* <Pressable onPress={handleCheckout}>
 							<Text style={styles.seeSummary}>See summary</Text>
-						</Pressable>
+						</Pressable> */}
 					</View>
 				)}
 
@@ -345,6 +346,7 @@ const styles = StyleSheet.create({
 		height: 2,
 		backgroundColor: '#333333',
 		marginHorizontal: 8,
+		marginBottom: 20,
 	},
 	progressLineInactive: {
 		backgroundColor: '#E5E5E5',
@@ -523,7 +525,7 @@ const styles = StyleSheet.create({
 	totalPrice: {
 		fontSize: 20,
 		fontWeight: 'bold',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	originalPrice: {
 		fontSize: 13,
@@ -550,14 +552,14 @@ const styles = StyleSheet.create({
 		elevation: 5,
 	},
 	checkoutButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		borderRadius: 10,
 		paddingVertical: 16,
 		alignItems: 'center',
 	},
 	checkoutButtonText: {
 		fontSize: 17,
-		color: '#FFFFFF',
+		color: CustomColors.darkBrown,
 		fontWeight: 'bold',
 	},
 });
