@@ -1,5 +1,6 @@
 import PrimaryButton from '@/components/buttons/PrimaryButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import * as ExpoLocation from 'expo-location';
 import {
 	useDeleteMutation,
 	useGetAllQuery,
@@ -53,31 +54,47 @@ export default function AddressesScreen() {
 		postalCode: '',
 	});
 
-	const handleGetCurrentLocation = () => {
-		Alert.alert(
-			'Get Current Location',
-			'This will use your device GPS to get your current address.',
-			[
-				{
-					text: 'Cancel',
-					style: 'cancel',
-				},
-				{
-					text: 'Allow',
-					onPress: () => {
-						// Simulate getting location
-						setFormData(prev => ({
-							...prev,
-							street: 'Current GPS Location Street',
-							area: 'Auto-detected Area',
-							city: 'Dhaka',
-							postalCode: '1200',
-						}));
-						Alert.alert('Success', 'Location detected and fields populated!');
-					},
-				},
-			]
-		);
+	const handleGetCurrentLocation = async () => {
+		try {
+			const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+			if (status !== 'granted') {
+				Alert.alert(
+					'Permission denied',
+					'Permission to access location was denied'
+				);
+				return;
+			}
+
+			// Show loading or feedback if needed (optional, but good UX)
+			// For now, we rely on the speed of the operation or could add a local loading state if desired.
+			// But since we didn't add a specific loading state for this button in the plan,
+			// we'll keep it simple as per the plan.
+
+			const location = await ExpoLocation.getCurrentPositionAsync({});
+			const { latitude, longitude } = location.coords;
+
+			const reverseGeocode = await ExpoLocation.reverseGeocodeAsync({
+				latitude,
+				longitude,
+			});
+
+			if (reverseGeocode.length > 0) {
+				const address = reverseGeocode[0];
+				setFormData(prev => ({
+					...prev,
+					street: `${address.name || ''} ${address.street || ''}`.trim(),
+					area: address.district || address.subregion || '',
+					city: address.city || address.region || '',
+					postalCode: address.postalCode || '',
+				}));
+				Alert.alert('Success', 'Location detected and fields populated!');
+			} else {
+				Alert.alert('Error', 'Could not determine address from location.');
+			}
+		} catch (error) {
+			console.error('Error fetching location:', error);
+			Alert.alert('Error', 'Failed to get current location.');
+		}
 	};
 
 	const handleSaveAddress = async () => {
