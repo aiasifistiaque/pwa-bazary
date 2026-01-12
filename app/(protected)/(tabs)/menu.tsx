@@ -71,6 +71,34 @@ export default function MenuScreen() {
 		router.push('/(protected)/(tabs)/favorites');
 	};
 
+	const handleSubscriptionPress = () => {
+		router.push('/subscription');
+	};
+
+	const handleVouchersPress = () => {
+		router.push('/vouchers');
+	};
+
+	const handleRewardsPress = () => {
+		router.push('/coming-soon');
+	};
+
+	const handleInvitePress = () => {
+		router.push('/invite-friends');
+	};
+
+	const handleTermsPress = () => {
+		router.push('/terms-conditions');
+	};
+
+	const handlePrivacyPress = () => {
+		router.push('/privacy-policy');
+	};
+
+	const handleAboutPress = () => {
+		router.push('/about');
+	};
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.safeArea}>
@@ -124,13 +152,13 @@ export default function MenuScreen() {
 					</View>
 
 					{/* Refund Account */}
-					<Pressable style={styles.refundCard}>
+					{/* <Pressable style={styles.refundCard}>
 						<View style={styles.menuItemLeft}>
 							<IconSymbol name='creditcard' size={28} color='#E63946' />
 							<Text style={styles.refundText}>Refund Account</Text>
 						</View>
 						<IconSymbol name='chevron.right' size={20} color='#999999' />
-					</Pressable>
+					</Pressable> */}
 				</View>
 
 				{/* Perks Section */}
@@ -140,10 +168,26 @@ export default function MenuScreen() {
 						icon='crown.fill'
 						title='Subscription'
 						iconColor='#666666'
+						onPress={handleSubscriptionPress}
 					/>
-					<MenuItem icon='ticket' title='Vouchers' iconColor='#666666' />
-					<MenuItem icon='trophy' title='bazarey rewards' iconColor='#666666' />
-					<MenuItem icon='gift' title='Invite friends' iconColor='#666666' />
+					<MenuItem
+						icon='ticket'
+						title='Vouchers'
+						iconColor='#666666'
+						onPress={handleVouchersPress}
+					/>
+					<MenuItem
+						icon='trophy'
+						title='bazarey rewards'
+						iconColor='#666666'
+						onPress={handleRewardsPress}
+					/>
+					<MenuItem
+						icon='gift'
+						title='Invite friends'
+						iconColor='#666666'
+						onPress={handleInvitePress}
+					/>
 				</View>
 
 				{/* General Section */}
@@ -159,13 +203,20 @@ export default function MenuScreen() {
 						icon='doc.text'
 						title='Terms & Conditions'
 						iconColor='#666666'
+						onPress={handleTermsPress}
 					/>
 					<MenuItem
-						icon='doc.text'
+						icon='shield.checkmark'
 						title='Privacy Policy'
 						iconColor='#666666'
+						onPress={handlePrivacyPress}
 					/>
-					<MenuItem icon='info.circle' title='About' iconColor='#666666' />
+					<MenuItem
+						icon='info.circle'
+						title='About'
+						iconColor='#666666'
+						onPress={handleAboutPress}
+					/>
 				</View>
 
 				{/* Bottom Spacing */}
@@ -247,7 +298,7 @@ const styles = StyleSheet.create({
 	cardsRow: {
 		flexDirection: 'row',
 		gap: 12,
-		marginBottom: 16,
+		// marginBottom: 16,
 	},
 	cardButton: {
 		flex: 1,
@@ -294,7 +345,7 @@ const styles = StyleSheet.create({
 	},
 	section: {
 		backgroundColor: '#FFFFFF',
-		marginTop: 12,
+		// marginTop: 12,
 		paddingVertical: 8,
 	},
 	sectionTitle: {

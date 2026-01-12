@@ -1,4 +1,6 @@
+import PrimaryButton from '@/components/buttons/PrimaryButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import * as ExpoLocation from 'expo-location';
 import {
 	useDeleteMutation,
 	useGetAllQuery,
@@ -11,6 +13,8 @@ import React, { useState } from 'react';
 import {
 	ActivityIndicator,
 	Alert,
+	KeyboardAvoidingView,
+	Platform,
 	Pressable,
 	ScrollView,
 	StyleSheet,
@@ -52,31 +56,47 @@ export default function AddressesScreen() {
 		postalCode: '',
 	});
 
-	const handleGetCurrentLocation = () => {
-		Alert.alert(
-			'Get Current Location',
-			'This will use your device GPS to get your current address.',
-			[
-				{
-					text: 'Cancel',
-					style: 'cancel',
-				},
-				{
-					text: 'Allow',
-					onPress: () => {
-						// Simulate getting location
-						setFormData(prev => ({
-							...prev,
-							street: 'Current GPS Location Street',
-							area: 'Auto-detected Area',
-							city: 'Dhaka',
-							postalCode: '1200',
-						}));
-						Alert.alert('Success', 'Location detected and fields populated!');
-					},
-				},
-			]
-		);
+	const handleGetCurrentLocation = async () => {
+		try {
+			const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+			if (status !== 'granted') {
+				Alert.alert(
+					'Permission denied',
+					'Permission to access location was denied'
+				);
+				return;
+			}
+
+			// Show loading or feedback if needed (optional, but good UX)
+			// For now, we rely on the speed of the operation or could add a local loading state if desired.
+			// But since we didn't add a specific loading state for this button in the plan,
+			// we'll keep it simple as per the plan.
+
+			const location = await ExpoLocation.getCurrentPositionAsync({});
+			const { latitude, longitude } = location.coords;
+
+			const reverseGeocode = await ExpoLocation.reverseGeocodeAsync({
+				latitude,
+				longitude,
+			});
+
+			if (reverseGeocode.length > 0) {
+				const address = reverseGeocode[0];
+				setFormData(prev => ({
+					...prev,
+					street: `${address.name || ''} ${address.street || ''}`.trim(),
+					area: address.district || address.subregion || '',
+					city: address.city || address.region || '',
+					postalCode: address.postalCode || '',
+				}));
+				Alert.alert('Success', 'Location detected and fields populated!');
+			} else {
+				Alert.alert('Error', 'Could not determine address from location.');
+			}
+		} catch (error) {
+			console.error('Error fetching location:', error);
+			Alert.alert('Error', 'Failed to get current location.');
+		}
 	};
 
 	const handleSaveAddress = async () => {
@@ -199,222 +219,216 @@ export default function AddressesScreen() {
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
-			{/* Header */}
-			<View style={styles.header}>
-				<Pressable onPress={() => router.back()} style={styles.backButton}>
-					<IconSymbol name='chevron.left' size={24} color='#000000' />
-				</Pressable>
-				<Text style={styles.headerTitle}>My Addresses</Text>
-				<View style={{ width: 40 }} />
-			</View>
+			<KeyboardAvoidingView
+				style={{ flex: 1 }}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			>
+				{/* Header */}
+				<View style={styles.header}>
+					<Pressable onPress={() => router.back()} style={styles.backButton}>
+						<IconSymbol name='chevron.left' size={24} color='#000000' />
+					</Pressable>
+					<Text style={styles.headerTitle}>My Addresses</Text>
+					<View style={{ width: 40 }} />
+				</View>
 
-			{isLoading ? (
-				<Loader />
-			) : (
-				<ScrollView
-					style={styles.scrollView}
-					showsVerticalScrollIndicator={false}
-				>
-					{/* Saved Addresses */}
-					<View style={styles.addressesContainer}>
-						{addresses?.map((address, index) => (
-							<AddressCard
-								key={index}
-								address={address}
-								handleEdit={handleEdit}
-								handleDelete={handleDelete}
-								handleSetDefault={handleSetDefault}
-								settingDefaultId={settingDefaultId}
-							/>
-						))}
+				{isLoading ? (
+					<Loader />
+				) : (
+					<ScrollView
+						style={styles.scrollView}
+						showsVerticalScrollIndicator={false}
+					>
+						{/* Saved Addresses */}
+						<View style={styles.addressesContainer}>
+							{addresses?.map((address, index) => (
+								<AddressCard
+									key={index}
+									address={address}
+									handleEdit={handleEdit}
+									handleDelete={handleDelete}
+									handleSetDefault={handleSetDefault}
+									settingDefaultId={settingDefaultId}
+								/>
+							))}
 
-						{addresses.length === 0 && (
-							<View style={styles.emptyState}>
-								<IconSymbol name='mappin.circle' size={64} color='#D0D0D0' />
-								<Text style={styles.emptyStateText}>No saved addresses</Text>
-								<Text style={styles.emptyStateSubtext}>
-									Add your first address to get started
-								</Text>
+							{addresses.length === 0 && (
+								<View style={styles.emptyState}>
+									<IconSymbol name='mappin.circle' size={64} color='#D0D0D0' />
+									<Text style={styles.emptyStateText}>No saved addresses</Text>
+									<Text style={styles.emptyStateSubtext}>
+										Add your first address to get started
+									</Text>
+								</View>
+							)}
+						</View>
+
+						{/* Add/Edit Address Form */}
+						{showAddForm && (
+							<View style={styles.formContainer}>
+								<View style={styles.formHeader}>
+									<Text style={styles.formTitle}>
+										{editingId ? 'Edit Address' : 'Add New Address'}
+									</Text>
+									<Pressable
+										onPress={() => {
+											setShowAddForm(false);
+											setEditingId(null);
+											setFormData({
+												label: '',
+												name: '',
+												phone: '',
+												street: '',
+												area: '',
+												city: '',
+												postalCode: '',
+											});
+										}}
+									>
+										<IconSymbol name='xmark' size={24} color='#666666' />
+									</Pressable>
+								</View>
+
+								{/* Location Button */}
+								<PrimaryButton
+									icon='location.fill'
+									title='Use Current Location'
+									onPress={handleGetCurrentLocation}
+									style={{ marginBottom: 20 }}
+								/>
+
+								{/* Form Fields */}
+								<View style={styles.formField}>
+									<Text style={styles.label}>Label *</Text>
+									<View style={styles.labelOptions}>
+										{['Home', 'Office', 'Other'].map(label => (
+											<Pressable
+												key={label}
+												style={[
+													styles.labelOption,
+													formData.label === label && styles.labelOptionActive,
+												]}
+												onPress={() =>
+													setFormData(prev => ({ ...prev, label }))
+												}
+											>
+												<Text
+													style={[
+														styles.labelOptionText,
+														formData.label === label &&
+															styles.labelOptionTextActive,
+													]}
+												>
+													{label}
+												</Text>
+											</Pressable>
+										))}
+									</View>
+								</View>
+
+								<View style={styles.formField}>
+									<Text style={styles.label}>Full Name *</Text>
+									<TextInput
+										style={styles.input}
+										placeholder='Enter full name'
+										value={formData.name}
+										onChangeText={text =>
+											setFormData(prev => ({ ...prev, name: text }))
+										}
+									/>
+								</View>
+
+								<View style={styles.formField}>
+									<Text style={styles.label}>Phone Number *</Text>
+									<TextInput
+										style={styles.input}
+										placeholder='+880 1XXXXXXXXX'
+										keyboardType='phone-pad'
+										value={formData.phone}
+										onChangeText={text =>
+											setFormData(prev => ({ ...prev, phone: text }))
+										}
+									/>
+								</View>
+
+								<View style={styles.formField}>
+									<Text style={styles.label}>Street Address *</Text>
+									<TextInput
+										style={styles.input}
+										placeholder='House/Flat no., Street'
+										value={formData.street}
+										onChangeText={text =>
+											setFormData(prev => ({ ...prev, street: text }))
+										}
+									/>
+								</View>
+
+								<View style={styles.formField}>
+									<Text style={styles.label}>Area *</Text>
+									<TextInput
+										style={styles.input}
+										placeholder='Area/Locality'
+										value={formData.area}
+										onChangeText={text =>
+											setFormData(prev => ({ ...prev, area: text }))
+										}
+									/>
+								</View>
+
+								<View style={styles.formRow}>
+									<View style={[styles.formField, { flex: 1 }]}>
+										<Text style={styles.label}>City *</Text>
+										<TextInput
+											style={styles.input}
+											placeholder='City'
+											value={formData.city}
+											onChangeText={text =>
+												setFormData(prev => ({ ...prev, city: text }))
+											}
+										/>
+									</View>
+
+									<View style={[styles.formField, { flex: 1 }]}>
+										<Text style={styles.label}>Postal Code</Text>
+										<TextInput
+											style={styles.input}
+											placeholder='1200'
+											keyboardType='numeric'
+											value={formData.postalCode}
+											onChangeText={text =>
+												setFormData(prev => ({ ...prev, postalCode: text }))
+											}
+										/>
+									</View>
+								</View>
+
+								<PrimaryButton
+									icon={editingId ? 'pencil' : 'checkmark'}
+									title={editingId ? 'Update Address' : 'Save Address'}
+									onPress={handleSaveAddress}
+									loading={isSaving}
+									disabled={isSaving}
+									style={{ marginTop: 8 }}
+								/>
 							</View>
 						)}
+
+						{/* Bottom Spacing */}
+						<View style={{ height: 60 }} />
+					</ScrollView>
+				)}
+
+				{/* Add Address Button */}
+				{!showAddForm && (
+					<View style={styles.bottomContainer}>
+						<PrimaryButton
+							icon='plus'
+							title='Add New Address'
+							onPress={() => setShowAddForm(true)}
+						/>
 					</View>
-
-					{/* Add/Edit Address Form */}
-					{showAddForm && (
-						<View style={styles.formContainer}>
-							<View style={styles.formHeader}>
-								<Text style={styles.formTitle}>
-									{editingId ? 'Edit Address' : 'Add New Address'}
-								</Text>
-								<Pressable
-									onPress={() => {
-										setShowAddForm(false);
-										setEditingId(null);
-										setFormData({
-											label: '',
-											name: '',
-											phone: '',
-											street: '',
-											area: '',
-											city: '',
-											postalCode: '',
-										});
-									}}
-								>
-									<IconSymbol name='xmark' size={24} color='#666666' />
-								</Pressable>
-							</View>
-
-							{/* Location Button */}
-							<Pressable
-								style={styles.locationButton}
-								onPress={handleGetCurrentLocation}
-							>
-								<IconSymbol name='location.fill' size={20} color={CustomColors.darkBrown} />
-								<Text style={styles.locationButtonText}>
-									Use Current Location
-								</Text>
-							</Pressable>
-
-							{/* Form Fields */}
-							<View style={styles.formField}>
-								<Text style={styles.label}>Label *</Text>
-								<View style={styles.labelOptions}>
-									{['Home', 'Office', 'Other'].map(label => (
-										<Pressable
-											key={label}
-											style={[
-												styles.labelOption,
-												formData.label === label && styles.labelOptionActive,
-											]}
-											onPress={() => setFormData(prev => ({ ...prev, label }))}
-										>
-											<Text
-												style={[
-													styles.labelOptionText,
-													formData.label === label &&
-														styles.labelOptionTextActive,
-												]}
-											>
-												{label}
-											</Text>
-										</Pressable>
-									))}
-								</View>
-							</View>
-
-							<View style={styles.formField}>
-								<Text style={styles.label}>Full Name *</Text>
-								<TextInput
-									style={styles.input}
-									placeholder='Enter full name'
-									value={formData.name}
-									onChangeText={text =>
-										setFormData(prev => ({ ...prev, name: text }))
-									}
-								/>
-							</View>
-
-							<View style={styles.formField}>
-								<Text style={styles.label}>Phone Number *</Text>
-								<TextInput
-									style={styles.input}
-									placeholder='+880 1XXXXXXXXX'
-									keyboardType='phone-pad'
-									value={formData.phone}
-									onChangeText={text =>
-										setFormData(prev => ({ ...prev, phone: text }))
-									}
-								/>
-							</View>
-
-							<View style={styles.formField}>
-								<Text style={styles.label}>Street Address *</Text>
-								<TextInput
-									style={styles.input}
-									placeholder='House/Flat no., Street'
-									value={formData.street}
-									onChangeText={text =>
-										setFormData(prev => ({ ...prev, street: text }))
-									}
-								/>
-							</View>
-
-							<View style={styles.formField}>
-								<Text style={styles.label}>Area *</Text>
-								<TextInput
-									style={styles.input}
-									placeholder='Area/Locality'
-									value={formData.area}
-									onChangeText={text =>
-										setFormData(prev => ({ ...prev, area: text }))
-									}
-								/>
-							</View>
-
-							<View style={styles.formRow}>
-								<View style={[styles.formField, { flex: 1 }]}>
-									<Text style={styles.label}>City *</Text>
-									<TextInput
-										style={styles.input}
-										placeholder='City'
-										value={formData.city}
-										onChangeText={text =>
-											setFormData(prev => ({ ...prev, city: text }))
-										}
-									/>
-								</View>
-
-								<View style={[styles.formField, { flex: 1 }]}>
-									<Text style={styles.label}>Postal Code</Text>
-									<TextInput
-										style={styles.input}
-										placeholder='1200'
-										keyboardType='numeric'
-										value={formData.postalCode}
-										onChangeText={text =>
-											setFormData(prev => ({ ...prev, postalCode: text }))
-										}
-									/>
-								</View>
-							</View>
-
-							<Pressable
-								style={[
-									styles.saveButton,
-									isSaving && styles.saveButtonDisabled,
-								]}
-								onPress={handleSaveAddress}
-								disabled={isSaving}
-							>
-								{isSaving ? (
-									<ActivityIndicator size='small' color='#FFFFFF' />
-								) : (
-									<Text style={styles.saveButtonText}>
-										{editingId ? 'Update Address' : 'Save Address'}
-									</Text>
-								)}
-							</Pressable>
-						</View>
-					)}
-
-					{/* Bottom Spacing */}
-					<View style={{ height: 60 }} />
-				</ScrollView>
-			)}
-
-			{/* Add Address Button */}
-			{!showAddForm && (
-				<View style={styles.bottomContainer}>
-					<Pressable
-						style={styles.addButton}
-						onPress={() => setShowAddForm(true)}
-					>
-						<IconSymbol name='plus' size={20} color={CustomColors.darkBrown} />
-						<Text style={styles.addButtonText}>Add New Address</Text>
-					</Pressable>
-				</View>
-			)}
+				)}
+			</KeyboardAvoidingView>
 		</SafeAreaView>
 	);
 }
@@ -581,23 +595,6 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		color: '#000000',
 	},
-	locationButton: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		gap: 8,
-		backgroundColor: CustomColors.lightBrown,
-		paddingVertical: 12,
-		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: CustomColors.darkBrown,
-		marginBottom: 20,
-	},
-	locationButtonText: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: CustomColors.darkBrown,
-	},
 	formField: {
 		marginBottom: 16,
 	},
@@ -620,14 +617,14 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		paddingHorizontal: 16,
 		borderRadius: 8,
-		borderWidth: 1,
+		// borderWidth: 1,
 		borderColor: '#E5E5E5',
 		backgroundColor: '#F5F5F5',
 		alignItems: 'center',
 	},
 	labelOptionActive: {
 		backgroundColor: CustomColors.lightBrown,
-		borderColor: CustomColors.darkBrown,
+		// borderColor: CustomColors.darkBrown,
 	},
 	labelOptionText: {
 		fontSize: 14,
@@ -646,23 +643,6 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		color: '#000000',
 		backgroundColor: '#F5F5F5',
-	},
-	saveButton: {
-		backgroundColor: CustomColors.lightBrown,
-		paddingVertical: 16,
-		borderRadius: 8,
-		alignItems: 'center',
-		marginTop: 8,
-		borderWidth: 1,
-		borderColor: CustomColors.darkBrown,
-	},
-	saveButtonText: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		color: CustomColors.darkBrown,
-	},
-	saveButtonDisabled: {
-		opacity: 0.6,
 	},
 	bottomContainer: {
 		position: 'absolute',

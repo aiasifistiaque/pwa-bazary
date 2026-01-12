@@ -67,6 +67,26 @@ export default function RootLayout() {
 						<Stack.Screen name='profile' options={{ headerShown: false }} />
 						<Stack.Screen name='orders' options={{ headerShown: false }} />
 						<Stack.Screen
+							name='subscription'
+							options={{ headerShown: false }}
+						/>
+						<Stack.Screen
+							name='invite-friends'
+							options={{ headerShown: false }}
+						/>
+						<Stack.Screen name='vouchers' options={{ headerShown: false }} />
+						<Stack.Screen name='rewards' options={{ headerShown: false }} />
+						<Stack.Screen
+							name='terms-conditions'
+							options={{ headerShown: false }}
+						/>
+						<Stack.Screen
+							name='privacy-policy'
+							options={{ headerShown: false }}
+						/>
+						<Stack.Screen name='about' options={{ headerShown: false }} />
+						<Stack.Screen name='coming-soon' options={{ headerShown: false }} />
+						<Stack.Screen
 							name='order-detail'
 							options={{ headerShown: false }}
 						/>

@@ -141,8 +141,8 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 6,
-		borderWidth: 1,
-		borderColor: CustomColors.darkBrown,
+		// borderWidth: 1,
+		// borderColor: CustomColors.darkBrown,
 	},
 	defaultBadgeText: {
 		fontSize: 11,
@@ -183,8 +183,8 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		paddingVertical: 8,
 		borderRadius: 8,
-		borderWidth: 1,
-		borderColor: CustomColors.darkBrown,
+		// borderWidth: 1,
+		// borderColor: CustomColors.darkBrown,
 		backgroundColor: CustomColors.lightBrown,
 	},
 	setDefaultButtonDisabled: {

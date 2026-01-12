@@ -60,6 +60,18 @@ const MAPPING = {
 	'chevron.down': 'keyboard-arrow-down',
 	'message.fill': 'message',
 	'bubble.left.and.bubble.right.fill': 'chat',
+	'arrow.left': 'arrow-back',
+	'truck.fill': 'local-shipping',
+	'ticket.fill': 'confirmation-number',
+	'trophy.fill': 'emoji-events',
+	'star.fill': 'star',
+	'person.2.fill': 'group',
+	'doc.on.doc': 'file-copy',
+	'leaf.fill': 'eco',
+	'basket.fill': 'shopping-basket',
+	'fish.fill': 'restaurant', // Approximate for now, or use set-meal if available
+	'drop.fill': 'water-drop',
+	'envelope.fill': 'email',
 } as const;
 
 type IconSymbolName = keyof typeof MAPPING;

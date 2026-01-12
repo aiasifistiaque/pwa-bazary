@@ -21,6 +21,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CustomColors } from '@/constants/theme';
 import IconButton from '@/components/buttons/IconButton';
+import PrimaryButton from '@/components/buttons/PrimaryButton';
 
 export default function ProfileScreen() {
 	const dispatch = useDispatch();
@@ -208,10 +209,7 @@ export default function ProfileScreen() {
 								<IconButton icon='pencil' onPress={handleEdit} />
 							) : (
 								<>
-									<IconButton
-										icon='xmark'
-										onPress={handleCancel}
-									/>
+									<IconButton icon='xmark' onPress={handleCancel} />
 									<IconButton
 										icon='checkmark'
 										onPress={handleSave}
@@ -336,14 +334,11 @@ export default function ProfileScreen() {
 
 				{/* Logout Button */}
 				<View style={styles.logoutContainer}>
-					<Pressable style={styles.logoutButton} onPress={handleLogout}>
-						<IconSymbol
-							name='arrow.right.square'
-							size={20}
-							color={CustomColors.darkBrown}
-						/>
-						<Text style={styles.logoutText}>Logout</Text>
-					</Pressable>
+					<PrimaryButton
+						icon='arrow.right.square'
+						title='Logout'
+						onPress={handleLogout}
+					/>
 				</View>
 
 				{/* Bottom Spacing */}
@@ -541,8 +536,8 @@ const styles = StyleSheet.create({
 		backgroundColor: CustomColors.lightBrown,
 		borderRadius: 12,
 		padding: 16,
-		borderWidth: 2,
-		borderColor: CustomColors.darkBrown,
+		// borderWidth: 2,
+		// borderColor: CustomColors.darkBrown,
 		gap: 12,
 	},
 	logoutText: {
