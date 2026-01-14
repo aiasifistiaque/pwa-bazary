@@ -31,6 +31,7 @@ export default function ProductDetailScreen() {
 		path: 'products',
 		id,
 	});
+	console.log(productD);
 	const product: any = productD ? productD : {};
 	const [quantity, setQuantity] = useState(1);
 
@@ -99,9 +100,9 @@ export default function ProductDetailScreen() {
 				>
 					{/* Product Image */}
 					<View style={styles.imageContainer}>
-						{product.images?.[0] ? (
+						{product.image ? (
 							<Image
-								source={{ uri: product.images[0] }}
+								source={{ uri: product.image }}
 								style={styles.image}
 								resizeMode='contain'
 							/>
@@ -321,13 +322,14 @@ const styles = StyleSheet.create({
 	},
 	imageContainer: {
 		width: '100%',
-		height: 300,
+		height: 420,
 		backgroundColor: '#F5F5F5',
 		position: 'relative',
 	},
 	image: {
 		width: '100%',
-		height: '100%',
+		height: 420,
+		objectFit: 'cover',
 	},
 	discountBadge: {
 		position: 'absolute',
