@@ -25,6 +25,7 @@ if (
 }
 
 type ProductCardProps = {
+	product: any;
 	id: string;
 	name: string;
 	price: string | number;
@@ -32,6 +33,7 @@ type ProductCardProps = {
 	unitPrice?: string;
 	badge?: string;
 	badgeIcon?: string;
+	weight?: string;
 	image: string | number; // Can be URI string or require() number
 	onPress?: () => void;
 	/**
@@ -42,11 +44,13 @@ type ProductCardProps = {
 };
 
 export function ProductCard({
+	product,
 	id,
 	name,
 	price,
 	unit,
 	unitPrice,
+	weight,
 	badge,
 	badgeIcon,
 	image,
@@ -147,17 +151,12 @@ export function ProductCard({
 					<Text style={styles.badgeText}>{badge}</Text>
 				</View>
 			)}
-
 			<View style={styles.info}>
 				<Text style={styles.name} numberOfLines={2}>
-					{name}
+					{product?.name}
 				</Text>
-				<Text style={styles.price}>৳{price}</Text>
-				{unit && unitPrice && (
-					<Text style={styles.unitPrice}>
-						{unit} · {unitPrice}
-					</Text>
-				)}
+				<Text style={styles.unitPrice}>{product?.weight + ' ' + product?.unit}</Text>
+				<Text style={styles.price}>৳{product?.sellPrice}</Text>
 			</View>
 		</TouchableOpacity>
 	);

@@ -41,8 +41,10 @@ export default function CategoryScreen() {
 	const { data: productsData, isLoading: productsDataLoading } = useGetAllQuery(
 		{
 			path: 'products',
+			sort: '-priority',
 			filters: {
 				category_in: id,
+				isActive: true,
 			},
 		}
 	);
@@ -132,6 +134,7 @@ export default function CategoryScreen() {
 									productsData?.doc?.map((product: any) => (
 										<View key={product.id} style={styles.productCardWrapper}>
 											<ProductCard
+												product={product}
 												id={product.id}
 												name={product.name}
 												price={product.price}

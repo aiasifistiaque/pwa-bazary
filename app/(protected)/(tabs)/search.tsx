@@ -127,6 +127,7 @@ export default function SearchScreen() {
 									searchResults.doc.map((product: any) => (
 										<View key={product.id} style={styles.productCardWrapper}>
 											<ProductCard
+												product={product}
 												id={product.id}
 												name={product.name}
 												price={product.price}

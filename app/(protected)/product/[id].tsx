@@ -31,7 +31,7 @@ export default function ProductDetailScreen() {
 		path: 'products',
 		id,
 	});
-	console.log(productD);
+	console.log('productD', productD);
 	const product: any = productD ? productD : {};
 	const [quantity, setQuantity] = useState(1);
 
@@ -146,16 +146,14 @@ export default function ProductDetailScreen() {
 						)}
 						<Text style={styles.productName}>{product.name}</Text>
 
-						{product.unit && (
-							<Text style={styles.unit}>
-								{product.unit} · {product.unitPrice}
-							</Text>
-						)}
+						<Text style={styles.unit}>
+							{product.weight || 'N/A'} {product.unit || 'N/A'}
+						</Text>
 
 						<View style={styles.priceContainer}>
-							<Text style={styles.price}>৳{product.price}</Text>
+							<Text style={styles.price}>৳{product.sellPrice}</Text>
 							{product.price && (
-								<Text style={styles.originalPrice}>৳{product.price}</Text>
+								<Text style={styles.originalPrice}>৳{product.oldPrice}</Text>
 							)}
 						</View>
 
@@ -198,7 +196,7 @@ export default function ProductDetailScreen() {
 												{value as string}
 											</Text>
 										</View>
-									)
+									),
 								)}
 							</View>
 						</View>
@@ -220,7 +218,7 @@ export default function ProductDetailScreen() {
 												{value as string}
 											</Text>
 										</View>
-									)
+									),
 								)}
 							</View>
 						</View>

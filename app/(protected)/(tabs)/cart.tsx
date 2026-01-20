@@ -25,7 +25,7 @@ const fallback = require('../../../assets/images/fallback-fruit.png');
 export default function CartScreen() {
 	const dispatch = useDispatch();
 	const { cartItems, total, subTotal } = useSelector(
-		(state: RootState) => state.cart
+		(state: RootState) => state.cart,
 	);
 
 	const { data: latestProducts } = useGetAllQuery({
@@ -56,7 +56,7 @@ export default function CartScreen() {
 						variantStock: item.variantStock,
 					},
 					qty: 1,
-				})
+				}),
 			);
 		}
 	};
@@ -216,6 +216,7 @@ export default function CartScreen() {
 						{latestProducts?.doc?.map((item: any) => (
 							<View key={item.id} style={styles.popularCardContainer}>
 								<ProductCard
+									product={item}
 									id={item.id}
 									name={item.name}
 									image={item.image}
