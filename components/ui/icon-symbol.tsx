@@ -72,6 +72,7 @@ const MAPPING = {
 	'fish.fill': 'restaurant', // Approximate for now, or use set-meal if available
 	'drop.fill': 'water-drop',
 	'envelope.fill': 'email',
+	'square.and.arrow.up': 'share',
 } as const;
 
 type IconSymbolName = keyof typeof MAPPING;

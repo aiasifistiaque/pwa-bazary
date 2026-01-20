@@ -14,6 +14,7 @@ import { IconSymbol } from './ui/icon-symbol';
 import { useToast } from '@/contexts/ToastContext';
 import { RootState } from '@/store';
 import { addToCart, deleteOneFromCart } from '@/store/slices/cartSlice';
+import { CustomColors } from '@/constants/theme';
 
 const fallback = require('../assets/images/fallback-fruit.png');
 
@@ -48,9 +49,6 @@ export function ProductCard({
 	id,
 	name,
 	price,
-	unit,
-	unitPrice,
-	weight,
 	badge,
 	badgeIcon,
 	image,
@@ -91,7 +89,7 @@ export function ProductCard({
 						vat: 0,
 					},
 					qty: 1,
-				})
+				}),
 			);
 		}
 
@@ -126,7 +124,11 @@ export function ProductCard({
 								style={styles.iconButton}
 								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 							>
-								<IconSymbol name='minus' size={18} color='#E63946' />
+								<IconSymbol
+									name='minus'
+									size={18}
+									color={CustomColors.darkBrown}
+								/>
 							</TouchableOpacity>
 
 							<Text style={styles.quantityText}>{quantity}</Text>
@@ -138,7 +140,7 @@ export function ProductCard({
 						style={styles.iconButton}
 						hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 					>
-						<IconSymbol name='plus' size={20} color='#E63946' />
+						<IconSymbol name='plus' size={20} color={CustomColors.darkBrown} />
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -155,7 +157,9 @@ export function ProductCard({
 				<Text style={styles.name} numberOfLines={2}>
 					{product?.name}
 				</Text>
-				<Text style={styles.unitPrice}>{product?.weight + ' ' + product?.unit}</Text>
+				<Text style={styles.unitPrice}>
+					{`${product?.weight || '000'} ${product?.unit || 'unit'}`}
+				</Text>
 				<Text style={styles.price}>৳{product?.sellPrice}</Text>
 			</View>
 		</TouchableOpacity>
@@ -249,7 +253,7 @@ const styles = StyleSheet.create({
 	price: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: '#000',
+		color: CustomColors.darkBrown,
 		marginTop: 4,
 	},
 	unitPrice: {
