@@ -1,5 +1,6 @@
 import PrimaryButton from '@/components/buttons/PrimaryButton';
 import { ProductCard } from '@/components/product-card';
+import { ProductCardSkeleton } from '@/components/skeleton/ProductCardSkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
 import type { RootState } from '@/store';
@@ -28,11 +29,12 @@ export default function CartScreen() {
 		(state: RootState) => state.cart,
 	);
 
-	const { data: latestProducts } = useGetAllQuery({
-		path: '/products',
-		limit: 5,
-		sort: '-createdAt',
-	}) as any;
+	const { data: latestProducts, isLoading: latestProductsLoading } =
+		useGetAllQuery({
+			path: '/products',
+			limit: 5,
+			sort: '-createdAt',
+		}) as any;
 
 	const handleProductPress = (id: string) => {
 		router.push(`/product/${id}` as any);
@@ -202,7 +204,9 @@ export default function CartScreen() {
 					onPress={() => router.push('/(protected)/(tabs)/search')}
 				>
 					<IconSymbol name='plus' size={20} color='#000000' />
-					<Text style={styles.addMoreText}>{cartItems.length > 0 ? 'Add More Items' : 'Explore Products'}</Text>
+					<Text style={styles.addMoreText}>
+						{cartItems.length > 0 ? 'Add More Items' : 'Explore Products'}
+					</Text>
 				</Pressable>
 
 				{/* Popular with your order */}
@@ -213,20 +217,29 @@ export default function CartScreen() {
 						showsHorizontalScrollIndicator={false}
 						contentContainerStyle={styles.popularScroll}
 					>
-						{latestProducts?.doc?.map((item: any) => (
-							<View key={item.id} style={styles.popularCardContainer}>
-								<ProductCard
-									product={item}
-									id={item.id}
-									name={item.name}
-									image={item.image}
-									price={item.salePrice || item.price}
-									unit={item.unit}
-									unitPrice={item.price}
-									onPress={() => handleProductPress(item.id)}
-								/>
-							</View>
-						))}
+						{latestProductsLoading
+							? Array.from({ length: 5 }).map((_, index) => (
+									<View
+										key={`skeleton-${index}`}
+										style={styles.popularCardContainer}
+									>
+										<ProductCardSkeleton />
+									</View>
+								))
+							: latestProducts?.doc?.map((item: any) => (
+									<View key={item.id} style={styles.popularCardContainer}>
+										<ProductCard
+											product={item}
+											id={item.id}
+											name={item.name}
+											image={item.image}
+											price={item.salePrice || item.price}
+											unit={item.unit}
+											unitPrice={item.price}
+											onPress={() => handleProductPress(item.id)}
+										/>
+									</View>
+								))}
 					</ScrollView>
 				</View>
 
@@ -250,7 +263,9 @@ export default function CartScreen() {
 							<Text style={styles.seeSummary}>See summary</Text>
 						</Pressable> */}
 						{subTotal < 300 && (
-							<Text style={styles.seeSummary}>{`Add Tk ${300 - subTotal} more to proceed`}</Text>
+							<Text
+								style={styles.seeSummary}
+							>{`Add Tk ${300 - subTotal} more to proceed`}</Text>
 						)}
 					</View>
 				)}
