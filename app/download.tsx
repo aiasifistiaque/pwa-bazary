@@ -46,6 +46,8 @@ export default function DownloadPage() {
 
 		if (!prompt) {
 			console.log('No install prompt available');
+			// If no prompt available, redirect to home
+			setTimeout(() => router.replace('/'), 2000);
 			return;
 		}
 
@@ -59,9 +61,11 @@ export default function DownloadPage() {
 			console.log('User accepted the install prompt');
 			setDeferredPrompt(null);
 			// Redirect to home after installation
-			setTimeout(() => router.replace('/'), 1000);
+			router.replace('/');
 		} else {
 			console.log('User dismissed the install prompt');
+			// Still redirect to home if dismissed
+			setTimeout(() => router.replace('/'), 1500);
 		}
 	};
 
