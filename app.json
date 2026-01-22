@@ -32,7 +32,7 @@
 		},
 		"web": {
 			"output": "static",
-			"favicon": "./assets/images/bazareylogo.png",
+			"favicon": "./assets/images/icon.png",
 			"bundler": "metro",
 			"backgroundColor": "#ffffff",
 			"themeColor": "#4CAF50",
@@ -47,6 +47,11 @@
 			"dir": "auto",
 			"preferRelatedApplications": false,
 			"relatedApplications": [],
+			"config": {
+				"firebase": {
+					"analyticsCollectionEnabled": false
+				}
+			},
 			"build": {
 				"babel": {
 					"include": ["@expo/metro-runtime"]

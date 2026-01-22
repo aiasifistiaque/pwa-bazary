@@ -6,11 +6,11 @@ export function usePWADebug() {
 		if (Platform.OS !== 'web') return;
 
 		console.log('🔍 PWA Debug Info:');
-		
+
 		// Check if manifest is loaded
 		const manifestLink = document.querySelector('link[rel="manifest"]');
 		console.log('Manifest link:', manifestLink?.getAttribute('href'));
-		
+
 		// Check if service worker is registered
 		if ('serviceWorker' in navigator) {
 			navigator.serviceWorker.getRegistration().then(reg => {
@@ -19,16 +19,16 @@ export function usePWADebug() {
 		} else {
 			console.log('Service Worker: Not supported ❌');
 		}
-		
+
 		// Check display mode
 		const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 		console.log('Display mode:', isStandalone ? 'Standalone ✅' : 'Browser');
-		
+
 		// Check if installable
-		window.addEventListener('beforeinstallprompt', (e) => {
+		window.addEventListener('beforeinstallprompt', e => {
 			console.log('Install prompt available ✅');
 		});
-		
+
 		// Check manifest
 		fetch('/manifest.json')
 			.then(r => r.json())
@@ -36,6 +36,5 @@ export function usePWADebug() {
 				console.log('Manifest loaded:', manifest);
 			})
 			.catch(e => console.error('Manifest error:', e));
-			
 	}, []);
 }

@@ -1,14 +1,14 @@
+import { usePWADebug } from '@/hooks/use-pwa-debug';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { usePWADebug } from '@/hooks/use-pwa-debug';
 
 export default function DownloadPage() {
 	const router = useRouter();
 	const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 	const [isInstalled, setIsInstalled] = useState(false);
 	const [isIOS, setIsIOS] = useState(false);
-	
+
 	// Debug PWA setup
 	usePWADebug();
 
