@@ -277,6 +277,8 @@ export default function CheckoutScreen() {
 				paymentAmount: finalTotal,
 				status: 'pending',
 				paidAmount: finalTotal,
+				couponCode: appliedCoupon?.code || null,
+				discount: finalDiscount,
 				origin: 'app',
 				orderDate: new Date(),
 			};
@@ -1034,7 +1036,7 @@ const styles = StyleSheet.create({
 		resizeMode: 'contain',
 	},
 	removeCouponButton: {
-		backgroundColor: '#DC2626',
+		backgroundColor: CustomColors.lightRed,
 		paddingHorizontal: 20,
 		borderRadius: 8,
 		alignItems: 'center',
@@ -1056,7 +1058,7 @@ const styles = StyleSheet.create({
 	couponMessageSuccess: {
 		backgroundColor: '#ECFDF5',
 		borderWidth: 1,
-		borderColor: '#10B981',
+		borderColor: CustomColors.lightGreen,
 	},
 	couponMessageError: {
 		backgroundColor: CustomColors.lightBrown,
@@ -1069,7 +1071,7 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 	},
 	couponMessageTextSuccess: {
-		color: '#10B981',
+		color: CustomColors.lightGreen,
 	},
 	couponMessageTextError: {
 		color: CustomColors.darkBrown,
@@ -1082,13 +1084,13 @@ const styles = StyleSheet.create({
 		backgroundColor: '#ECFDF5',
 		borderRadius: 8,
 		borderWidth: 1,
-		borderColor: '#10B981',
+		borderColor: CustomColors.lightGreen,
 		marginTop: 12,
 	},
 	appliedCouponText: {
 		flex: 1,
 		fontSize: 13,
-		color: '#059669',
+		color: CustomColors.lightGreen,
 		fontWeight: '500',
 	},
 });
