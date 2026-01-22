@@ -1,0 +1,65 @@
+{
+	"name": "Bazarey",
+	"short_name": "Bazarey",
+	"description": "Your personal shopping assistant - Order groceries and more",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"orientation": "portrait-primary",
+	"background_color": "#ffffff",
+	"theme_color": "#4CAF50",
+	"lang": "en",
+	"dir": "auto",
+	"prefer_related_applications": false,
+	"icons": [
+		{
+			"src": "icon.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "icon.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	],
+	"categories": ["shopping", "food", "lifestyle"],
+	"screenshots": [],
+	"shortcuts": [
+		{
+			"name": "Browse Products",
+			"short_name": "Products",
+			"description": "Browse available products",
+			"url": "/explore",
+			"icons": [
+				{
+					"src": "icon.png",
+					"sizes": "192x192"
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"short_name": "Cart",
+			"description": "View your shopping cart",
+			"url": "/cart",
+			"icons": [
+				{
+					"src": "icon.png",
+					"sizes": "192x192"
+				}
+			]
+		}
+	],
+	"share_target": {
+		"action": "/share",
+		"method": "GET",
+		"params": {
+			"title": "title",
+			"text": "text",
+			"url": "url"
+		}
+	}
+}
