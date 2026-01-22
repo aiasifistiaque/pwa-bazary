@@ -202,7 +202,7 @@ export default function CartScreen() {
 					onPress={() => router.push('/(protected)/(tabs)/search')}
 				>
 					<IconSymbol name='plus' size={20} color='#000000' />
-					<Text style={styles.addMoreText}>Add more items</Text>
+					<Text style={styles.addMoreText}>{cartItems.length > 0 ? 'Add More Items' : 'Explore Products'}</Text>
 				</Pressable>
 
 				{/* Popular with your order */}
@@ -249,6 +249,9 @@ export default function CartScreen() {
 						{/* <Pressable onPress={handleCheckout}>
 							<Text style={styles.seeSummary}>See summary</Text>
 						</Pressable> */}
+						{subTotal < 300 && (
+							<Text style={styles.seeSummary}>{`Add Tk ${300 - subTotal} more to proceed`}</Text>
+						)}
 					</View>
 				)}
 
@@ -263,6 +266,7 @@ export default function CartScreen() {
 						// icon='info.circle'
 						title='Review payment and address'
 						onPress={handleCheckout}
+						disabled={subTotal < 300}
 					/>
 				</View>
 			)}
@@ -537,8 +541,8 @@ const styles = StyleSheet.create({
 	},
 	seeSummary: {
 		fontSize: 14,
-		color: '#000000',
-		textDecorationLine: 'underline',
+		color: CustomColors.lightRed,
+		// textDecorationLine: 'underline',
 		fontWeight: '500',
 	},
 	checkoutContainer: {
