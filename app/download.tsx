@@ -14,8 +14,8 @@ export default function DownloadPage() {
 		// Check if already installed
 		if (window.matchMedia('(display-mode: standalone)').matches) {
 			setIsInstalled(true);
-			// Redirect to home after 2 seconds
-			setTimeout(() => router.replace('/'), 2000);
+			// Redirect to home immediately
+			router.replace('/');
 			return;
 		}
 
@@ -28,18 +28,13 @@ export default function DownloadPage() {
 		const handleBeforeInstallPrompt = (e: Event) => {
 			e.preventDefault();
 			setDeferredPrompt(e);
-			// Automatically trigger install prompt after a brief delay
+			// Automatically trigger install prompt immediately
 			setTimeout(() => {
 				showInstallPrompt(e);
-			}, 500);
+			}, 100);
 		};
 
 		window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-		// For iOS, we can't auto-trigger, so show instructions immediately
-		if (iOS) {
-			// Instructions will be shown in the UI
-		}
 
 		return () => {
 			window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
