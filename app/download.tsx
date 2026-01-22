@@ -28,6 +28,13 @@ export default function DownloadPage() {
 		const iOS = /iphone|ipad|ipod/.test(userAgent);
 		setIsIOS(iOS);
 
+		// For iOS, redirect to home page immediately
+		// This ensures the bookmark points to "/" not "/download"
+		if (iOS) {
+			router.replace('/');
+			return;
+		}
+
 		// Listen for beforeinstallprompt event (Android/Chrome)
 		const handleBeforeInstallPrompt = (e: Event) => {
 			e.preventDefault();
@@ -110,39 +117,13 @@ export default function DownloadPage() {
 			<View style={styles.container}>
 				<View style={styles.content}>
 					<Text style={styles.icon}>📱</Text>
-					<Text style={styles.title}>Install Bazarey</Text>
-					<Text style={styles.message}>To install this app on your iPhone or iPad:</Text>
-
-					<View style={styles.steps}>
-						<View style={styles.step}>
-							<Text style={styles.stepNumber}>1</Text>
-							<Text style={styles.stepText}>
-								Tap the <Text style={styles.bold}>Share</Text> button{' '}
-								<Text style={styles.icon2}>⎋</Text> at the bottom of Safari
-							</Text>
-						</View>
-
-						<View style={styles.step}>
-							<Text style={styles.stepNumber}>2</Text>
-							<Text style={styles.stepText}>
-								Scroll down and tap <Text style={styles.bold}>"Add to Home Screen"</Text>{' '}
-								<Text style={styles.icon2}>➕</Text>
-							</Text>
-						</View>
-
-						<View style={styles.step}>
-							<Text style={styles.stepNumber}>3</Text>
-							<Text style={styles.stepText}>
-								Tap <Text style={styles.bold}>"Add"</Text> in the top right
-							</Text>
-						</View>
-					</View>
-
-					<Pressable
-						style={styles.button}
-						onPress={handleGoHome}>
-						<Text style={styles.buttonText}>Open App</Text>
-					</Pressable>
+					<Text style={styles.title}>Redirecting...</Text>
+					<Text style={styles.message}>
+						You'll be redirected to the homepage where you can install the app.
+					</Text>
+					<Text style={styles.submessage}>
+						Once on the homepage, tap Share → Add to Home Screen
+					</Text>
 				</View>
 			</View>
 		);

@@ -4,6 +4,7 @@ import { FeaturedCategorySection } from '@/components/featured-category-section'
 import { SectionHeader } from '@/components/section-header';
 import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
+import { IOSInstallPrompt } from '@/components/IOSInstallPrompt';
 import { CustomColors } from '@/constants/theme';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
@@ -60,6 +61,9 @@ export default function DiscoverScreen() {
 
 	return (
 		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+			{/* iOS Install Prompt Banner */}
+			<IOSInstallPrompt />
+			
 			{/* Banner Carousel */}
 			<BannerCarousel
 				banners={bannersData?.doc}
