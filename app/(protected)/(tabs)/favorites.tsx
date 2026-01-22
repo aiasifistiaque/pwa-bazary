@@ -71,6 +71,7 @@ export default function FavoritesScreen() {
 						renderItem={({ item }) => (
 							<View style={styles.itemContainer}>
 								<ProductCard
+									product={item}
 									id={item.id}
 									name={item.name}
 									price={item.price.toString()}

@@ -82,6 +82,8 @@ export const CustomColors = {
 	optionBgColor: '#e7e7e7',
 	lightBrown: '#ebd7b0ff',
 	darkBrown: '#604724',
+	lightGreen: '#10B981',
 	darkGreen: '#2c451a',
 	greySkeleton: '#E5E5E5',
+	lightRed: '#FF5252',
 };

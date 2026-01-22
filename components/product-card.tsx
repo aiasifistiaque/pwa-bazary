@@ -14,6 +14,7 @@ import { IconSymbol } from './ui/icon-symbol';
 import { useToast } from '@/contexts/ToastContext';
 import { RootState } from '@/store';
 import { addToCart, deleteOneFromCart } from '@/store/slices/cartSlice';
+import { CustomColors } from '@/constants/theme';
 
 const fallback = require('../assets/images/fallback-fruit.png');
 
@@ -25,6 +26,7 @@ if (
 }
 
 type ProductCardProps = {
+	product: any;
 	id: string;
 	name: string;
 	price: string | number;
@@ -32,6 +34,7 @@ type ProductCardProps = {
 	unitPrice?: string;
 	badge?: string;
 	badgeIcon?: string;
+	weight?: string;
 	image: string | number; // Can be URI string or require() number
 	onPress?: () => void;
 	/**
@@ -42,11 +45,10 @@ type ProductCardProps = {
 };
 
 export function ProductCard({
+	product,
 	id,
 	name,
 	price,
-	unit,
-	unitPrice,
 	badge,
 	badgeIcon,
 	image,
@@ -87,7 +89,7 @@ export function ProductCard({
 						vat: 0,
 					},
 					qty: 1,
-				})
+				}),
 			);
 		}
 
@@ -122,7 +124,11 @@ export function ProductCard({
 								style={styles.iconButton}
 								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 							>
-								<IconSymbol name='minus' size={18} color='#E63946' />
+								<IconSymbol
+									name='minus'
+									size={18}
+									color={CustomColors.darkBrown}
+								/>
 							</TouchableOpacity>
 
 							<Text style={styles.quantityText}>{quantity}</Text>
@@ -134,7 +140,7 @@ export function ProductCard({
 						style={styles.iconButton}
 						hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 					>
-						<IconSymbol name='plus' size={20} color='#E63946' />
+						<IconSymbol name='plus' size={20} color={CustomColors.darkBrown} />
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -147,17 +153,14 @@ export function ProductCard({
 					<Text style={styles.badgeText}>{badge}</Text>
 				</View>
 			)}
-
 			<View style={styles.info}>
 				<Text style={styles.name} numberOfLines={2}>
-					{name}
+					{product?.name}
 				</Text>
-				<Text style={styles.price}>৳{price}</Text>
-				{unit && unitPrice && (
-					<Text style={styles.unitPrice}>
-						{unit} · {unitPrice}
-					</Text>
-				)}
+				<Text style={styles.unitPrice}>
+					{`${product?.weight || '000'} ${product?.unit || 'unit'}`}
+				</Text>
+				<Text style={styles.price}>৳{product?.sellPrice}</Text>
 			</View>
 		</TouchableOpacity>
 	);
@@ -250,7 +253,7 @@ const styles = StyleSheet.create({
 	price: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: '#000',
+		color: CustomColors.darkBrown,
 		marginTop: 4,
 	},
 	unitPrice: {

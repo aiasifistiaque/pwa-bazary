@@ -48,12 +48,14 @@ export const FeaturedCategorySection = ({ category }: { category: any }) => {
 				data={productsData.doc}
 				renderItem={({ item }) => (
 					<ProductCard
+						product={item}
 						id={item.id}
 						name={item.name}
 						price={item.sellPrice.toString()}
 						image={item.image}
 						unit={item.unit}
 						unitPrice={item.unitPrice}
+						weight={item.weight}
 						onPress={() => handleProductPress(item.id)}
 						onAddPress={() => handleAddPress(item)}
 					/>

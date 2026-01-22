@@ -9,18 +9,24 @@ import React, { useState } from 'react';
 
 import {
 	Image,
+	Modal,
 	Platform,
 	ScrollView,
+	Share,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
+	FlatList,
+	Dimensions,
 } from 'react-native';
+const { width } = Dimensions.get('window');
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
 const fallback = require('../../../assets/images/fallback-fruit.png');
 
 import { useToast } from '@/contexts/ToastContext';
+import { CustomColors } from '@/constants/theme';
 
 export default function ProductDetailScreen() {
 	const dispatch = useDispatch();
@@ -31,8 +37,21 @@ export default function ProductDetailScreen() {
 		path: 'products',
 		id,
 	});
+	console.log('productD', productD);
 	const product: any = productD ? productD : {};
 	const [quantity, setQuantity] = useState(1);
+	const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+
+	const handleShare = async () => {
+		try {
+			await Share.share({
+				message: `Check out ${product.name} on Bazarey! Price: ৳${product.sellPrice}. ${product.shortDescription || ''}`,
+				url: `https://bazarey.com/product/${product.id}`,
+			});
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	const favorites = useSelector((state: RootState) => state.favorites.items);
 	const isFavorite = favorites.some(item => item.id === product.id);
@@ -61,7 +80,7 @@ export default function ProductDetailScreen() {
 					vat: 0,
 				},
 				qty: quantity,
-			})
+			}),
 		);
 		showToast('Added to cart');
 	};
@@ -76,7 +95,7 @@ export default function ProductDetailScreen() {
 				image: product.image,
 				unit: product.unit,
 				unitPrice: product.unitPrice,
-			})
+			}),
 		);
 		showToast(willBeFavorite ? 'Added to favorites' : 'Removed from favorites');
 	};
@@ -99,9 +118,9 @@ export default function ProductDetailScreen() {
 				>
 					{/* Product Image */}
 					<View style={styles.imageContainer}>
-						{product.images?.[0] ? (
+						{product.image ? (
 							<Image
-								source={{ uri: product.images[0] }}
+								source={{ uri: product.image }}
 								style={styles.image}
 								resizeMode='contain'
 							/>
@@ -143,20 +162,71 @@ export default function ProductDetailScreen() {
 						{product.category && (
 							<Text style={styles.category}>{product.category.name}</Text>
 						)}
-						<Text style={styles.productName}>{product.name}</Text>
-
-						{product.unit && (
-							<Text style={styles.unit}>
-								{product.unit} · {product.unitPrice}
+						<View style={styles.nameHeader}>
+							<Text style={[styles.productName, { flex: 1 }]}>
+								{product.name}
 							</Text>
-						)}
+							<TouchableOpacity
+								onPress={handleShare}
+								style={styles.shareButton}
+							>
+								<IconSymbol name='square.and.arrow.up' size={24} color='#666' />
+							</TouchableOpacity>
+						</View>
 
-						<View style={styles.priceContainer}>
-							<Text style={styles.price}>৳{product.price}</Text>
-							{product.price && (
-								<Text style={styles.originalPrice}>৳{product.price}</Text>
+						<View style={styles.unitRow}>
+							<Text style={styles.unit}>
+								{product.weight || product.unitValue || '000'}{' '}
+								{product.unit || 'unit'}
+							</Text>
+							{product.stock !== undefined && (
+								<View
+									style={[
+										styles.stockBadge,
+										product.stock > 0 ? styles.inStock : styles.outOfStock,
+									]}
+								>
+									<Text
+										style={[
+											styles.stockText,
+											product.stock > 0
+												? styles.inStockText
+												: styles.outOfStockText,
+										]}
+									>
+										{product.stock > 0
+											? `${product.stock} items left`
+											: 'Sold Out'}
+									</Text>
+								</View>
 							)}
 						</View>
+
+						<View style={[styles.priceContainer, { flexWrap: 'wrap' }]}>
+							<Text style={styles.price}>
+								{`৳${
+									product.isDiscount
+										? product.discountedPrice
+										: product.sellPrice
+								}`}
+							</Text>
+							{product.oldPrice && (
+								<Text style={styles.originalPrice}>৳{product.oldPrice}</Text>
+							)}
+							{product.isDiscount && product.discount > 0 && (
+								<View style={styles.saveBadge}>
+									<Text style={styles.saveBadgeText}>
+										Save ৳{product.discount}
+									</Text>
+								</View>
+							)}
+						</View>
+
+						{product.shortDescription && (
+							<Text style={styles.shortDescription}>
+								{product.shortDescription}
+							</Text>
+						)}
 
 						{product.badge !== undefined && (
 							<View style={styles.badgeContainer}>
@@ -168,7 +238,7 @@ export default function ProductDetailScreen() {
 
 					{/* Description */}
 					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>Description</Text>
+						<Text style={styles.sectionTitle}>More about the product</Text>
 						<Text style={styles.description}>{product.description}</Text>
 					</View>
 
@@ -197,41 +267,77 @@ export default function ProductDetailScreen() {
 												{value as string}
 											</Text>
 										</View>
-									)
+									),
 								)}
 							</View>
 						</View>
 					)}
 
-					{product.nutritionPer100g && (
+					{/* More Images */}
+					{product.images && product.images.length > 0 && (
 						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>
-								Nutrition Information (per 100g)
-							</Text>
-							<View style={styles.nutritionTable}>
-								{Object.entries(product.nutritionPer100g).map(
-									([key, value]) => (
-										<View key={key} style={styles.nutritionRow}>
-											<Text style={styles.nutritionKey}>
-												{key.charAt(0).toUpperCase() + key.slice(1)}
-											</Text>
-											<Text style={styles.nutritionValue}>
-												{value as string}
-											</Text>
-										</View>
-									)
-								)}
+							<Text style={styles.sectionTitle}>More Images</Text>
+							<View style={styles.imageGrid}>
+								{product.images.map((img: string, index: number) => (
+									<TouchableOpacity
+										key={index}
+										style={styles.gridImageContainer}
+										onPress={() => setActiveImageIndex(index)}
+									>
+										<Image source={{ uri: img }} style={styles.gridImage} />
+									</TouchableOpacity>
+								))}
 							</View>
 						</View>
 					)}
 
-					{/* Origin */}
-					{product.origin && (
-						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>Origin</Text>
-							<Text style={styles.description}>{product.origin}</Text>
+					{/* Image Preview Modal */}
+					<Modal
+						visible={activeImageIndex !== null}
+						transparent={true}
+						onRequestClose={() => setActiveImageIndex(null)}
+					>
+						<View style={styles.modalBackground}>
+							<TouchableOpacity
+								style={styles.closeModalButton}
+								onPress={() => setActiveImageIndex(null)}
+							>
+								<IconSymbol name='xmark' size={24} color='#FFF' />
+							</TouchableOpacity>
+
+							{activeImageIndex !== null && (
+								<View style={styles.modalContent}>
+									<TouchableOpacity
+										style={[styles.navButton, styles.prevButton]}
+										onPress={() =>
+											setActiveImageIndex(prev =>
+												prev! > 0 ? prev! - 1 : product.images.length - 1,
+											)
+										}
+									>
+										<IconSymbol name='chevron.left' size={30} color='#FFF' />
+									</TouchableOpacity>
+
+									<Image
+										source={{ uri: product.images[activeImageIndex] }}
+										style={styles.fullImage}
+										resizeMode='contain'
+									/>
+
+									<TouchableOpacity
+										style={[styles.navButton, styles.nextButton]}
+										onPress={() =>
+											setActiveImageIndex(prev =>
+												prev! < product.images.length - 1 ? prev! + 1 : 0,
+											)
+										}
+									>
+										<IconSymbol name='chevron.right' size={30} color='#FFF' />
+									</TouchableOpacity>
+								</View>
+							)}
 						</View>
-					)}
+					</Modal>
 
 					{/* Spacer for bottom bar */}
 					<View style={{ height: 100 }} />
@@ -245,7 +351,11 @@ export default function ProductDetailScreen() {
 							onPress={handleDecrement}
 							activeOpacity={0.7}
 						>
-							<IconSymbol name='minus' size={20} color='#E63946' />
+							<IconSymbol
+								name='minus'
+								size={20}
+								color={CustomColors.darkBrown}
+							/>
 						</TouchableOpacity>
 						<Text style={styles.quantityText}>{quantity}</Text>
 						<TouchableOpacity
@@ -253,7 +363,11 @@ export default function ProductDetailScreen() {
 							onPress={handleIncrement}
 							activeOpacity={0.7}
 						>
-							<IconSymbol name='plus' size={20} color='#E63946' />
+							<IconSymbol
+								name='plus'
+								size={20}
+								color={CustomColors.darkBrown}
+							/>
 						</TouchableOpacity>
 					</View>
 
@@ -262,7 +376,11 @@ export default function ProductDetailScreen() {
 						onPress={handleAddToCart}
 						activeOpacity={0.8}
 					>
-						<IconSymbol name='cart.fill' size={20} color='#FFF' />
+						<IconSymbol
+							name='cart.fill'
+							size={20}
+							color={CustomColors.darkBrown}
+						/>
 						<Text style={styles.addToCartText}>Add ৳{totalPrice}</Text>
 					</TouchableOpacity>
 				</View>
@@ -321,13 +439,14 @@ const styles = StyleSheet.create({
 	},
 	imageContainer: {
 		width: '100%',
-		height: 300,
+		height: 420,
 		backgroundColor: '#F5F5F5',
 		position: 'relative',
 	},
 	image: {
 		width: '100%',
-		height: '100%',
+		height: 420,
+		objectFit: 'cover',
 	},
 	discountBadge: {
 		position: 'absolute',
@@ -362,7 +481,6 @@ const styles = StyleSheet.create({
 	unit: {
 		fontSize: 14,
 		color: '#666',
-		marginBottom: 12,
 	},
 	priceContainer: {
 		flexDirection: 'row',
@@ -373,7 +491,7 @@ const styles = StyleSheet.create({
 	price: {
 		fontSize: 28,
 		fontWeight: 'bold',
-		color: '#E63946',
+		color: CustomColors.darkBrown,
 	},
 	originalPrice: {
 		fontSize: 18,
@@ -406,6 +524,112 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		lineHeight: 22,
 		color: '#333',
+	},
+	nameHeader: {
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		justifyContent: 'space-between',
+		gap: 12,
+		marginBottom: 8,
+	},
+	shareButton: {
+		padding: 4,
+	},
+	unitRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 12,
+		marginBottom: 12,
+	},
+	stockBadge: {
+		paddingHorizontal: 8,
+		paddingVertical: 2,
+		borderRadius: 4,
+	},
+	inStock: {
+		backgroundColor: '#E8F5E9',
+	},
+	outOfStock: {
+		backgroundColor: '#FFEBEE',
+	},
+	stockText: {
+		fontSize: 12,
+		fontWeight: '600',
+	},
+	inStockText: {
+		color: '#2E7D32',
+	},
+	outOfStockText: {
+		color: '#C62828',
+	},
+	saveBadge: {
+		backgroundColor: '#5bab6dff',
+		paddingHorizontal: 8,
+		paddingVertical: 4,
+		borderRadius: 4,
+	},
+	saveBadgeText: {
+		color: '#FFF',
+		fontSize: 12,
+		fontWeight: 'bold',
+	},
+	shortDescription: {
+		fontSize: 14,
+		color: '#666',
+		lineHeight: 20,
+		marginBottom: 16,
+	},
+	imageGrid: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		gap: 12,
+	},
+	gridImageContainer: {
+		width: (width - 52) / 2,
+		aspectRatio: 1,
+		borderRadius: 8,
+		overflow: 'hidden',
+		backgroundColor: '#F5F5F5',
+	},
+	gridImage: {
+		width: '100%',
+		height: '100%',
+	},
+	modalBackground: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.9)',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	modalContent: {
+		flex: 1,
+		width: '100%',
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	closeModalButton: {
+		position: 'absolute',
+		top: Platform.OS === 'ios' ? 60 : 40,
+		right: 20,
+		zIndex: 10,
+		padding: 8,
+	},
+	fullImage: {
+		width: width,
+		height: '100%',
+	},
+	navButton: {
+		position: 'absolute',
+		zIndex: 20,
+		padding: 10,
+		backgroundColor: 'rgba(255,255,255,0.2)',
+		borderRadius: 25,
+	},
+	prevButton: {
+		left: 20,
+	},
+	nextButton: {
+		right: 20,
 	},
 	nutritionTable: {
 		gap: 8,
@@ -443,9 +667,9 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		backgroundColor: '#F5F5F5',
-		borderRadius: 24,
+		borderRadius: 28,
 		paddingHorizontal: 8,
-		paddingVertical: 8,
+		height: 56,
 		gap: 16,
 	},
 	quantityButton: {
@@ -473,11 +697,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: '#E63946',
-		borderRadius: 24,
-		paddingVertical: 14,
+		backgroundColor: CustomColors.lightBrown,
+		borderRadius: 28,
+		height: 56,
 		gap: 8,
-		shadowColor: '#E63946',
+		shadowColor: CustomColors.lightBrown,
 		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.3,
 		shadowRadius: 4,
@@ -486,6 +710,6 @@ const styles = StyleSheet.create({
 	addToCartText: {
 		fontSize: 16,
 		fontWeight: 'bold',
-		color: '#FFF',
+		color: CustomColors.darkBrown,
 	},
 });

@@ -22,12 +22,14 @@ export default function DiscoverScreen() {
 	// data fetching
 	const { data: categoryData, isLoading } = useGetAllQuery({
 		path: '/categorys',
-		filters: { displayInHomePage: true },
+		sort: '-priority',
+		filters: { displayInHomePage: true, isActive: true },
 	}) as any;
 
 	const { data: featuredCategoriesData } = useGetAllQuery({
 		path: '/categorys',
-		filters: { isFeatured: true },
+		sort: '-priority',
+		filters: { isFeatured: true, isActive: true },
 	}) as any;
 
 	const { data: combosData, isLoading: combosLoading } = useGetAllQuery({
@@ -80,7 +82,7 @@ export default function DiscoverScreen() {
 					</View>
 				) : (
 					<View style={styles.categoriesGrid}>
-						{categoryData?.doc?.map((category: any) => (
+						{categoryData?.doc?.slice(0, 8).map((category: any) => (
 							<CategoryCard
 								key={category.id}
 								{...category}
