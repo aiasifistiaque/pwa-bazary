@@ -276,6 +276,7 @@ export default function CheckoutScreen() {
 				paymentMethod: selectedPayment,
 				paymentAmount: finalTotal,
 				status: 'pending',
+				paidAmount: finalTotal,
 				origin: 'app',
 				orderDate: new Date(),
 			};
