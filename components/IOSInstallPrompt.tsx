@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export function IOSInstallPrompt() {
 	const [showPrompt, setShowPrompt] = useState(false);
@@ -10,13 +10,13 @@ export function IOSInstallPrompt() {
 		// Check if iOS
 		const userAgent = window.navigator.userAgent.toLowerCase();
 		const isIOS = /iphone|ipad|ipod/.test(userAgent);
-		
+
 		// Check if already installed (standalone mode)
 		const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-		
+
 		// Check if user has dismissed before
 		const dismissed = localStorage.getItem('ios-install-dismissed');
-		
+
 		if (isIOS && !isStandalone && !dismissed) {
 			setShowPrompt(true);
 		}
@@ -40,7 +40,9 @@ export function IOSInstallPrompt() {
 						<Text style={styles.bold}>Add to Home Screen</Text>
 					</Text>
 				</View>
-				<Pressable onPress={handleDismiss} style={styles.closeButton}>
+				<Pressable
+					onPress={handleDismiss}
+					style={styles.closeButton}>
 					<Text style={styles.closeText}>✕</Text>
 				</Pressable>
 			</View>

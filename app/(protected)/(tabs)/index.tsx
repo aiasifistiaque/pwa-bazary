@@ -1,10 +1,10 @@
 import { BannerCarousel } from '@/components/banner-carousel';
 import { CategoryCard } from '@/components/category-card';
 import { FeaturedCategorySection } from '@/components/featured-category-section';
+import { IOSInstallPrompt } from '@/components/IOSInstallPrompt';
 import { SectionHeader } from '@/components/section-header';
 import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
-import { IOSInstallPrompt } from '@/components/IOSInstallPrompt';
 import { CustomColors } from '@/constants/theme';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
@@ -60,10 +60,12 @@ export default function DiscoverScreen() {
 	};
 
 	return (
-		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+		<ScrollView
+			style={styles.container}
+			showsVerticalScrollIndicator={false}>
 			{/* iOS Install Prompt Banner */}
 			<IOSInstallPrompt />
-			
+
 			{/* Banner Carousel */}
 			<BannerCarousel
 				banners={bannersData?.doc}
@@ -101,8 +103,7 @@ export default function DiscoverScreen() {
 					<TouchableOpacity
 						style={styles.showMoreButton}
 						onPress={handleShowMoreCategories}
-						activeOpacity={0.7}
-					>
+						activeOpacity={0.7}>
 						<Text style={styles.showMoreText}>Show more categories</Text>
 					</TouchableOpacity>
 				)}
@@ -132,17 +133,14 @@ export default function DiscoverScreen() {
 							<TouchableOpacity
 								style={styles.recipeCard}
 								onPress={() => handleRecipePress(item.id)}
-								activeOpacity={0.8}
-							>
+								activeOpacity={0.8}>
 								<Image
 									source={{ uri: item.image }}
 									style={styles.recipeImage}
 								/>
 								<View style={styles.recipeInfo}>
 									<Text style={styles.recipeName}>{item.name}</Text>
-									<Text style={styles.recipeDescription}>
-										{item.shortDescription}
-									</Text>
+									<Text style={styles.recipeDescription}>{item.shortDescription}</Text>
 								</View>
 							</TouchableOpacity>
 						)}
@@ -155,7 +153,10 @@ export default function DiscoverScreen() {
 
 			{/* Featured Product Sections */}
 			{featuredCategoriesData?.doc?.map((category: any) => (
-				<FeaturedCategorySection key={category.id} category={category} />
+				<FeaturedCategorySection
+					key={category.id}
+					category={category}
+				/>
 			))}
 		</ScrollView>
 	);
