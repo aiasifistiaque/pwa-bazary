@@ -1,11 +1,27 @@
 {
-	"buildCommand": "expo export -p web",
+	"buildCommand": "expo export -p web && bash scripts/copy-pwa-files.sh",
 	"outputDirectory": "dist",
 	"framework": null,
-	"rewrites": [
+	"routes": [
 		{
-			"source": "/((?!manifest\\.json|sw\\.js|.*\\.(png|jpg|ico|css|js)).*)",
-			"destination": "/index.html"
+			"src": "/manifest.json",
+			"dest": "/manifest.json"
+		},
+		{
+			"src": "/sw.js",
+			"dest": "/sw.js"
+		},
+		{
+			"src": "/offline.html",
+			"dest": "/offline.html"
+		},
+		{
+			"src": "/(.*\\.(png|jpg|ico|css|js|json))",
+			"dest": "/$1"
+		},
+		{
+			"src": "/(.*)",
+			"dest": "/index.html"
 		}
 	],
 	"headers": [
