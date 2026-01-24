@@ -26,18 +26,21 @@ const thisWeekCategories = [
 		name: 'All Offers',
 		icon: '🏷️',
 		color: CustomColors.darkBrown,
+		route: '/offers',
 	},
 	{
 		id: 'new',
 		name: 'New in App',
 		icon: '✨',
 		color: '#7f5539',
+		route: '/product-list?category=New%20in%20the%20App',
 	},
 	{
 		id: 'recipes',
 		name: 'All Recipes',
 		icon: '🍳',
 		color: '#9c6644',
+		route: '/recipes',
 	},
 ];
 
@@ -67,7 +70,7 @@ export default function SearchScreen() {
 			path: 'products',
 			search: debouncedQuery,
 		},
-		{ skip: !debouncedQuery }
+		{ skip: !debouncedQuery },
 	);
 
 	const handleCategoryPress = (categoryId: string) => {
@@ -90,7 +93,7 @@ export default function SearchScreen() {
 					vat: 0,
 				},
 				qty: 1,
-			})
+			}),
 		);
 	};
 
@@ -161,18 +164,18 @@ export default function SearchScreen() {
 						<View style={styles.section}>
 							<Text style={styles.sectionTitle}>This Week</Text>
 							<View style={styles.thisWeekGrid}>
-								{thisWeekCategories.map(category => (
+								{thisWeekCategories.map(item => (
 									<TouchableOpacity
-										key={category.id}
+										key={item.id}
 										style={[
 											styles.thisWeekCard,
-											{ backgroundColor: category.color },
+											{ backgroundColor: item.color },
 										]}
-										onPress={() => handleCategoryPress(category.id)}
+										onPress={() => router.push(item.route as any)}
 										activeOpacity={0.7}
 									>
-										<Text style={styles.thisWeekIcon}>{category.icon}</Text>
-										<Text style={styles.thisWeekName}>{category.name}</Text>
+										<Text style={styles.thisWeekIcon}>{item.icon}</Text>
+										<Text style={styles.thisWeekName}>{item.name}</Text>
 										<IconSymbol name='chevron.right' size={20} color='#333' />
 									</TouchableOpacity>
 								))}
