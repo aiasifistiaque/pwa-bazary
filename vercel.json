@@ -1,5 +1,5 @@
 {
-	"buildCommand": "expo export -p web && bash scripts/copy-pwa-files.sh",
+	"buildCommand": "npm run vercel-build",
 	"outputDirectory": "dist",
 	"framework": null,
 	"cleanUrls": false,
