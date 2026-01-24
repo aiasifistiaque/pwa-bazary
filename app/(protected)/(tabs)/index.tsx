@@ -1,6 +1,7 @@
 import { BannerCarousel } from '@/components/banner-carousel';
 import { CategoryCard } from '@/components/category-card';
 import { FeaturedCategorySection } from '@/components/featured-category-section';
+import { RecipeCard } from '@/components/recipe-card';
 import { SectionHeader } from '@/components/section-header';
 import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
@@ -34,7 +35,8 @@ export default function DiscoverScreen() {
 
 	const { data: combosData, isLoading: combosLoading } = useGetAllQuery({
 		path: '/combos',
-		filters: { isFeatured: true },
+		sort: '-priority',
+		filters: { isFeatured: true, isActive: true },
 	}) as any;
 
 	const { data: bannersData, isLoading: bannersLoading } = useGetAllQuery({
@@ -109,7 +111,10 @@ export default function DiscoverScreen() {
 				{combosLoading ? (
 					<View style={styles.sectionHeaderSkeleton} />
 				) : (
-					<SectionHeader title='Combo Recipes' />
+					<SectionHeader
+						title='Combo Recipes'
+						onSeeAllPress={() => router.push('/recipes')}
+					/>
 				)}
 				{combosLoading ? (
 					<FlatList
@@ -123,24 +128,14 @@ export default function DiscoverScreen() {
 				) : (
 					<FlatList
 						horizontal
-						data={combosData?.doc}
+						data={combosData?.doc?.slice(0, 5)}
 						renderItem={({ item }) => (
-							<TouchableOpacity
+							<RecipeCard
+								key={item.id}
+								{...item}
+								onPress={handleRecipePress}
 								style={styles.recipeCard}
-								onPress={() => handleRecipePress(item.id)}
-								activeOpacity={0.8}
-							>
-								<Image
-									source={{ uri: item.image }}
-									style={styles.recipeImage}
-								/>
-								<View style={styles.recipeInfo}>
-									<Text style={styles.recipeName}>{item.name}</Text>
-									<Text style={styles.recipeDescription}>
-										{item.shortDescription}
-									</Text>
-								</View>
-							</TouchableOpacity>
+							/>
 						)}
 						keyExtractor={item => item.id}
 						showsHorizontalScrollIndicator={false}
@@ -205,34 +200,6 @@ const styles = StyleSheet.create({
 	recipeCard: {
 		width: 280,
 		marginRight: 12,
-		borderRadius: 12,
-		backgroundColor: '#FFFFFF',
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
-		overflow: 'hidden',
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 2,
-	},
-	recipeImage: {
-		width: '100%',
-		height: 160,
-		resizeMode: 'cover',
-	},
-	recipeInfo: {
-		padding: 12,
-	},
-	recipeName: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		color: '#000000',
-		marginBottom: 4,
-	},
-	recipeDescription: {
-		fontSize: 13,
-		color: '#666666',
 	},
 	sectionHeaderSkeleton: {
 		height: 24,
