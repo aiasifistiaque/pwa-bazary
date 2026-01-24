@@ -17,6 +17,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import { ProductCard } from '@/components/product-card';
 import { Loader } from '@/components/Loader';
+import { CustomColors } from '@/constants/theme';
 const fallbackImage = require('../../../assets/images/fallback-fruit.png');
 // Featured categories for "This Week"
 const thisWeekCategories = [
@@ -24,19 +25,19 @@ const thisWeekCategories = [
 		id: 'offers',
 		name: 'All Offers',
 		icon: '🏷️',
-		color: '#FFF9C4',
+		color: CustomColors.darkBrown,
 	},
 	{
 		id: 'new',
 		name: 'New in App',
 		icon: '✨',
-		color: '#F8BBD0',
+		color: '#7f5539',
 	},
 	{
 		id: 'recipes',
 		name: 'All Recipes',
 		icon: '🍳',
-		color: '#C8E6C9',
+		color: '#9c6644',
 	},
 ];
 
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		fontSize: 16,
 		fontWeight: '600',
-		color: '#333',
+		color: CustomColors.bodyColor,
 	},
 	categoriesGrid: {
 		gap: 12,
