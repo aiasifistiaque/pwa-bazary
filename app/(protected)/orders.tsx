@@ -1,7 +1,11 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Toast } from '@/components/ui/Toast';
+import { CustomColors } from '@/constants/theme';
+import { useGetSelfQuery } from '@/store/services/authApi';
+import { useGetOrdersQuery } from '@/store/services/checkoutApi';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
 	ActivityIndicator,
 	Animated,
@@ -12,12 +16,8 @@ import {
 	Text,
 	View,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { useGetOrdersQuery } from '@/store/services/checkoutApi';
-import { useGetSelfQuery } from '@/store/services/authApi';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CustomColors } from '@/constants/theme';
-import { Toast } from '@/components/ui/Toast';
+import { useDispatch } from 'react-redux';
 
 type OrderItem = {
 	id: string;
@@ -78,12 +78,7 @@ type OrderCardProps = {
 	onPress?: (orderId: string) => void;
 };
 
-const OrderCard = ({
-	order,
-	showReorderButton = true,
-	onReorder,
-	onPress,
-}: OrderCardProps) => {
+const OrderCard = ({ order, showReorderButton = true, onReorder, onPress }: OrderCardProps) => {
 	const statusColor = getStatusColor(order.status);
 	const statusText = getStatusText(order.status);
 	const fallbackImage = 'https://via.placeholder.com/200'; // Fallback image
@@ -108,46 +103,50 @@ const OrderCard = ({
 	const displayedItems = isExpanded ? order.items : order.items.slice(0, 3);
 
 	return (
-		<Pressable style={styles.orderCard} onPress={() => onPress?.(order.id)}>
+		<Pressable
+			style={styles.orderCard}
+			onPress={() => onPress?.(order.id)}>
 			{/* Order Header */}
 			<View style={styles.orderHeader}>
 				<View>
 					<Text style={styles.orderNumber}>{order.orderNumber}</Text>
 					<Text style={styles.orderDate}>{order.date}</Text>
 				</View>
-				<View
-					style={[styles.statusBadge, { backgroundColor: `${statusColor}15` }]}
-				>
-					<Text style={[styles.statusText, { color: statusColor }]}>
-						{statusText}
-					</Text>
+				<View style={[styles.statusBadge, { backgroundColor: `${statusColor}15` }]}>
+					<Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
 				</View>
 			</View>
 
 			{/* Order Items Preview */}
 			<View style={styles.itemsPreview}>
 				{displayedItems?.map((item, index) => (
-					<View key={index} style={styles.itemRow}>
+					<View
+						key={index}
+						style={styles.itemRow}>
 						<Image
 							source={{ uri: item.image || fallbackImage }}
 							style={styles.itemImage}
 						/>
 						<View style={styles.itemInfo}>
-							<Text style={styles.itemName} numberOfLines={1}>
+							<Text
+								style={styles.itemName}
+								numberOfLines={1}>
 								{item.name}
 							</Text>
-							<Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
+							<Text style={styles.itemQuantity}>Qty: {item?.quantity}</Text>
 						</View>
-						<Text style={styles.itemPrice}>৳{item.price * item.quantity}</Text>
+						<Text style={styles.itemPrice}>
+							৳{(item?.price * item?.quantity)?.toLocaleString()}
+						</Text>
 					</View>
 				))}
 
 				{hasMoreItems && (
-					<Pressable onPress={toggleExpand} style={styles.expandButton}>
+					<Pressable
+						onPress={toggleExpand}
+						style={styles.expandButton}>
 						<Text style={styles.expandButtonText}>
-							{isExpanded
-								? 'Show less'
-								: `+${order.items.length - 3} more items`}
+							{isExpanded ? 'Show less' : `+${order.items.length - 3} more items`}
 						</Text>
 						<IconSymbol
 							name={isExpanded ? 'chevron.up' : 'chevron.down'}
@@ -162,7 +161,7 @@ const OrderCard = ({
 			<View style={styles.orderFooter}>
 				<View style={styles.totalSection}>
 					<Text style={styles.totalLabel}>Total</Text>
-					<Text style={styles.totalAmount}>৳{order.total}</Text>
+					<Text style={styles.totalAmount}>৳{order?.total?.toLocaleString()}</Text>
 				</View>
 
 				{showReorderButton && (
@@ -171,8 +170,7 @@ const OrderCard = ({
 						onPress={e => {
 							e.stopPropagation();
 							onReorder?.(order);
-						}}
-					>
+						}}>
 						<IconSymbol
 							name='arrow.clockwise'
 							size={16}
@@ -212,17 +210,13 @@ export default function OrdersScreen() {
 			// Filter orders to only show logged-in user's orders
 			const userOrders = data.doc.filter((order: any) => {
 				const customerId =
-					typeof order.customer === 'object'
-						? order.customer?._id
-						: order.customer;
+					typeof order.customer === 'object' ? order.customer?._id : order.customer;
 				return customerId === loggedInUserId;
 			});
 
 			const newOrders: Order[] = userOrders.map((order: any) => ({
 				id: order._id,
-				orderNumber: order.invoice
-					? `#${order.invoice}`
-					: `#${order._id.slice(-6)}`,
+				orderNumber: order.invoice ? `#${order.invoice}` : `#${order._id.slice(-6)}`,
 				date: new Date(order.orderDate).toISOString().split('T')[0],
 				status: order.status,
 				items: order.items.map((item: any) => ({
@@ -251,9 +245,7 @@ export default function OrdersScreen() {
 	// Show Load More button only if:
 	// 1. We have loaded at least 10 orders (meaning there might be more)
 	// 2. Current page is less than total pages (there are more pages to fetch)
-	const hasMore = data
-		? allOrders.length >= 10 && currentPage < data.totalPages
-		: false;
+	const hasMore = data ? allOrders.length >= 10 && currentPage < data.totalPages : false;
 
 	const ongoingOrders = allOrders.filter(order =>
 		[
@@ -263,12 +255,10 @@ export default function OrdersScreen() {
 			'processing',
 			'ready-to-ship',
 			'out-for-delivery',
-		].includes(order.status)
+		].includes(order.status),
 	);
 	const pastOrders = allOrders.filter(order =>
-		['delivered', 'cancelled', 'completed', 'refunded', 'failed'].includes(
-			order.status
-		)
+		['delivered', 'cancelled', 'completed', 'refunded', 'failed'].includes(order.status),
 	);
 
 	// Reset pagination when switching tabs
@@ -296,8 +286,7 @@ export default function OrdersScreen() {
 			console.log('Adding item to cart:', item); // Debug log
 
 			// Extract the actual product ID from the object
-			const productId =
-				typeof item.id === 'object' ? (item.id as any)._id : item.id;
+			const productId = typeof item.id === 'object' ? (item.id as any)._id : item.id;
 
 			dispatch(
 				addToCart({
@@ -310,15 +299,13 @@ export default function OrdersScreen() {
 						vat: 0,
 					},
 					qty: item.quantity,
-				})
+				}),
 			);
 		});
 
 		// Show toast notification
 		setToastMessage(
-			`${order.items.length} item${
-				order.items.length > 1 ? 's' : ''
-			} added to cart!`
+			`${order.items.length} item${order.items.length > 1 ? 's' : ''} added to cart!`,
 		);
 		setToastVisible(true);
 	};
@@ -327,8 +314,14 @@ export default function OrdersScreen() {
 		<SafeAreaView style={styles.safeArea}>
 			{/* Header */}
 			<View style={styles.header}>
-				<Pressable onPress={() => router.back()} style={styles.backButton}>
-					<IconSymbol name='chevron.left' size={24} color='#000000' />
+				<Pressable
+					onPress={() => router.back()}
+					style={styles.backButton}>
+					<IconSymbol
+						name='chevron.left'
+						size={24}
+						color='#000000'
+					/>
 				</Pressable>
 				<Text style={styles.headerTitle}>My Orders</Text>
 				<View style={{ width: 40 }} />
@@ -338,27 +331,15 @@ export default function OrdersScreen() {
 			<View style={styles.tabContainer}>
 				<Pressable
 					style={[styles.tab, activeTab === 'ongoing' && styles.activeTab]}
-					onPress={() => handleTabChange('ongoing')}
-				>
-					<Text
-						style={[
-							styles.tabText,
-							activeTab === 'ongoing' && styles.activeTabText,
-						]}
-					>
+					onPress={() => handleTabChange('ongoing')}>
+					<Text style={[styles.tabText, activeTab === 'ongoing' && styles.activeTabText]}>
 						Ongoing ({ongoingOrders.length})
 					</Text>
 				</Pressable>
 				<Pressable
 					style={[styles.tab, activeTab === 'past' && styles.activeTab]}
-					onPress={() => handleTabChange('past')}
-				>
-					<Text
-						style={[
-							styles.tabText,
-							activeTab === 'past' && styles.activeTabText,
-						]}
-					>
+					onPress={() => handleTabChange('past')}>
+					<Text style={[styles.tabText, activeTab === 'past' && styles.activeTabText]}>
 						Past Orders ({pastOrders.length})
 					</Text>
 				</Pressable>
@@ -367,17 +348,23 @@ export default function OrdersScreen() {
 			{/* Orders List */}
 			<ScrollView
 				style={styles.scrollView}
-				showsVerticalScrollIndicator={false}
-			>
+				showsVerticalScrollIndicator={false}>
 				{isLoading ? (
 					<View style={styles.loadingContainer}>
-						<ActivityIndicator size='large' color={CustomColors.darkBrown} />
+						<ActivityIndicator
+							size='large'
+							color={CustomColors.darkBrown}
+						/>
 					</View>
 				) : activeTab === 'ongoing' ? (
 					<View style={styles.ordersContainer}>
 						{ongoingOrders.length === 0 ? (
 							<View style={styles.emptyState}>
-								<IconSymbol name='tray' size={64} color='#D0D0D0' />
+								<IconSymbol
+									name='tray'
+									size={64}
+									color='#D0D0D0'
+								/>
 								<Text style={styles.emptyStateText}>No ongoing orders</Text>
 							</View>
 						) : (
@@ -396,8 +383,7 @@ export default function OrdersScreen() {
 							<Pressable
 								style={styles.loadMoreButton}
 								onPress={handleLoadMore}
-								disabled={isFetching}
-							>
+								disabled={isFetching}>
 								{isFetching ? (
 									<ActivityIndicator
 										size='small'
@@ -413,7 +399,11 @@ export default function OrdersScreen() {
 					<View style={styles.ordersContainer}>
 						{pastOrders.length === 0 ? (
 							<View style={styles.emptyState}>
-								<IconSymbol name='tray' size={64} color='#D0D0D0' />
+								<IconSymbol
+									name='tray'
+									size={64}
+									color='#D0D0D0'
+								/>
 								<Text style={styles.emptyStateText}>No past orders</Text>
 							</View>
 						) : (
@@ -433,8 +423,7 @@ export default function OrdersScreen() {
 							<Pressable
 								style={styles.loadMoreButton}
 								onPress={handleLoadMore}
-								disabled={isFetching}
-							>
+								disabled={isFetching}>
 								{isFetching ? (
 									<ActivityIndicator
 										size='small'

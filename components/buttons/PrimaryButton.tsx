@@ -1,14 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
 import React from 'react';
-import {
-	ActivityIndicator,
-	Pressable,
-	StyleProp,
-	StyleSheet,
-	Text,
-	ViewStyle,
-} from 'react-native';
+import { ActivityIndicator, Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 
 type PrimaryButtonProps = {
 	title: string;
@@ -31,14 +24,20 @@ export default function PrimaryButton({
 		<Pressable
 			style={[styles.button, disabled && styles.disabled, style]}
 			onPress={onPress}
-			disabled={disabled || loading}
-		>
+			disabled={disabled || loading}>
 			{loading ? (
-				<ActivityIndicator size='small' color={CustomColors.darkBrown} />
+				<ActivityIndicator
+					size='small'
+					color={CustomColors.darkBrown}
+				/>
 			) : (
 				<>
 					{icon && (
-						<IconSymbol name={icon} size={20} color={CustomColors.darkBrown} />
+						<IconSymbol
+							name={icon}
+							size={20}
+							color={CustomColors.darkBrown}
+						/>
 					)}
 					<Text style={styles.text}>{title}</Text>
 				</>
@@ -53,7 +52,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		backgroundColor: CustomColors.lightBrown,
-		borderRadius: 12,
+		borderRadius: 99,
 		paddingVertical: 16,
 		paddingHorizontal: 24,
 		gap: 12,
@@ -66,7 +65,7 @@ const styles = StyleSheet.create({
 	},
 	text: {
 		fontSize: 16,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: CustomColors.darkBrown,
 	},
 });

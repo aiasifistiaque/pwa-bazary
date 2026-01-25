@@ -1,13 +1,14 @@
 import { Loader } from '@/components/Loader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useGetByIdQuery } from '@/store/services/commonApi';
-import { addToCart } from '@/store/slices/cartSlice';
-import { toggleFavorite } from '@/store/slices/favoritesSlice';
 import { RootState } from '@/store';
+import { useGetByIdQuery } from '@/store/services/commonApi';
+import { addToCart, removeFromCart, updateCartItemQuantity } from '@/store/slices/cartSlice';
+import { toggleFavorite } from '@/store/slices/favoritesSlice';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 
 import {
+	Dimensions,
 	Image,
 	Modal,
 	Platform,
@@ -17,16 +18,14 @@ import {
 	Text,
 	TouchableOpacity,
 	View,
-	FlatList,
-	Dimensions,
 } from 'react-native';
-const { width } = Dimensions.get('window');
-import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
+const { width } = Dimensions.get('window');
 const fallback = require('../../../assets/images/fallback-fruit.png');
 
-import { useToast } from '@/contexts/ToastContext';
 import { CustomColors } from '@/constants/theme';
+import { useToast } from '@/contexts/ToastContext';
 
 export default function ProductDetailScreen() {
 	const dispatch = useDispatch();
@@ -37,10 +36,18 @@ export default function ProductDetailScreen() {
 		path: 'products',
 		id,
 	});
-	console.log('productD', productD);
+
 	const product: any = productD ? productD : {};
 	const [quantity, setQuantity] = useState(1);
 	const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+
+	// Get cart item to check if product is in cart
+	const cartItems = useSelector((state: RootState) => state.cart.cartItems);
+	const cartItem = cartItems?.find(
+		(item: any) => item.id === product?.id || item._id === product?.id,
+	);
+	const cartQuantity = cartItem?.qty || 0;
+	const isInCart = cartQuantity > 0;
 
 	const handleShare = async () => {
 		try {
@@ -61,11 +68,35 @@ export default function ProductDetailScreen() {
 	};
 
 	const handleIncrement = () => {
-		setQuantity(prev => prev + 1);
+		if (isInCart) {
+			// Update cart quantity
+			dispatch(
+				updateCartItemQuantity({
+					id: product?.id,
+					qty: cartQuantity + 1,
+				}),
+			);
+		} else {
+			// Local quantity for adding to cart
+			setQuantity(prev => prev + 1);
+		}
 	};
 
 	const handleDecrement = () => {
-		setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+		if (isInCart) {
+			// Update cart quantity
+			if (cartQuantity > 1) {
+				dispatch(
+					updateCartItemQuantity({
+						id: product?.id,
+						qty: cartQuantity - 1,
+					}),
+				);
+			}
+		} else {
+			// Local quantity for adding to cart
+			setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+		}
 	};
 
 	const handleAddToCart = () => {
@@ -82,7 +113,13 @@ export default function ProductDetailScreen() {
 				qty: quantity,
 			}),
 		);
-		showToast('Added to cart');
+		showToast(`${product?.name} added to cart`);
+		setQuantity(1); // Reset local quantity after adding
+	};
+
+	const handleRemoveFromCart = () => {
+		dispatch(removeFromCart(product?.id));
+		showToast(`${product?.name} removed from cart`);
 	};
 
 	const handleFavoritePress = () => {
@@ -102,8 +139,7 @@ export default function ProductDetailScreen() {
 	};
 
 	// Ensure product.price is parsed safely (handles numbers or strings with commas)
-	const priceNumber =
-		parseFloat(String(product?.price ?? '0').replace(/,/g, '')) || 0;
+	const priceNumber = parseFloat(String(product?.price ?? '0').replace(/,/g, '')) || 0;
 	const totalPrice = (priceNumber * quantity).toLocaleString();
 	if (isLoading) {
 		return <Loader />;
@@ -111,12 +147,33 @@ export default function ProductDetailScreen() {
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			<View style={styles.container}>
+				{/* Fixed Header Buttons */}
+				<TouchableOpacity
+					style={styles.backButton}
+					onPress={handleBack}
+					activeOpacity={0.7}>
+					<IconSymbol
+						name='chevron.left'
+						size={24}
+						color='#000'
+					/>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.favoriteButton}
+					activeOpacity={0.7}
+					onPress={handleFavoritePress}>
+					<IconSymbol
+						name={isFavorite ? 'heart.fill' : 'heart'}
+						size={24}
+						color={isFavorite ? CustomColors.darkBrown : '#000'}
+					/>
+				</TouchableOpacity>
+
 				{/* Scrollable Content */}
 				<ScrollView
 					style={styles.scrollView}
 					showsVerticalScrollIndicator={false}
-					contentContainerStyle={styles.scrollContent}
-				>
+					contentContainerStyle={styles.scrollContent}>
 					{/* Product Image */}
 					<View style={styles.imageContainer}>
 						{product.image ? (
@@ -137,67 +194,40 @@ export default function ProductDetailScreen() {
 								<Text style={styles.discountText}>{product.discount}</Text>
 							</View>
 						)}
-						{/* Overlay Buttons */}
-						<TouchableOpacity
-							style={styles.backButton}
-							onPress={handleBack}
-							activeOpacity={0.7}
-						>
-							<IconSymbol name='chevron.left' size={24} color='#000' />
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={styles.favoriteButton}
-							activeOpacity={0.7}
-							onPress={handleFavoritePress}
-						>
-							<IconSymbol
-								name={isFavorite ? 'heart.fill' : 'heart'}
-								size={24}
-								color={isFavorite ? CustomColors.darkBrown : '#000'}
-							/>
-						</TouchableOpacity>
 					</View>
 
 					{/* Product Info */}
 					<View style={styles.infoSection}>
-						{product.category && (
-							<Text style={styles.category}>{product.category.name}</Text>
-						)}
+						{product.category && <Text style={styles.category}>{product.category.name}</Text>}
 						<View style={styles.nameHeader}>
-							<Text style={[styles.productName, { flex: 1 }]}>
-								{product.name}
-							</Text>
+							<Text style={[styles.productName, { flex: 1 }]}>{product.name}</Text>
 							<TouchableOpacity
 								onPress={handleShare}
-								style={styles.shareButton}
-							>
-								<IconSymbol name='square.and.arrow.up' size={24} color='#666' />
+								style={styles.shareButton}>
+								<IconSymbol
+									name='square.and.arrow.up'
+									size={24}
+									color='#666'
+								/>
 							</TouchableOpacity>
 						</View>
 
 						<View style={styles.unitRow}>
 							<Text style={styles.unit}>
-								{product.weight || product.unitValue || '000'}{' '}
-								{product.unit || 'unit'}
+								{product.weight || product.unitValue || '000'} {product.unit || 'unit'}
 							</Text>
 							{product.stock !== undefined && (
 								<View
 									style={[
 										styles.stockBadge,
 										product.stock > 0 ? styles.inStock : styles.outOfStock,
-									]}
-								>
+									]}>
 									<Text
 										style={[
 											styles.stockText,
-											product.stock > 0
-												? styles.inStockText
-												: styles.outOfStockText,
-										]}
-									>
-										{product.stock > 0
-											? `${product.stock} items left`
-											: 'Sold Out'}
+											product.stock > 0 ? styles.inStockText : styles.outOfStockText,
+										]}>
+										{product.stock > 0 ? `${product.stock} items left` : 'Sold Out'}
 									</Text>
 								</View>
 							)}
@@ -205,33 +235,27 @@ export default function ProductDetailScreen() {
 
 						<View style={[styles.priceContainer, { flexWrap: 'wrap' }]}>
 							<Text style={styles.price}>
-								{`৳${
-									product.isDiscount
-										? product.discountedPrice
-										: product.sellPrice
-								}`}
+								{`৳${product.isDiscount ? product.discountedPrice : product.sellPrice}`}
 							</Text>
-							{product.oldPrice && (
-								<Text style={styles.originalPrice}>৳{product.oldPrice}</Text>
-							)}
+							{product.oldPrice && <Text style={styles.originalPrice}>৳{product.oldPrice}</Text>}
 							{product.isDiscount && product.discount > 0 && (
 								<View style={styles.saveBadge}>
-									<Text style={styles.saveBadgeText}>
-										Save ৳{product.discount}
-									</Text>
+									<Text style={styles.saveBadgeText}>Save ৳{product.discount}</Text>
 								</View>
 							)}
 						</View>
 
 						{product.shortDescription && (
-							<Text style={styles.shortDescription}>
-								{product.shortDescription}
-							</Text>
+							<Text style={styles.shortDescription}>{product.shortDescription}</Text>
 						)}
 
 						{product.badge !== undefined && (
 							<View style={styles.badgeContainer}>
-								<IconSymbol name='sparkles' size={14} color='#E63946' />
+								<IconSymbol
+									name='sparkles'
+									size={14}
+									color='#E63946'
+								/>
 								<Text style={styles.badgeText}>{product.badge}</Text>
 							</View>
 						)}
@@ -254,22 +278,18 @@ export default function ProductDetailScreen() {
 					{/* Nutrition Information */}
 					{product.nutritionPer100ml && (
 						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>
-								Nutrition Information (per 100ml)
-							</Text>
+							<Text style={styles.sectionTitle}>Nutrition Information (per 100ml)</Text>
 							<View style={styles.nutritionTable}>
-								{Object.entries(product.nutritionPer100ml).map(
-									([key, value]) => (
-										<View key={key} style={styles.nutritionRow}>
-											<Text style={styles.nutritionKey}>
-												{key.charAt(0).toUpperCase() + key.slice(1)}
-											</Text>
-											<Text style={styles.nutritionValue}>
-												{value as string}
-											</Text>
-										</View>
-									),
-								)}
+								{Object.entries(product.nutritionPer100ml).map(([key, value]) => (
+									<View
+										key={key}
+										style={styles.nutritionRow}>
+										<Text style={styles.nutritionKey}>
+											{key.charAt(0).toUpperCase() + key.slice(1)}
+										</Text>
+										<Text style={styles.nutritionValue}>{value as string}</Text>
+									</View>
+								))}
 							</View>
 						</View>
 					)}
@@ -283,9 +303,11 @@ export default function ProductDetailScreen() {
 									<TouchableOpacity
 										key={index}
 										style={styles.gridImageContainer}
-										onPress={() => setActiveImageIndex(index)}
-									>
-										<Image source={{ uri: img }} style={styles.gridImage} />
+										onPress={() => setActiveImageIndex(index)}>
+										<Image
+											source={{ uri: img }}
+											style={styles.gridImage}
+										/>
 									</TouchableOpacity>
 								))}
 							</View>
@@ -296,14 +318,16 @@ export default function ProductDetailScreen() {
 					<Modal
 						visible={activeImageIndex !== null}
 						transparent={true}
-						onRequestClose={() => setActiveImageIndex(null)}
-					>
+						onRequestClose={() => setActiveImageIndex(null)}>
 						<View style={styles.modalBackground}>
 							<TouchableOpacity
 								style={styles.closeModalButton}
-								onPress={() => setActiveImageIndex(null)}
-							>
-								<IconSymbol name='xmark' size={24} color='#FFF' />
+								onPress={() => setActiveImageIndex(null)}>
+								<IconSymbol
+									name='xmark'
+									size={24}
+									color='#FFF'
+								/>
 							</TouchableOpacity>
 
 							{activeImageIndex !== null && (
@@ -314,9 +338,12 @@ export default function ProductDetailScreen() {
 											setActiveImageIndex(prev =>
 												prev! > 0 ? prev! - 1 : product.images.length - 1,
 											)
-										}
-									>
-										<IconSymbol name='chevron.left' size={30} color='#FFF' />
+										}>
+										<IconSymbol
+											name='chevron.left'
+											size={30}
+											color='#FFF'
+										/>
 									</TouchableOpacity>
 
 									<Image
@@ -331,9 +358,12 @@ export default function ProductDetailScreen() {
 											setActiveImageIndex(prev =>
 												prev! < product.images.length - 1 ? prev! + 1 : 0,
 											)
-										}
-									>
-										<IconSymbol name='chevron.right' size={30} color='#FFF' />
+										}>
+										<IconSymbol
+											name='chevron.right'
+											size={30}
+											color='#FFF'
+										/>
 									</TouchableOpacity>
 								</View>
 							)}
@@ -350,20 +380,18 @@ export default function ProductDetailScreen() {
 						<TouchableOpacity
 							style={styles.quantityButton}
 							onPress={handleDecrement}
-							activeOpacity={0.7}
-						>
+							activeOpacity={0.7}>
 							<IconSymbol
 								name='minus'
 								size={20}
 								color={CustomColors.darkBrown}
 							/>
 						</TouchableOpacity>
-						<Text style={styles.quantityText}>{quantity}</Text>
+						<Text style={styles.quantityText}>{isInCart ? cartQuantity : quantity}</Text>
 						<TouchableOpacity
 							style={styles.quantityButton}
 							onPress={handleIncrement}
-							activeOpacity={0.7}
-						>
+							activeOpacity={0.7}>
 							<IconSymbol
 								name='plus'
 								size={20}
@@ -372,18 +400,31 @@ export default function ProductDetailScreen() {
 						</TouchableOpacity>
 					</View>
 
-					<TouchableOpacity
-						style={styles.addToCartButton}
-						onPress={handleAddToCart}
-						activeOpacity={0.8}
-					>
-						<IconSymbol
-							name='cart.fill'
-							size={20}
-							color={CustomColors.darkBrown}
-						/>
-						<Text style={styles.addToCartText}>Add ৳{totalPrice}</Text>
-					</TouchableOpacity>
+					{isInCart ? (
+						<TouchableOpacity
+							style={[styles.addToCartButton, styles.removeButton]}
+							onPress={handleRemoveFromCart}
+							activeOpacity={0.8}>
+							<IconSymbol
+								name='trash'
+								size={20}
+								color='#FFF'
+							/>
+							<Text style={[styles.addToCartText, styles.removeButtonText]}>Remove from Cart</Text>
+						</TouchableOpacity>
+					) : (
+						<TouchableOpacity
+							style={styles.addToCartButton}
+							onPress={handleAddToCart}
+							activeOpacity={0.8}>
+							<IconSymbol
+								name='cart.fill'
+								size={20}
+								color={CustomColors.darkBrown}
+							/>
+							<Text style={styles.addToCartText}>Add ৳{totalPrice}</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 			</View>
 		</SafeAreaView>
@@ -661,7 +702,7 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingHorizontal: 20,
 		paddingVertical: 8,
-		paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+		paddingBottom: Platform.OS === 'ios' ? 0 : 8,
 		backgroundColor: '#FFFFFF',
 	},
 	quantitySelector: {
@@ -670,7 +711,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F5F5F5',
 		borderRadius: 28,
 		paddingHorizontal: 8,
-		height: 56,
+		height: 46,
 		gap: 16,
 	},
 	quantityButton: {
@@ -700,7 +741,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		backgroundColor: CustomColors.lightBrown,
 		borderRadius: 28,
-		height: 56,
+		height: 46,
 		gap: 8,
 		shadowColor: CustomColors.lightBrown,
 		shadowOffset: { width: 0, height: 2 },
@@ -712,5 +753,12 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: 'bold',
 		color: CustomColors.darkBrown,
+	},
+	removeButton: {
+		backgroundColor: '#E63946',
+		shadowColor: '#E63946',
+	},
+	removeButtonText: {
+		color: '#FFF',
 	},
 });

@@ -1,53 +1,41 @@
-import { ProductCard } from '@/components/product-card';
+import { CompactProductCard } from '@/components/CompactProductCard';
 import { SectionHeader } from '@/components/section-header';
 import { useGetAllQuery } from '@/store/services/commonApi';
-import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
 import React from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { useDispatch } from 'react-redux';
 
 export const FeaturedCategorySection = ({ category }: { category: any }) => {
-	const dispatch = useDispatch();
 	const { data: productsData, isLoading } = useGetAllQuery({
 		path: '/products',
-		filters: { category: category.id },
+		sort: '-priority',
+		limit: 10,
+		filters: { category_in: category.id, isActive: true },
 	});
 
 	const handleProductPress = (productId: string) => {
 		router.push(`/product/${productId}`);
 	};
 
-	const handleAddPress = (product: any) => {
-		dispatch(
-			addToCart({
-				item: {
-					id: product.id,
-					_id: product.id,
-					name: product.name,
-					price: product.sellPrice,
-					image: product.image,
-					vat: 0,
-				},
-				qty: 1,
-			})
-		);
-	};
-
 	const handleSeeAllPress = () => {
 		router.push(`/category/${category.id}`);
 	};
 
-	if (isLoading || !productsData?.doc?.length) return null;
+	// Don't render if loading or no products
+	if (isLoading) return null;
+	if (!productsData?.doc || productsData.doc.length === 0) return null;
 
 	return (
 		<View style={styles.section}>
-			<SectionHeader title={category.name} onSeeAllPress={handleSeeAllPress} />
+			<SectionHeader
+				title={category.name}
+				onSeeAllPress={handleSeeAllPress}
+			/>
 			<FlatList
 				horizontal
 				data={productsData.doc}
 				renderItem={({ item }) => (
-					<ProductCard
+					<CompactProductCard
 						product={item}
 						id={item.id}
 						name={item.name}
@@ -57,7 +45,6 @@ export const FeaturedCategorySection = ({ category }: { category: any }) => {
 						unitPrice={item.unitPrice}
 						weight={item.weight}
 						onPress={() => handleProductPress(item.id)}
-						onAddPress={() => handleAddPress(item)}
 					/>
 				)}
 				keyExtractor={item => item.id}

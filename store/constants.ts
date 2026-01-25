@@ -1,12 +1,10 @@
-export const TOKEN_NAME: string =
-	process.env.NEXT_PUBLIC_TOKEN_NAME || 'bazarey';
-export const REFRESH_TOKEN: string =
-	process.env.NEXT_PUBLIC_REFRESH || 'TEST_REFRESH_ECOM_ONE';
+export const TOKEN_NAME: string = process.env.NEXT_PUBLIC_TOKEN_NAME || 'bazarey';
+export const REFRESH_TOKEN: string = process.env.NEXT_PUBLIC_REFRESH || 'TEST_REFRESH_ECOM_ONE';
 
 export const BASE_LIMIT: number = 10;
 
 export const URL = {
-	api: process.env.EXPO_PUBLIC_BACKEND_URL || 'http://localhost:5000',
+	api: process.env.EXPO_PUBLIC_BACKEND_URL || 'https://bazarey-1c3a6b62cdef.herokuapp.com',
 };
 
 export const PRIVACY_CONTAINER = { base: 4, md: '15vw' };

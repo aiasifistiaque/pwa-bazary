@@ -1,4 +1,3 @@
-
 import { CustomColors } from '@/constants/theme';
 import { useLoginMutation } from '@/store/services/authApi';
 import { login } from '@/store/slices/authSlice';
@@ -6,20 +5,20 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-	View,
+	ActivityIndicator,
+	BackHandler,
+	Image,
+	Keyboard,
+	Platform,
+	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
-	StyleSheet,
 	TouchableWithoutFeedback,
-	Keyboard,
-	ActivityIndicator,
-	BackHandler,
-	Platform,
+	View,
 } from 'react-native';
 import { Button, Dialog, Paragraph, Portal } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
-
 
 export default function LoginScreen() {
 	const dispatch = useDispatch();
@@ -50,11 +49,13 @@ export default function LoginScreen() {
 
 		const res = await loginTrigger({ email, password }).unwrap();
 
-		dispatch(login({
-			token: res.token,
-			refreshToken: res.refreshToken,
-			user: res.user
-		}));
+		dispatch(
+			login({
+				token: res.token,
+				refreshToken: res.refreshToken,
+				user: res.user,
+			}),
+		);
 	};
 
 	const resetAll = () => {
@@ -62,7 +63,7 @@ export default function LoginScreen() {
 		setPassword('');
 		setErrors({ email: '', password: '' });
 	};
-console.log("login res",loginResponse)
+	console.log('login res', loginResponse);
 	useEffect(() => {
 		if (loginResponse.isSuccess && loginResponse.data) {
 			resetAll();
@@ -83,16 +84,13 @@ console.log("login res",loginResponse)
 	useEffect(() => {
 		// Only add back handler on mobile platforms
 		if (Platform.OS !== 'web') {
-			const backHandler = BackHandler.addEventListener(
-				'hardwareBackPress',
-				() => {
-					if (router.canGoBack()) {
-						BackHandler.exitApp();
-						return true;
-					}
-					return false;
+			const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+				if (router.canGoBack()) {
+					BackHandler.exitApp();
+					return true;
 				}
-			);
+				return false;
+			});
 
 			return () => backHandler.remove();
 		}
@@ -106,6 +104,11 @@ console.log("login res",loginResponse)
 
 	const content = (
 		<View style={styles.container}>
+			<Image
+				source={require('@/assets/images/bazareylogo.png')}
+				style={styles.logo}
+				resizeMode='contain'
+			/>
 			<Text style={styles.title}>Login</Text>
 
 			<View style={styles.inputContainer}>
@@ -122,9 +125,7 @@ console.log("login res",loginResponse)
 					autoCapitalize='none'
 					autoComplete='email'
 				/>
-				{errors.email ? (
-					<Text style={styles.errorText}>{errors.email}</Text>
-				) : null}
+				{errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 			</View>
 
 			<View style={styles.inputContainer}>
@@ -136,39 +137,42 @@ console.log("login res",loginResponse)
 						value={password}
 						onChangeText={value => {
 							setPassword(value);
-							if (errors.password)
-								setErrors(prev => ({ ...prev, password: '' }));
+							if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
 						}}
 						secureTextEntry={!isPasswordVisible}
 						autoComplete='password'
 					/>
 					<TouchableOpacity
 						style={styles.eyeButton}
-						onPress={() => setIsPasswordVisible(prev => !prev)}
-					>
+						onPress={() => setIsPasswordVisible(prev => !prev)}>
 						{isPasswordVisible ? (
-							<FontAwesome name='eye' size={20} color='#000' />
+							<FontAwesome
+								name='eye'
+								size={20}
+								color='#000'
+							/>
 						) : (
-							<FontAwesome name='eye-slash' size={20} color='#000' />
+							<FontAwesome
+								name='eye-slash'
+								size={20}
+								color='#000'
+							/>
 						)}
 					</TouchableOpacity>
 				</View>
-				{errors.password && (
-					<Text style={styles.errorText}>{errors.password}</Text>
-				)}
+				{errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 			</View>
 
 			<TouchableOpacity
-				style={[
-					styles.button,
-					loginResponse.isLoading && styles.buttonDisabled,
-				]}
+				style={[styles.button, loginResponse.isLoading && styles.buttonDisabled]}
 				onPress={handleLogin}
-				disabled={loginResponse.isLoading}
-			>
+				disabled={loginResponse.isLoading}>
 				<Text style={styles.buttonText}>
 					{loginResponse.isLoading ? (
-						<ActivityIndicator size={'small'} color={'#fff'} />
+						<ActivityIndicator
+							size={'small'}
+							color={'#fff'}
+						/>
 					) : (
 						'Login'
 					)}
@@ -177,7 +181,9 @@ console.log("login res",loginResponse)
 
 			<Text style={styles.footerText}>
 				Do not have an account?{' '}
-				<Text style={styles.linkText} onPress={() => router.push('/register')}>
+				<Text
+					style={styles.linkText}
+					onPress={() => router.push('/register')}>
 					Register now!
 				</Text>
 			</Text>
@@ -186,8 +192,7 @@ console.log("login res",loginResponse)
 			<Portal>
 				<Dialog
 					visible={isDialogVisible}
-					onDismiss={() => setDialogVisible(false)}
-				>
+					onDismiss={() => setDialogVisible(false)}>
 					<Dialog.Title>Oops!</Dialog.Title>
 					<Dialog.Content>
 						<Paragraph>
@@ -196,9 +201,7 @@ console.log("login res",loginResponse)
 									const errorData = loginResponse.error.data as {
 										message?: string;
 									};
-									return (
-										errorData?.message || 'An error occurred. Please try again.'
-									);
+									return errorData?.message || 'An error occurred. Please try again.';
 								}
 								if (loginResponse?.error && 'message' in loginResponse.error) {
 									return loginResponse.error.message;
@@ -220,11 +223,7 @@ console.log("login res",loginResponse)
 		return content;
 	}
 
-	return (
-		<TouchableWithoutFeedback onPress={dismissKeyboard}>
-			{content}
-		</TouchableWithoutFeedback>
-	);
+	return <TouchableWithoutFeedback onPress={dismissKeyboard}>{content}</TouchableWithoutFeedback>;
 }
 
 const bodyColor = CustomColors.bodyColor;
@@ -239,6 +238,11 @@ const styles = StyleSheet.create({
 		padding: 16,
 		backgroundColor: bodyColor,
 		gap: 10,
+	},
+	logo: {
+		width: 150,
+		height: 150,
+		marginBottom: 20,
 	},
 	title: {
 		fontSize: 24,
@@ -277,7 +281,7 @@ const styles = StyleSheet.create({
 	button: {
 		width: '100%',
 		height: 50,
-		backgroundColor: buttonBgColor,
+		backgroundColor: CustomColors.darkBrown,
 		justifyContent: 'center',
 		alignItems: 'center',
 		borderRadius: 5,

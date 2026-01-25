@@ -1,12 +1,14 @@
-import { Provider, useDispatch } from 'react-redux';
-import { store } from '../store/index';
-import { Slot } from 'expo-router';
-import { PaperProvider } from 'react-native-paper';
+import { MobileOnlyGuard } from '@/components/MobileOnlyGuard';
+import { ToastProvider } from '@/contexts/ToastContext';
 import ReduxProvider from '@/store/provider/ReduxProvider';
-import { useEffect } from 'react';
 import { hydrateAuth, loadStoredToken } from '@/store/slices/authSlice';
 import { loadFavorites, setFavorites } from '@/store/slices/favoritesSlice';
-import { ToastProvider } from '@/contexts/ToastContext';
+import { Slot } from 'expo-router';
+import { useEffect } from 'react';
+import { Platform } from 'react-native';
+import { PaperProvider } from 'react-native-paper';
+import { Provider, useDispatch } from 'react-redux';
+import { store } from '../store/index';
 
 function AuthHydrator({ children }: { children: React.ReactNode }) {
 	const dispatch = useDispatch();
@@ -32,14 +34,30 @@ function AuthHydrator({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+	// Register service worker for PWA
+	useEffect(() => {
+		if (Platform.OS === 'web' && 'serviceWorker' in navigator) {
+			navigator.serviceWorker
+				.register('/sw.js')
+				.then(registration => {
+					console.log('Service Worker registered:', registration);
+				})
+				.catch(error => {
+					console.log('Service Worker registration failed:', error);
+				});
+		}
+	}, []);
+
 	return (
 		<Provider store={store}>
 			<ReduxProvider>
 				<PaperProvider>
 					<ToastProvider>
-						<AuthHydrator>
-							<Slot />
-						</AuthHydrator>
+						<MobileOnlyGuard>
+							<AuthHydrator>
+								<Slot />
+							</AuthHydrator>
+						</MobileOnlyGuard>
 					</ToastProvider>
 				</PaperProvider>
 			</ReduxProvider>

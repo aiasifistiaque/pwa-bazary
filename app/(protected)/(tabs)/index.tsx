@@ -5,19 +5,12 @@ import { RecipeCard } from '@/components/recipe-card';
 import { SectionHeader } from '@/components/section-header';
 import CategorySkeleton from '@/components/skeleton/CategorySkeleton';
 import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
 import React from 'react';
-import {
-	FlatList,
-	Image,
-	ScrollView,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-} from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function DiscoverScreen() {
 	// data fetching
@@ -60,8 +53,27 @@ export default function DiscoverScreen() {
 		router.push(`/recipe/${recipeId}`);
 	};
 
+	const handleSearchPress = () => {
+		router.push('/search');
+	};
+
 	return (
-		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+		<ScrollView
+			style={styles.container}
+			showsVerticalScrollIndicator={false}>
+			{/* Search Bar */}
+			<TouchableOpacity
+				style={styles.searchBar}
+				onPress={handleSearchPress}
+				activeOpacity={0.7}>
+				<IconSymbol
+					name='magnifyingglass'
+					size={20}
+					color='#999'
+				/>
+				<Text style={styles.searchPlaceholder}>Search for products...</Text>
+			</TouchableOpacity>
+
 			{/* Banner Carousel */}
 			<BannerCarousel
 				banners={bannersData?.doc}
@@ -99,8 +111,7 @@ export default function DiscoverScreen() {
 					<TouchableOpacity
 						style={styles.showMoreButton}
 						onPress={handleShowMoreCategories}
-						activeOpacity={0.7}
-					>
+						activeOpacity={0.7}>
 						<Text style={styles.showMoreText}>Show more categories</Text>
 					</TouchableOpacity>
 				)}
@@ -121,7 +132,10 @@ export default function DiscoverScreen() {
 						horizontal
 						data={Array.from({ length: 3 })}
 						renderItem={({ index }) => (
-							<RecipeCardSkeleton key={index} style={styles.recipeCard} />
+							<RecipeCardSkeleton
+								key={index}
+								style={styles.recipeCard}
+							/>
 						)}
 						keyExtractor={(_, index) => `skeleton-${index}`}
 						showsHorizontalScrollIndicator={false}
@@ -148,7 +162,10 @@ export default function DiscoverScreen() {
 
 			{/* Featured Product Sections */}
 			{featuredCategoriesData?.doc?.map((category: any) => (
-				<FeaturedCategorySection key={category.id} category={category} />
+				<FeaturedCategorySection
+					key={category?.id}
+					category={category}
+				/>
 			))}
 		</ScrollView>
 	);
@@ -159,6 +176,22 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#FFFFFF',
 		paddingTop: 4,
+	},
+	searchBar: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		backgroundColor: '#F5F5F5',
+		marginHorizontal: 16,
+		marginVertical: 12,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		borderRadius: 12,
+		gap: 12,
+	},
+	searchPlaceholder: {
+		flex: 1,
+		fontSize: 15,
+		color: '#999',
 	},
 	categoriesSection: {
 		marginBottom: 16,

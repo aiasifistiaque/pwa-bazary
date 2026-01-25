@@ -1,71 +1,90 @@
 {
-  "expo": {
-    "name": "Bazarey",
-    "slug": "bazarey",
-    "owner": "thinkexpo",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/bazareylogo.png",
-    "scheme": "bazarey",
-    "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/bazareylogo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
-      "hideText": true
-    },
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.ailabs99.bazarey"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/bazareylogo.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.ailabs99.bazarey",
-      "versionCode": 1, 
-      "permissions": [] 
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/bazareylogo.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/bazareylogo.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "image": "./assets/images/bazareylogo.png",
-            "backgroundColor": "#000000"
-          }
-        }
-      ],
-      "expo-secure-store"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "27d4eb01-7218-475a-b941-9bea77f6e017"
-      }
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/27d4eb01-7218-475a-b941-9bea77f6e017"
-    }
-  }
+	"expo": {
+		"name": "Bazarey",
+		"slug": "bazarey",
+		"owner": "thinkexpo",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/images/bazareylogo.png",
+		"scheme": "bazarey",
+		"userInterfaceStyle": "automatic",
+		"splash": {
+			"image": "./assets/images/bazareylogo.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff",
+			"hideText": true
+		},
+		"newArchEnabled": true,
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.ailabs99.bazarey"
+		},
+		"android": {
+			"adaptiveIcon": {
+				"backgroundColor": "#E6F4FE",
+				"foregroundImage": "./assets/images/bazareylogo.png"
+			},
+			"edgeToEdgeEnabled": true,
+			"predictiveBackGestureEnabled": false,
+			"package": "com.ailabs99.bazarey",
+			"versionCode": 1,
+			"permissions": []
+		},
+		"web": {
+			"output": "static",
+			"favicon": "./assets/images/bazareylogo.png",
+			"bundler": "metro",
+			"backgroundColor": "#ffffff",
+			"themeColor": "#4CAF50",
+			"name": "Bazarey",
+			"shortName": "Bazarey",
+			"description": "Your personal shopping assistant",
+			"lang": "en",
+			"scope": "/",
+			"startUrl": "/",
+			"display": "standalone",
+			"orientation": "portrait",
+			"dir": "auto",
+			"preferRelatedApplications": false,
+			"relatedApplications": [],
+			"build": {
+				"babel": {
+					"include": ["@expo/metro-runtime"]
+				}
+			}
+		},
+		"plugins": [
+			"expo-router",
+			[
+				"expo-splash-screen",
+				{
+					"image": "./assets/images/bazareylogo.png",
+					"imageWidth": 200,
+					"resizeMode": "contain",
+					"backgroundColor": "#ffffff",
+					"dark": {
+						"image": "./assets/images/bazareylogo.png",
+						"backgroundColor": "#000000"
+					}
+				}
+			],
+			"expo-secure-store"
+		],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true
+		},
+		"extra": {
+			"router": {},
+			"eas": {
+				"projectId": "27d4eb01-7218-475a-b941-9bea77f6e017"
+			}
+		},
+		"runtimeVersion": {
+			"policy": "appVersion"
+		},
+		"updates": {
+			"url": "https://u.expo.dev/27d4eb01-7218-475a-b941-9bea77f6e017"
+		}
+	}
 }

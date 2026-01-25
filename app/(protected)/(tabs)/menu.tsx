@@ -14,18 +14,23 @@ type MenuItemProps = {
 	iconColor?: string;
 };
 
-const MenuItem = ({
-	icon,
-	title,
-	onPress,
-	iconColor = '#666666',
-}: MenuItemProps) => (
-	<Pressable style={styles.menuItem} onPress={onPress}>
+const MenuItem = ({ icon, title, onPress, iconColor = '#666666' }: MenuItemProps) => (
+	<Pressable
+		style={styles.menuItem}
+		onPress={onPress}>
 		<View style={styles.menuItemLeft}>
-			<IconSymbol name={icon} size={24} color={iconColor} />
+			<IconSymbol
+				name={icon}
+				size={24}
+				color={iconColor}
+			/>
 			<Text style={styles.menuItemText}>{title}</Text>
 		</View>
-		<IconSymbol name='chevron.right' size={20} color='#999999' />
+		<IconSymbol
+			name='chevron.right'
+			size={20}
+			color='#999999'
+		/>
 	</Pressable>
 );
 
@@ -36,8 +41,14 @@ type CardButtonProps = {
 };
 
 const CardButton = ({ icon, title, onPress }: CardButtonProps) => (
-	<Pressable style={styles.cardButton} onPress={onPress}>
-		<IconSymbol name={icon} size={32} color='#666666' />
+	<Pressable
+		style={styles.cardButton}
+		onPress={onPress}>
+		<IconSymbol
+			name={icon}
+			size={32}
+			color='#666666'
+		/>
 		<Text style={styles.cardButtonText}>{title}</Text>
 	</Pressable>
 );
@@ -104,9 +115,7 @@ export default function MenuScreen() {
 			<View style={styles.safeArea}>
 				{/* Header */}
 				<View style={styles.header}>
-					<Text style={styles.headerTitle}>
-						{isLoading ? 'Loading...' : headerTitle}
-					</Text>
+					<Text style={styles.headerTitle}>{isLoading ? 'Loading...' : headerTitle}</Text>
 					{/* <Pressable style={styles.settingsButton}>
 						<IconSymbol name='gearshape' size={24} color='#000000' />
 					</Pressable> */}
@@ -115,18 +124,15 @@ export default function MenuScreen() {
 
 			<ScrollView
 				style={styles.scrollView}
-				showsVerticalScrollIndicator={false}
-			>
+				showsVerticalScrollIndicator={false}>
 				{/* User Profile Section */}
 				<View style={styles.profileSection}>
 					<View style={styles.profileHeader}>
-						<Text style={styles.userName}>
-							{isLoading ? 'Loading...' : userName || 'Guest'}
-						</Text>
-						<View style={styles.proBadge}>
+						<Text style={styles.userName}>{isLoading ? 'Loading...' : userName || 'Guest'}</Text>
+						{/* <View style={styles.proBadge}>
 							<IconSymbol name='crown.fill' size={14} color='#FFFFFF' />
 							<Text style={styles.proText}>PRO</Text>
-						</View>
+						</View> */}
 					</View>
 					<Pressable onPress={handleViewProfile}>
 						<Text style={styles.viewProfile}>View profile</Text>

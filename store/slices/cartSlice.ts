@@ -75,12 +75,9 @@ const saveStateToLocalStorage = (state: typeof initialState) => {
 
 // Helper function to calculate totals
 const calculateTotals = (state: State) => {
-	state.subTotal = state.cartItems.reduce(
-		(total: number, cartItem: CartItem) => {
-			return total + cartItem.price;
-		},
-		0
-	);
+	state.subTotal = state.cartItems.reduce((total: number, cartItem: CartItem) => {
+		return total + cartItem.price;
+	}, 0);
 
 	state.vat = state.cartItems.reduce((total: number, cartItem: CartItem) => {
 		if (cartItem.vat) {
@@ -90,10 +87,7 @@ const calculateTotals = (state: State) => {
 	}, 0);
 
 	state.total = state.subTotal + state.vat + state.shipping - state.discount;
-	state.totalItems = state.cartItems.reduce(
-		(total, item) => total + item.qty,
-		0
-	);
+	state.totalItems = state.cartItems.reduce((total, item) => total + item.qty, 0);
 };
 
 export const cartSlice = createSlice({
@@ -104,13 +98,7 @@ export const cartSlice = createSlice({
 	})(),
 	reducers: {
 		calculateCartTotals: (state, action) => {
-			const {
-				subTotal = 0,
-				total = 0,
-				vat = 0,
-				discount = 0,
-				shipping = 0,
-			} = action.payload;
+			const { subTotal = 0, total = 0, vat = 0, discount = 0, shipping = 0 } = action.payload;
 			state.subTotal = subTotal;
 			state.total = total;
 			state.vat = vat;
@@ -128,8 +116,7 @@ export const cartSlice = createSlice({
 			// Create unique ID based on product and variation
 			const baseId = item?._id || item?.id;
 			const variationPart =
-				item.variationId ||
-				`${item.selectedSize || 'no-size'}-${item.selectedColor || 'no-color'}`;
+				item.variationId || `${item.selectedSize || 'no-size'}-${item.selectedColor || 'no-color'}`;
 			const uniqueId = `${baseId}-${variationPart}`;
 
 			// Check stock if variation has stock info
@@ -140,7 +127,7 @@ export const cartSlice = createSlice({
 			}
 
 			const existItem = state.cartItems.find(
-				(stateItem: CartItem) => stateItem.uniqueId === uniqueId
+				(stateItem: CartItem) => stateItem.uniqueId === uniqueId,
 			);
 
 			if (existItem) {
@@ -160,8 +147,8 @@ export const cartSlice = createSlice({
 								...stateItem,
 								qty: updatedQty,
 								price: updatedPrice,
-						  }
-						: stateItem
+							}
+						: stateItem,
 				);
 			} else {
 				const newItem: CartItem = {
@@ -214,7 +201,7 @@ export const cartSlice = createSlice({
 		deleteOneFromCart: (state, action) => {
 			const uniqueId = action.payload; // Now expects uniqueId instead of just _id
 			const findItem = state.cartItems.find(
-				(stateItem: CartItem) => stateItem.uniqueId === uniqueId
+				(stateItem: CartItem) => stateItem.uniqueId === uniqueId,
 			);
 
 			if (findItem) {
@@ -225,13 +212,13 @@ export const cartSlice = createSlice({
 									...stateItem,
 									qty: stateItem.qty - 1,
 									price: stateItem.unitPrice * (stateItem.qty - 1),
-							  }
-							: stateItem
+								}
+							: stateItem,
 					);
 				} else {
 					// Remove item if qty is 1
 					state.cartItems = state.cartItems.filter(
-						(stateItem: CartItem) => stateItem.uniqueId !== uniqueId
+						(stateItem: CartItem) => stateItem.uniqueId !== uniqueId,
 					);
 				}
 
@@ -254,11 +241,11 @@ export const cartSlice = createSlice({
 		deleteSingleItemFromCart: (state, action) => {
 			const uniqueId = action.payload; // Now expects uniqueId instead of just _id
 			const findItem = state.cartItems.find(
-				(stateItem: CartItem) => stateItem.uniqueId === uniqueId
+				(stateItem: CartItem) => stateItem.uniqueId === uniqueId,
 			);
 			if (findItem) {
 				state.cartItems = state.cartItems.filter(
-					(stateItem: CartItem) => stateItem.uniqueId !== uniqueId
+					(stateItem: CartItem) => stateItem.uniqueId !== uniqueId,
 				);
 			}
 			if (state.cartItems.length === 0) {
@@ -271,6 +258,53 @@ export const cartSlice = createSlice({
 			}
 			calculateTotals(state);
 			saveStateToLocalStorage(state);
+		},
+
+		updateCartItemQuantity: (state, action) => {
+			const { id, qty } = action.payload;
+			if (qty <= 0) return;
+
+			state.cartItems = state.cartItems.map((stateItem: CartItem) => {
+				if (stateItem.id === id || stateItem._id === id) {
+					// Check stock if available
+					const availableStock = stateItem.variantStock || Infinity;
+					if (availableStock < qty) {
+						console.warn('Insufficient stock for item:', stateItem.name);
+						return stateItem;
+					}
+
+					return {
+						...stateItem,
+						qty: qty,
+						price: stateItem.unitPrice * qty,
+					};
+				}
+				return stateItem;
+			});
+
+			calculateTotals(state);
+			const { toggleCart, ...stt } = state;
+			saveStateToLocalStorage({ toggleCart: false, ...stt });
+		},
+
+		removeFromCart: (state, action) => {
+			const id = action.payload;
+			state.cartItems = state.cartItems.filter(
+				(stateItem: CartItem) => stateItem.id !== id && stateItem._id !== id,
+			);
+
+			if (state.cartItems.length === 0) {
+				state.totalItems = 0;
+				state.subTotal = 0;
+				state.total = 0;
+				state.vat = 0;
+				state.shipping = 0;
+				state.discount = 0;
+			}
+
+			calculateTotals(state);
+			const { toggleCart, ...stt } = state;
+			saveStateToLocalStorage({ toggleCart: false, ...stt });
 		},
 
 		deleteAllFromCart: state => {
@@ -315,6 +349,8 @@ export const {
 	deleteOneFromCart,
 	deleteAllFromCart,
 	deleteSingleItemFromCart,
+	updateCartItemQuantity,
+	removeFromCart,
 	resetCart,
 	setCartLoading,
 	calculateCartTotals,

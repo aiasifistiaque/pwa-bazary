@@ -1,5 +1,4 @@
-import { ProductCard } from '@/components/product-card';
-import { ProductCardSkeleton } from '@/components/skeleton/ProductCardSkeleton';
+import { HorizontalProductCard } from '@/components/HorizontalProductCard';
 import { SubCategorySkeleton } from '@/components/skeleton/SubCategorySkeleton';
 import { SubCategoryCard } from '@/components/SubCategoryCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -7,12 +6,12 @@ import { useGetAllQuery, useGetByIdQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
 import { router, useLocalSearchParams } from 'expo-router';
 
+import { CustomColors } from '@/constants/theme';
 import React, { useEffect, useRef, useState } from 'react';
 import {
 	ActivityIndicator,
 	Animated,
 	FlatList,
-	Image,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -21,7 +20,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
-import { CustomColors } from '@/constants/theme';
 
 const fallback = require('../../../assets/images/splash-icon.png');
 
@@ -50,20 +48,19 @@ export default function CategoryScreen() {
 	const flatListRef = useRef<FlatList>(null);
 	const cartAnim = useRef(new Animated.Value(1)).current;
 
-	const { data: productsData, isFetching: productsDataLoading } =
-		useGetAllQuery(
-			{
-				path: 'products',
-				sort: '-priority',
-				page: page,
-				limit: 10,
-				filters: {
-					category_in: id,
-					isActive: true,
-				},
+	const { data: productsData, isFetching: productsDataLoading } = useGetAllQuery(
+		{
+			path: 'products',
+			sort: '-priority',
+			page: page,
+			limit: 10,
+			filters: {
+				category_in: id,
+				isActive: true,
 			},
-			{ skip: !id },
-		);
+		},
+		{ skip: !id },
+	);
 
 	useEffect(() => {
 		if (!productsDataLoading && allProducts.length === 0) {
@@ -156,9 +153,12 @@ export default function CategoryScreen() {
 					<TouchableOpacity
 						style={styles.backButton}
 						onPress={handleBack}
-						activeOpacity={0.7}
-					>
-						<IconSymbol name='chevron.left' size={24} color='#000' />
+						activeOpacity={0.7}>
+						<IconSymbol
+							name='chevron.left'
+							size={24}
+							color='#000'
+						/>
 					</TouchableOpacity>
 					<Text style={styles.headerTitle}>{catName?.name}</Text>
 					<View style={styles.headerSpacer} />
@@ -167,8 +167,7 @@ export default function CategoryScreen() {
 				{hasSubcategories ? (
 					<ScrollView
 						style={styles.scrollView}
-						showsVerticalScrollIndicator={false}
-					>
+						showsVerticalScrollIndicator={false}>
 						<View style={styles.section}>
 							<View style={styles.categoriesGrid}>
 								{childCatLoading
@@ -193,25 +192,20 @@ export default function CategoryScreen() {
 							ref={flatListRef}
 							data={allProducts}
 							keyExtractor={item => item.id}
-							numColumns={2}
-							columnWrapperStyle={styles.columnWrapper}
 							contentContainerStyle={styles.listContainer}
 							renderItem={({ item }) => (
-								<View style={styles.productCardWrapper}>
-									<ProductCard
-										product={item}
-										id={item.id}
-										name={item.name}
-										price={item.price}
-										unit={item.unit}
-										unitPrice={item.unitPrice}
-										badge={item.badge}
-										badgeIcon={item.badgeIcon}
-										image={item.image}
-										onPress={() => handleProductPress(item.id)}
-										onAddPress={() => handleAddPress(item)}
-									/>
-								</View>
+								<HorizontalProductCard
+									product={item}
+									id={item.id}
+									name={item.name}
+									price={item.price}
+									unit={item.unit}
+									unitPrice={item.unitPrice}
+									badge={item.badge}
+									badgeIcon={item.badgeIcon}
+									image={item.image}
+									onPress={() => handleProductPress(item.id)}
+								/>
 							)}
 							ListEmptyComponent={() => (
 								<View style={{ flex: 1, justifyContent: 'center' }}>
@@ -220,37 +214,34 @@ export default function CategoryScreen() {
 											{Array.from({ length: 6 }).map((_, index) => (
 												<View
 													key={`skeleton-${index}`}
-													style={styles.productCardWrapper}
-												>
-													<ProductCardSkeleton />
+													style={styles.skeletonWrapper}>
+													<View style={styles.skeletonCard}>
+														<View style={styles.skeletonImage} />
+														<View style={styles.skeletonInfo}>
+															<View style={styles.skeletonLine} />
+															<View style={styles.skeletonLineSmall} />
+															<View style={styles.skeletonLineShort} />
+														</View>
+													</View>
 												</View>
 											))}
 										</View>
 									) : (
 										!productsDataLoading && (
 											<View style={styles.emptyStateContainer}>
-												<Animated.View
-													style={{ transform: [{ scale: cartAnim }] }}
-												>
+												<Animated.View style={{ transform: [{ scale: cartAnim }] }}>
 													<IconSymbol
 														name='cart.fill'
 														size={64}
 														color={CustomColors.darkBrown}
 													/>
 												</Animated.View>
-												<Text style={styles.emptyStateText}>
-													No Products Found
-												</Text>
-												<Text style={styles.emptyStateSubtext}>
-													Check back later for new items
-												</Text>
+												<Text style={styles.emptyStateText}>No Products Found</Text>
+												<Text style={styles.emptyStateSubtext}>Check back later for new items</Text>
 												<TouchableOpacity
 													style={styles.viewAllButton}
-													onPress={() => router.push('/all-categories')}
-												>
-													<Text style={styles.viewAllButtonText}>
-														View other products
-													</Text>
+													onPress={() => router.push('/all-categories')}>
+													<Text style={styles.viewAllButtonText}>View other products</Text>
 												</TouchableOpacity>
 											</View>
 										)
@@ -271,23 +262,23 @@ export default function CategoryScreen() {
 							)}
 							onEndReached={handleLoadMore}
 							onEndReachedThreshold={0.5}
-							onScroll={Animated.event(
-								[{ nativeEvent: { contentOffset: { y: scrollY } } }],
-								{ useNativeDriver: false },
-							)}
+							onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+								useNativeDriver: false,
+							})}
 							scrollEventThrottle={16}
 							showsVerticalScrollIndicator={false}
 						/>
 
-						<Animated.View
-							style={[styles.backToTopButton, { opacity: buttonOpacity }]}
-						>
+						<Animated.View style={[styles.backToTopButton, { opacity: buttonOpacity }]}>
 							<TouchableOpacity
 								onPress={scrollToTop}
 								activeOpacity={0.8}
-								style={styles.backToTopInner}
-							>
-								<IconSymbol name='chevron.up' size={24} color='#FFF' />
+								style={styles.backToTopInner}>
+								<IconSymbol
+									name='chevron.up'
+									size={24}
+									color='#FFF'
+								/>
 							</TouchableOpacity>
 						</Animated.View>
 					</View>
@@ -358,13 +349,53 @@ const styles = StyleSheet.create({
 		color: '#333',
 	},
 	productsGrid: {
-		flexDirection: 'row',
-		flexWrap: 'wrap',
-		justifyContent: 'space-between',
+		gap: 12,
 	},
 	productCardWrapper: {
 		width: '48%',
 		marginBottom: 12,
+	},
+	skeletonWrapper: {
+		marginBottom: 12,
+	},
+	skeletonCard: {
+		flexDirection: 'row',
+		backgroundColor: '#FFF',
+		borderRadius: 12,
+		padding: 12,
+		borderWidth: 1,
+		borderColor: '#F0F0F0',
+	},
+	skeletonImage: {
+		width: 80,
+		height: 80,
+		borderRadius: 8,
+		backgroundColor: '#E0E0E0',
+	},
+	skeletonInfo: {
+		flex: 1,
+		marginLeft: 12,
+		justifyContent: 'space-between',
+	},
+	skeletonLine: {
+		height: 16,
+		backgroundColor: '#E0E0E0',
+		borderRadius: 4,
+		marginBottom: 8,
+		width: '80%',
+	},
+	skeletonLineSmall: {
+		height: 12,
+		backgroundColor: '#E0E0E0',
+		borderRadius: 4,
+		marginBottom: 8,
+		width: '50%',
+	},
+	skeletonLineShort: {
+		height: 14,
+		backgroundColor: '#E0E0E0',
+		borderRadius: 4,
+		width: '40%',
 	},
 	emptyStateContainer: {
 		flex: 1,
@@ -399,9 +430,6 @@ const styles = StyleSheet.create({
 	listContainer: {
 		padding: 16,
 		flexGrow: 1,
-	},
-	columnWrapper: {
-		justifyContent: 'space-between',
 	},
 	footerLoader: {
 		paddingVertical: 16,

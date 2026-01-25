@@ -22,7 +22,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 	UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-type ProductCardProps = {
+type CompactProductCardProps = {
 	product: any;
 	id: string;
 	name: string;
@@ -32,16 +32,11 @@ type ProductCardProps = {
 	badge?: string;
 	badgeIcon?: string;
 	weight?: string;
-	image: string | number; // Can be URI string or require() number
+	image: string | number;
 	onPress?: () => void;
-	/**
-	 * @deprecated onAddPress is now handled internally via Redux,
-	 * but kept for compatibility or additional side effects if needed.
-	 */
-	onAddPress?: () => void;
 };
 
-export function ProductCard({
+export function CompactProductCard({
 	product,
 	id,
 	name,
@@ -53,25 +48,20 @@ export function ProductCard({
 	badgeIcon,
 	image,
 	onPress,
-	onAddPress,
-}: ProductCardProps) {
-	// Determine if image is a URI or local require
+}: CompactProductCardProps) {
 	const imageSource = typeof image === 'string' ? { uri: image } : image;
 
 	const { showToast } = useToast();
 	const dispatch = useDispatch();
 
 	const cartItems = useSelector((state: RootState) => state.cart.cartItems);
-
-	// Find cart item by id or _id
-	const cartItem = cartItems.find((item: any) => item.id === id || item._id === id);
-	const quantity = cartItem ? cartItem.qty : 0;
+	const cartItem = cartItems?.find((item: any) => item.id === id || item._id === id);
+	const quantity = cartItem?.qty || 0;
 
 	const handleIncrement = () => {
 		LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
 		if (quantity > 0) {
-			// Item already in cart, increment quantity
 			dispatch(
 				updateCartItemQuantity({
 					id,
@@ -79,11 +69,6 @@ export function ProductCard({
 				}),
 			);
 		} else {
-			// Add new item to cart
-			if (onAddPress) {
-				onAddPress();
-			}
-
 			dispatch(
 				addToCart({
 					item: {
@@ -142,7 +127,7 @@ export function ProductCard({
 								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
 								<IconSymbol
 									name='minus'
-									size={18}
+									size={14}
 									color={CustomColors.darkBrown}
 								/>
 							</TouchableOpacity>
@@ -157,7 +142,7 @@ export function ProductCard({
 						hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
 						<IconSymbol
 							name='plus'
-							size={20}
+							size={16}
 							color={CustomColors.darkBrown}
 						/>
 					</TouchableOpacity>
@@ -169,7 +154,7 @@ export function ProductCard({
 					{badgeIcon && (
 						<IconSymbol
 							name={badgeIcon as any}
-							size={12}
+							size={10}
 							color='#E63946'
 						/>
 					)}
@@ -184,7 +169,6 @@ export function ProductCard({
 				</Text>
 				<Text style={styles.unitPrice}>
 					{`${product?.weight || product?.unitValue || weight || '000'} ${product?.unit || unit || 'unit'}`}
-					{product?.unitPrice || unitPrice ? ` · ${product?.unitPrice || unitPrice}` : ''}
 				</Text>
 				<Text style={styles.price}>
 					৳{product?.discountedPrice || product?.sellPrice || product?.price || price}
@@ -196,16 +180,15 @@ export function ProductCard({
 
 const styles = StyleSheet.create({
 	card: {
-		minWidth: 160,
-		width: '100%',
+		width: 140,
 		backgroundColor: '#FFF',
-		borderRadius: 12,
+		borderRadius: 10,
 		overflow: 'hidden',
 		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 3,
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.08,
+		shadowRadius: 3,
+		elevation: 2,
 	},
 	imageContainer: {
 		width: '100%',
@@ -217,76 +200,75 @@ const styles = StyleSheet.create({
 		width: '100%',
 		height: '100%',
 	},
-	// New Button Styles
 	buttonContainer: {
 		position: 'absolute',
-		bottom: 8,
-		right: 8,
-		height: 32,
-		minWidth: 32,
-		borderRadius: 16,
+		bottom: 6,
+		right: 6,
+		height: 28,
+		minWidth: 28,
+		borderRadius: 14,
 		backgroundColor: '#FFF',
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: 0.2,
+		shadowOpacity: 0.15,
 		shadowRadius: 2,
 		elevation: 2,
 		paddingHorizontal: 0,
 	},
 	buttonContainerExpanded: {
 		paddingHorizontal: 4,
-		minWidth: 90, // Minimum width when expanded
+		minWidth: 75,
 		justifyContent: 'space-between',
 	},
 	iconButton: {
-		width: 32,
-		height: 32,
+		width: 28,
+		height: 28,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
 	quantityText: {
-		fontSize: 14,
+		fontSize: 12,
 		fontWeight: '600',
 		color: '#333',
-		marginHorizontal: 4,
-		minWidth: 16,
+		marginHorizontal: 2,
+		minWidth: 14,
 		textAlign: 'center',
 	},
 	badgeContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		paddingHorizontal: 12,
-		paddingTop: 8,
-		gap: 4,
+		paddingHorizontal: 8,
+		paddingTop: 6,
+		gap: 3,
 	},
 	badgeText: {
-		fontSize: 11,
+		fontSize: 10,
 		color: '#E63946',
 		fontWeight: '500',
 	},
 	info: {
-		padding: 12,
-		gap: 4,
+		padding: 8,
+		gap: 3,
 	},
 	name: {
-		fontSize: 14,
+		fontSize: 13,
 		fontWeight: '600',
 		color: '#333',
-		lineHeight: 18,
-		minHeight: 36,
+		lineHeight: 16,
+		minHeight: 32,
 	},
 	price: {
-		fontSize: 16,
+		fontSize: 14,
 		fontWeight: 'bold',
 		color: CustomColors.darkBrown,
-		marginTop: 4,
+		marginTop: 2,
 	},
 	unitPrice: {
-		fontSize: 11,
+		fontSize: 10,
 		color: '#666',
-		marginTop: 2,
+		marginTop: 1,
 	},
 });

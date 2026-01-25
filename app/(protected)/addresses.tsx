@@ -1,6 +1,9 @@
+import { Loader } from '@/components/Loader';
 import PrimaryButton from '@/components/buttons/PrimaryButton';
+import AddressCard from '@/components/cards/AddressCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import * as ExpoLocation from 'expo-location';
+import { CustomColors } from '@/constants/theme';
+import { useGetSelfQuery } from '@/store/services/authApi';
 import {
 	useDeleteMutation,
 	useGetAllQuery,
@@ -8,10 +11,10 @@ import {
 	useUpdateMutation,
 } from '@/store/services/commonApi';
 import { Address } from '@/store/slices/addressSlice';
+import * as ExpoLocation from 'expo-location';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-	ActivityIndicator,
 	Alert,
 	KeyboardAvoidingView,
 	Platform,
@@ -23,10 +26,6 @@ import {
 	View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useGetSelfQuery } from '@/store/services/authApi';
-import { Loader } from '@/components/Loader';
-import AddressCard from '@/components/cards/AddressCard';
-import { CustomColors } from '@/constants/theme';
 
 export default function AddressesScreen() {
 	const { data: userData } = useGetSelfQuery({});
@@ -60,10 +59,7 @@ export default function AddressesScreen() {
 		try {
 			const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
 			if (status !== 'granted') {
-				Alert.alert(
-					'Permission denied',
-					'Permission to access location was denied'
-				);
+				Alert.alert('Permission denied', 'Permission to access location was denied');
 				return;
 			}
 
@@ -168,26 +164,22 @@ export default function AddressesScreen() {
 	};
 
 	const handleDelete = (id: string) => {
-		Alert.alert(
-			'Delete Address',
-			'Are you sure you want to delete this address?',
-			[
-				{ text: 'Cancel', style: 'cancel' },
-				{
-					text: 'Confirm',
-					style: 'destructive',
-					onPress: async () => {
-						try {
-							await deleteAddress({ path: 'addresses', id }).unwrap();
-							Alert.alert('Success', 'Address deleted successfully');
-						} catch (error) {
-							console.error('Failed to delete address:', error);
-							Alert.alert('Error', 'Failed to delete address');
-						}
-					},
+		Alert.alert('Delete Address', 'Are you sure you want to delete this address?', [
+			{ text: 'Cancel', style: 'cancel' },
+			{
+				text: 'Confirm',
+				style: 'destructive',
+				onPress: async () => {
+					try {
+						await deleteAddress({ path: 'addresses', id }).unwrap();
+						Alert.alert('Success', 'Address deleted successfully');
+					} catch (error) {
+						console.error('Failed to delete address:', error);
+						Alert.alert('Error', 'Failed to delete address');
+					}
 				},
-			]
-		);
+			},
+		]);
 	};
 
 	const handleSetDefault = async (id: string) => {
@@ -221,12 +213,17 @@ export default function AddressesScreen() {
 		<SafeAreaView style={styles.safeArea}>
 			<KeyboardAvoidingView
 				style={{ flex: 1 }}
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-			>
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 				{/* Header */}
 				<View style={styles.header}>
-					<Pressable onPress={() => router.back()} style={styles.backButton}>
-						<IconSymbol name='chevron.left' size={24} color='#000000' />
+					<Pressable
+						onPress={() => router.back()}
+						style={styles.backButton}>
+						<IconSymbol
+							name='chevron.left'
+							size={24}
+							color='#000000'
+						/>
 					</Pressable>
 					<Text style={styles.headerTitle}>My Addresses</Text>
 					<View style={{ width: 40 }} />
@@ -237,8 +234,7 @@ export default function AddressesScreen() {
 				) : (
 					<ScrollView
 						style={styles.scrollView}
-						showsVerticalScrollIndicator={false}
-					>
+						showsVerticalScrollIndicator={false}>
 						{/* Saved Addresses */}
 						<View style={styles.addressesContainer}>
 							{addresses?.map((address, index) => (
@@ -254,7 +250,11 @@ export default function AddressesScreen() {
 
 							{addresses.length === 0 && (
 								<View style={styles.emptyState}>
-									<IconSymbol name='mappin.circle' size={64} color='#D0D0D0' />
+									<IconSymbol
+										name='mappin.circle'
+										size={64}
+										color='#D0D0D0'
+									/>
 									<Text style={styles.emptyStateText}>No saved addresses</Text>
 									<Text style={styles.emptyStateSubtext}>
 										Add your first address to get started
@@ -283,9 +283,12 @@ export default function AddressesScreen() {
 												city: '',
 												postalCode: '',
 											});
-										}}
-									>
-										<IconSymbol name='xmark' size={24} color='#666666' />
+										}}>
+										<IconSymbol
+											name='xmark'
+											size={24}
+											color='#666666'
+										/>
 									</Pressable>
 								</View>
 
@@ -308,17 +311,12 @@ export default function AddressesScreen() {
 													styles.labelOption,
 													formData.label === label && styles.labelOptionActive,
 												]}
-												onPress={() =>
-													setFormData(prev => ({ ...prev, label }))
-												}
-											>
+												onPress={() => setFormData(prev => ({ ...prev, label }))}>
 												<Text
 													style={[
 														styles.labelOptionText,
-														formData.label === label &&
-															styles.labelOptionTextActive,
-													]}
-												>
+														formData.label === label && styles.labelOptionTextActive,
+													]}>
 													{label}
 												</Text>
 											</Pressable>
@@ -332,9 +330,7 @@ export default function AddressesScreen() {
 										style={styles.input}
 										placeholder='Enter full name'
 										value={formData.name}
-										onChangeText={text =>
-											setFormData(prev => ({ ...prev, name: text }))
-										}
+										onChangeText={text => setFormData(prev => ({ ...prev, name: text }))}
 									/>
 								</View>
 
@@ -345,9 +341,7 @@ export default function AddressesScreen() {
 										placeholder='+880 1XXXXXXXXX'
 										keyboardType='phone-pad'
 										value={formData.phone}
-										onChangeText={text =>
-											setFormData(prev => ({ ...prev, phone: text }))
-										}
+										onChangeText={text => setFormData(prev => ({ ...prev, phone: text }))}
 									/>
 								</View>
 
@@ -357,9 +351,7 @@ export default function AddressesScreen() {
 										style={styles.input}
 										placeholder='House/Flat no., Street'
 										value={formData.street}
-										onChangeText={text =>
-											setFormData(prev => ({ ...prev, street: text }))
-										}
+										onChangeText={text => setFormData(prev => ({ ...prev, street: text }))}
 									/>
 								</View>
 
@@ -369,9 +361,7 @@ export default function AddressesScreen() {
 										style={styles.input}
 										placeholder='Area/Locality'
 										value={formData.area}
-										onChangeText={text =>
-											setFormData(prev => ({ ...prev, area: text }))
-										}
+										onChangeText={text => setFormData(prev => ({ ...prev, area: text }))}
 									/>
 								</View>
 
@@ -382,9 +372,7 @@ export default function AddressesScreen() {
 											style={styles.input}
 											placeholder='City'
 											value={formData.city}
-											onChangeText={text =>
-												setFormData(prev => ({ ...prev, city: text }))
-											}
+											onChangeText={text => setFormData(prev => ({ ...prev, city: text }))}
 										/>
 									</View>
 
@@ -395,9 +383,7 @@ export default function AddressesScreen() {
 											placeholder='1200'
 											keyboardType='numeric'
 											value={formData.postalCode}
-											onChangeText={text =>
-												setFormData(prev => ({ ...prev, postalCode: text }))
-											}
+											onChangeText={text => setFormData(prev => ({ ...prev, postalCode: text }))}
 										/>
 									</View>
 								</View>
@@ -649,16 +635,16 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		left: 0,
 		right: 0,
-		backgroundColor: '#FFFFFF',
+		// backgroundColor: '#FFFFFF',
 		borderTopWidth: 1,
 		borderTopColor: '#E5E5E5',
 		paddingHorizontal: 20,
-		paddingVertical: 16,
-		shadowColor: '#000',
+		paddingTop: 12,
+		// shadowColor: '#000',
 		shadowOffset: { width: 0, height: -2 },
 		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 5,
+		// shadowRadius: 4,
+		// elevation: 5,
 	},
 	addButton: {
 		flexDirection: 'row',

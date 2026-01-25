@@ -1,40 +1,25 @@
 import PrimaryButton from '@/components/buttons/PrimaryButton';
-import { ProductCard } from '@/components/product-card';
+import { CompactProductCard } from '@/components/CompactProductCard';
 import { ProductCardSkeleton } from '@/components/skeleton/ProductCardSkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
 import type { RootState } from '@/store';
 import { useGetAllQuery } from '@/store/services/commonApi';
-import {
-	addToCart,
-	deleteOneFromCart,
-	deleteSingleItemFromCart,
-} from '@/store/slices/cartSlice';
+import { addToCart, deleteOneFromCart, deleteSingleItemFromCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
-import {
-	Image,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 const fallback = require('../../../assets/images/fallback-fruit.png');
 export default function CartScreen() {
 	const dispatch = useDispatch();
-	const { cartItems, total, subTotal } = useSelector(
-		(state: RootState) => state.cart,
-	);
+	const { cartItems, total, subTotal } = useSelector((state: RootState) => state.cart);
 
-	const { data: latestProducts, isLoading: latestProductsLoading } =
-		useGetAllQuery({
-			path: '/products',
-			limit: 5,
-			sort: '-createdAt',
-		}) as any;
+	const { data: latestProducts, isLoading: latestProductsLoading } = useGetAllQuery({
+		path: '/products',
+		limit: 5,
+		sort: '-createdAt',
+	}) as any;
 
 	const handleProductPress = (id: string) => {
 		router.push(`/product/${id}` as any);
@@ -84,8 +69,14 @@ export default function CartScreen() {
 			{/* Header with Progress */}
 			<View style={styles.headerSafeArea}>
 				<View style={styles.header}>
-					<Pressable onPress={handleBack} style={styles.closeButton}>
-						<IconSymbol name='xmark' size={24} color='#000000' />
+					<Pressable
+						onPress={handleBack}
+						style={styles.closeButton}>
+						<IconSymbol
+							name='xmark'
+							size={24}
+							color='#000000'
+						/>
 					</Pressable>
 					<View style={styles.headerTitleContainer}>
 						<Text style={styles.headerTitle}>Cart</Text>
@@ -120,8 +111,7 @@ export default function CartScreen() {
 			<ScrollView
 				style={styles.container}
 				contentContainerStyle={styles.scrollContent}
-				showsVerticalScrollIndicator={false}
-			>
+				showsVerticalScrollIndicator={false}>
 				{/* Delivery Time Section */}
 				{/* <View style={styles.deliverySection}>
 					<Image
@@ -145,7 +135,9 @@ export default function CartScreen() {
 						</View>
 					) : (
 						cartItems?.map((item: any) => (
-							<View key={item.uniqueId} style={styles.cartItem}>
+							<View
+								key={item.uniqueId}
+								style={styles.cartItem}>
 								{item.image ? (
 									<Image
 										source={{
@@ -154,43 +146,53 @@ export default function CartScreen() {
 										style={styles.itemImage}
 									/>
 								) : (
-									<Image source={fallback} style={styles.itemImage} />
+									<Image
+										source={fallback}
+										style={styles.itemImage}
+									/>
 								)}
 								<View style={styles.itemInfo}>
-									<Text style={styles.itemName} numberOfLines={2}>
+									<Text
+										style={styles.itemName}
+										numberOfLines={2}>
 										{item.name}
 									</Text>
-									{item.variantName && (
-										<Text style={styles.itemVariant}>{item.variantName}</Text>
-									)}
+									{item.variantName && <Text style={styles.itemVariant}>{item.variantName}</Text>}
 									<View style={styles.itemFooter}>
 										<View style={styles.quantityControls}>
 											{item.qty === 1 ? (
 												<Pressable
 													onPress={() => handleRemove(item.uniqueId)}
-													style={styles.quantityButton}
-												>
-													<IconSymbol name='minus' size={18} color='#666666' />
+													style={styles.quantityButton}>
+													<IconSymbol
+														name='minus'
+														size={18}
+														color='#666666'
+													/>
 												</Pressable>
 											) : (
 												<Pressable
 													onPress={() => handleDecrement(item.uniqueId)}
-													style={styles.quantityButton}
-												>
-													<IconSymbol name='minus' size={18} color='#000000' />
+													style={styles.quantityButton}>
+													<IconSymbol
+														name='minus'
+														size={18}
+														color='#000000'
+													/>
 												</Pressable>
 											)}
 											<Text style={styles.quantityText}>{item.qty}</Text>
 											<Pressable
 												onPress={() => handleIncrement(item.uniqueId)}
-												style={styles.quantityButton}
-											>
-												<IconSymbol name='plus' size={18} color='#000000' />
+												style={styles.quantityButton}>
+												<IconSymbol
+													name='plus'
+													size={18}
+													color='#000000'
+												/>
 											</Pressable>
 										</View>
-										<Text style={styles.itemPrice}>
-											Tk {item.price.toLocaleString()}
-										</Text>
+										<Text style={styles.itemPrice}>Tk {item.price.toLocaleString()}</Text>
 									</View>
 								</View>
 							</View>
@@ -201,9 +203,12 @@ export default function CartScreen() {
 				{/* Add More Items */}
 				<Pressable
 					style={styles.addMoreButton}
-					onPress={() => router.push('/(protected)/(tabs)/search')}
-				>
-					<IconSymbol name='plus' size={20} color='#000000' />
+					onPress={() => router.push('/(protected)/(tabs)/search')}>
+					<IconSymbol
+						name='plus'
+						size={20}
+						color='#000000'
+					/>
 					<Text style={styles.addMoreText}>
 						{cartItems.length > 0 ? 'Add More Items' : 'Explore Products'}
 					</Text>
@@ -215,20 +220,20 @@ export default function CartScreen() {
 					<ScrollView
 						horizontal
 						showsHorizontalScrollIndicator={false}
-						contentContainerStyle={styles.popularScroll}
-					>
+						contentContainerStyle={styles.popularScroll}>
 						{latestProductsLoading
 							? Array.from({ length: 5 }).map((_, index) => (
 									<View
 										key={`skeleton-${index}`}
-										style={styles.popularCardContainer}
-									>
+										style={styles.popularCardContainer}>
 										<ProductCardSkeleton />
 									</View>
 								))
 							: latestProducts?.doc?.map((item: any) => (
-									<View key={item.id} style={styles.popularCardContainer}>
-										<ProductCard
+									<View
+										key={item.id}
+										style={styles.popularCardContainer}>
+										<CompactProductCard
 											product={item}
 											id={item.id}
 											name={item.name}
@@ -249,13 +254,9 @@ export default function CartScreen() {
 						<View style={styles.totalRow}>
 							<Text style={styles.totalLabel}>Total (incl. fees and tax)</Text>
 							<View style={styles.totalPriceContainer}>
-								<Text style={styles.totalPrice}>
-									Tk {total.toLocaleString()}
-								</Text>
+								<Text style={styles.totalPrice}>Tk {total.toLocaleString()}</Text>
 								{subTotal !== total && (
-									<Text style={styles.originalPrice}>
-										Tk {subTotal.toLocaleString()}
-									</Text>
+									<Text style={styles.originalPrice}>Tk {subTotal.toLocaleString()}</Text>
 								)}
 							</View>
 						</View>
@@ -263,9 +264,7 @@ export default function CartScreen() {
 							<Text style={styles.seeSummary}>See summary</Text>
 						</Pressable> */}
 						{subTotal < 300 && (
-							<Text
-								style={styles.seeSummary}
-							>{`Add Tk ${300 - subTotal} more to proceed`}</Text>
+							<Text style={styles.seeSummary}>{`Add Tk ${300 - subTotal} more to proceed`}</Text>
 						)}
 					</View>
 				)}
@@ -563,7 +562,7 @@ const styles = StyleSheet.create({
 	checkoutContainer: {
 		backgroundColor: '#FFFFFF',
 		paddingHorizontal: 16,
-		paddingVertical: 16,
+		paddingVertical: 12,
 		borderTopWidth: 1,
 		borderTopColor: '#E5E5E5',
 		shadowColor: '#000',

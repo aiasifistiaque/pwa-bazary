@@ -1,27 +1,19 @@
+import PrimaryButton from '@/components/buttons/PrimaryButton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { CustomColors } from '@/constants/theme';
 import type { RootState } from '@/store';
-import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
-import { resetCart } from '@/store/slices/cartSlice';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import {
-	Alert,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	Text,
-	TextInput,
-	View,
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useGetSelfQuery } from '@/store/services/authApi';
 import { useCreateOrderMutation } from '@/store/services/checkoutApi';
 import { useGetAllQuery } from '@/store/services/commonApi';
-import { useGetSelfQuery } from '@/store/services/authApi';
+import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
+import { resetCart } from '@/store/slices/cartSlice';
 import { Image } from 'expo-image';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import PrimaryButton from '@/components/buttons/PrimaryButton';
-import { CustomColors } from '@/constants/theme';
+import { useEffect, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
 
 type DeliveryTimeSlot = {
 	id: string;
@@ -227,16 +219,8 @@ export default function CheckoutScreen() {
 			setError('Please select a delivery time slot.');
 			return;
 		}
-		if (
-			!address.name ||
-			!address.phone ||
-			!address.street ||
-			!address.area ||
-			!address.city
-		) {
-			setError(
-				'Please complete your delivery address (name, phone, street, area, city).',
-			);
+		if (!address.name || !address.phone || !address.street || !address.area || !address.city) {
+			setError('Please complete your delivery address (name, phone, street, area, city).');
 			return;
 		}
 		if (!selectedPayment) {
@@ -315,9 +299,7 @@ export default function CheckoutScreen() {
 			}
 		} catch (error: any) {
 			console.error(error);
-			setError(
-				error?.data?.message || 'Failed to place order. Please try again.',
-			);
+			setError(error?.data?.message || 'Failed to place order. Please try again.');
 		}
 	};
 
@@ -325,8 +307,14 @@ export default function CheckoutScreen() {
 		<SafeAreaView style={styles.safeArea}>
 			{/* Header */}
 			<View style={styles.header}>
-				<Pressable onPress={handleBack} style={styles.backButton}>
-					<IconSymbol name='chevron.left' size={24} color='#000000' />
+				<Pressable
+					onPress={handleBack}
+					style={styles.backButton}>
+					<IconSymbol
+						name='chevron.left'
+						size={24}
+						color='#000000'
+					/>
 				</Pressable>
 				<Text style={styles.headerTitle}>Checkout</Text>
 				<View style={{ width: 40 }} />
@@ -334,8 +322,7 @@ export default function CheckoutScreen() {
 
 			<ScrollView
 				style={styles.container}
-				contentContainerStyle={styles.scrollContent}
-			>
+				contentContainerStyle={styles.scrollContent}>
 				{/* Delivery Time Section */}
 				<View style={styles.section}>
 					<View style={styles.sectionHeader}>
@@ -349,16 +336,10 @@ export default function CheckoutScreen() {
 					{deliverySlots.map(slot => (
 						<Pressable
 							key={slot.id}
-							style={[
-								styles.optionCard,
-								selectedTimeSlot === slot.id && styles.selectedOption,
-							]}
-							onPress={() => setSelectedTimeSlot(slot.id)}
-						>
+							style={[styles.optionCard, selectedTimeSlot === slot.id && styles.selectedOption]}
+							onPress={() => setSelectedTimeSlot(slot.id)}>
 							<View style={styles.radioCircle}>
-								{selectedTimeSlot === slot.id && (
-									<View style={styles.radioSelected} />
-								)}
+								{selectedTimeSlot === slot.id && <View style={styles.radioSelected} />}
 							</View>
 							<View style={styles.optionInfo}>
 								<Text style={styles.optionTitle}>{slot.day}</Text>
@@ -383,17 +364,14 @@ export default function CheckoutScreen() {
 					{savedAddresses.length > 0 && (
 						<Pressable
 							style={styles.savedAddressesButton}
-							onPress={() => setShowSavedAddresses(!showSavedAddresses)}
-						>
+							onPress={() => setShowSavedAddresses(!showSavedAddresses)}>
 							<IconSymbol
 								name='mappin.circle.fill'
 								size={20}
 								color={CustomColors.darkBrown}
 							/>
 							<Text style={styles.savedAddressesButtonText}>
-								{showSavedAddresses
-									? 'Hide Saved Addresses'
-									: 'Choose from Saved Addresses'}
+								{showSavedAddresses ? 'Hide Saved Addresses' : 'Choose from Saved Addresses'}
 							</Text>
 							<IconSymbol
 								name={showSavedAddresses ? 'chevron.up' : 'chevron.down'}
@@ -408,34 +386,22 @@ export default function CheckoutScreen() {
 						<View style={styles.savedAddressesList}>
 							{savedAddresses.map(addr => {
 								const addrId = (addr as any)._id || addr.id;
-								const selectedId =
-									(selectedCheckoutAddr as any)?._id ||
-									selectedCheckoutAddr?.id;
+								const selectedId = (selectedCheckoutAddr as any)?._id || selectedCheckoutAddr?.id;
 								const isSelected = selectedId === addrId;
 
 								return (
 									<Pressable
 										key={addrId}
-										style={[
-											styles.savedAddressCard,
-											isSelected && styles.selectedSavedAddress,
-										]}
-										onPress={() => handleSelectSavedAddress(addr)}
-									>
+										style={[styles.savedAddressCard, isSelected && styles.selectedSavedAddress]}
+										onPress={() => handleSelectSavedAddress(addr)}>
 										<View style={styles.savedAddressHeader}>
 											<View style={styles.addressLabelRow}>
 												<IconSymbol
-													name={
-														addr.label === 'Home'
-															? 'house.fill'
-															: 'building.2.fill'
-													}
+													name={addr.label === 'Home' ? 'house.fill' : 'building.2.fill'}
 													size={18}
 													color={CustomColors.darkBrown}
 												/>
-												<Text style={styles.savedAddressLabel}>
-													{addr.label}
-												</Text>
+												<Text style={styles.savedAddressLabel}>{addr.label}</Text>
 												{addr.isDefault && (
 													<View style={styles.miniDefaultBadge}>
 														<Text style={styles.miniDefaultText}>Default</Text>
@@ -453,8 +419,7 @@ export default function CheckoutScreen() {
 										<Text style={styles.savedAddressName}>{addr.name}</Text>
 										<Text style={styles.savedAddressText}>{addr.phone}</Text>
 										<Text style={styles.savedAddressText}>
-											{addr.street}, {addr.area}, {addr.city} -{' '}
-											{addr.postalCode}
+											{addr.street}, {addr.area}, {addr.city} - {addr.postalCode}
 										</Text>
 									</Pressable>
 								);
@@ -516,9 +481,7 @@ export default function CheckoutScreen() {
 								style={styles.input}
 								placeholder='1200'
 								value={address.postalCode}
-								onChangeText={text =>
-									setAddress({ ...address, postalCode: text })
-								}
+								onChangeText={text => setAddress({ ...address, postalCode: text })}
 								keyboardType='number-pad'
 							/>
 						</View>
@@ -538,16 +501,10 @@ export default function CheckoutScreen() {
 					{paymentMethods.map(method => (
 						<Pressable
 							key={method.id}
-							style={[
-								styles.optionCard,
-								selectedPayment === method.id && styles.selectedOption,
-							]}
-							onPress={() => setSelectedPayment(method.id)}
-						>
+							style={[styles.optionCard, selectedPayment === method.id && styles.selectedOption]}
+							onPress={() => setSelectedPayment(method.id)}>
 							<View style={styles.radioCircle}>
-								{selectedPayment === method.id && (
-									<View style={styles.radioSelected} />
-								)}
+								{selectedPayment === method.id && <View style={styles.radioSelected} />}
 							</View>
 							{method.type === 'image' ? (
 								<Image
@@ -591,15 +548,13 @@ export default function CheckoutScreen() {
 						{!appliedCoupon ? (
 							<Pressable
 								style={styles.applyCouponButton}
-								onPress={handleApplyCoupon}
-							>
+								onPress={handleApplyCoupon}>
 								<Text style={styles.applyCouponText}>Apply</Text>
 							</Pressable>
 						) : (
 							<Pressable
 								style={styles.removeCouponButton}
-								onPress={handleRemoveCoupon}
-							>
+								onPress={handleRemoveCoupon}>
 								<Text style={styles.removeCouponText}>Remove</Text>
 							</Pressable>
 						)}
@@ -613,8 +568,7 @@ export default function CheckoutScreen() {
 								couponMessage.type === 'success'
 									? styles.couponMessageSuccess
 									: styles.couponMessageError,
-							]}
-						>
+							]}>
 							<IconSymbol
 								name={
 									couponMessage.type === 'success'
@@ -622,11 +576,7 @@ export default function CheckoutScreen() {
 										: 'exclamationmark.triangle.fill'
 								}
 								size={16}
-								color={
-									couponMessage.type === 'success'
-										? '#10B981'
-										: CustomColors.darkBrown
-								}
+								color={couponMessage.type === 'success' ? '#10B981' : CustomColors.darkBrown}
 							/>
 							<Text
 								style={[
@@ -634,8 +584,7 @@ export default function CheckoutScreen() {
 									couponMessage.type === 'success'
 										? styles.couponMessageTextSuccess
 										: styles.couponMessageTextError,
-								]}
-							>
+								]}>
 								{couponMessage.text}
 							</Text>
 						</View>
@@ -644,7 +593,11 @@ export default function CheckoutScreen() {
 					{/* Applied Coupon Display */}
 					{appliedCoupon && (
 						<View style={styles.appliedCouponBadge}>
-							<IconSymbol name='tag.fill' size={16} color='#10B981' />
+							<IconSymbol
+								name='tag.fill'
+								size={16}
+								color='#10B981'
+							/>
 							<Text style={styles.appliedCouponText}>
 								{appliedCoupon.code} - {appliedCoupon.description}
 							</Text>
@@ -657,15 +610,11 @@ export default function CheckoutScreen() {
 					<Text style={styles.sectionTitle}>Order Summary</Text>
 					<View style={styles.summaryRow}>
 						<Text style={styles.summaryLabel}>Subtotal</Text>
-						<Text style={styles.summaryValue}>
-							৳{subTotal.toLocaleString()}
-						</Text>
+						<Text style={styles.summaryValue}>৳{subTotal.toLocaleString()}</Text>
 					</View>
 					<View style={styles.summaryRow}>
 						<Text style={styles.summaryLabel}>Delivery Fee</Text>
-						<Text style={styles.summaryValue}>
-							৳{shipping.toLocaleString()}
-						</Text>
+						<Text style={styles.summaryValue}>৳{shipping.toLocaleString()}</Text>
 					</View>
 					<View style={styles.summaryRow}>
 						<Text style={styles.summaryLabel}>VAT</Text>
@@ -673,9 +622,7 @@ export default function CheckoutScreen() {
 					</View>
 					{discount > 0 && (
 						<View style={styles.summaryRow}>
-							<Text style={[styles.summaryLabel, { color: '#28A745' }]}>
-								Discount
-							</Text>
+							<Text style={[styles.summaryLabel, { color: '#28A745' }]}>Discount</Text>
 							<Text style={[styles.summaryValue, { color: '#28A745' }]}>
 								-৳{discount.toLocaleString()}
 							</Text>
@@ -693,9 +640,7 @@ export default function CheckoutScreen() {
 					)}
 					<View style={[styles.summaryRow, styles.totalRow]}>
 						<Text style={styles.totalLabel}>Total</Text>
-						<Text style={styles.totalValue}>
-							৳{(total - couponDiscount).toLocaleString()}
-						</Text>
+						<Text style={styles.totalValue}>৳{(total - couponDiscount).toLocaleString()}</Text>
 					</View>
 				</View>
 
@@ -925,15 +870,10 @@ const styles = StyleSheet.create({
 	bottomContainer: {
 		backgroundColor: '#FFFFFF',
 		paddingHorizontal: 16,
-		paddingTop: 12,
+		paddingTop: 10,
 		paddingBottom: 16,
 		borderTopWidth: 1,
 		borderTopColor: '#E5E5E5',
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: -2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 5,
 	},
 	placeOrderButton: {
 		backgroundColor: CustomColors.darkBrown,
@@ -981,7 +921,7 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: '#E5E5E5',
 		backgroundColor: '#F9F9F9',
-		marginBottom: 12,
+		marginBottom: 8,
 	},
 	selectedSavedAddress: {
 		borderColor: '#10B981',
