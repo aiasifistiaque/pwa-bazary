@@ -60,11 +60,11 @@ export default function CheckoutScreen() {
 	const [createOrder, { isLoading }] = useCreateOrderMutation();
 	const [errorMsg, setErrorMsg] = useState<string>('');
 	const { total, subTotal, shipping, vat, discount, cartItems } = useSelector(
-		(state: RootState) => state.cart
+		(state: RootState) => state.cart,
 	);
 
 	const selectedCheckoutAddr = useSelector(
-		(state: RootState) => state.address.selectedCheckoutAddress
+		(state: RootState) => state.address.selectedCheckoutAddress,
 	);
 
 	const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
@@ -235,7 +235,7 @@ export default function CheckoutScreen() {
 			!address.city
 		) {
 			setError(
-				'Please complete your delivery address (name, phone, street, area, city).'
+				'Please complete your delivery address (name, phone, street, area, city).',
 			);
 			return;
 		}
@@ -268,7 +268,7 @@ export default function CheckoutScreen() {
 					vat,
 					shipping,
 					discount: finalDiscount,
-					couponId: appliedCoupon?._id || null,
+					couponId: appliedCoupon?._id || undefined,
 					dueAmount: finalTotal,
 				},
 				address,
@@ -277,7 +277,7 @@ export default function CheckoutScreen() {
 				paymentAmount: finalTotal,
 				status: 'pending',
 				paidAmount: finalTotal,
-				couponCode: appliedCoupon?.code || null,
+				couponCode: appliedCoupon?.code || undefined,
 				discount: finalDiscount,
 				origin: 'app',
 				orderDate: new Date(),
@@ -310,13 +310,13 @@ export default function CheckoutScreen() {
 							},
 						},
 					],
-					{ cancelable: false } // Prevent dismissing alert without pressing OK
+					{ cancelable: false }, // Prevent dismissing alert without pressing OK
 				);
 			}
 		} catch (error: any) {
 			console.error(error);
 			setError(
-				error?.data?.message || 'Failed to place order. Please try again.'
+				error?.data?.message || 'Failed to place order. Please try again.',
 			);
 		}
 	};
