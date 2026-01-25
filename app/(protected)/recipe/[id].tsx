@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
+import { CustomColors } from '@/constants/theme';
 
 const fallback = require('../../../assets/images/fallback-fruit.png');
 
@@ -86,7 +87,7 @@ const IngredientWithProduct = ({
 			{/* Ingredient Image */}
 			{isLoading ? (
 				<View style={[styles.ingredientImage, styles.loadingImageContainer]}>
-					<ActivityIndicator size='small' color='#E63946' />
+					<ActivityIndicator size='small' color={CustomColors.lightBrown} />
 				</View>
 			) : (
 				<Image
@@ -485,7 +486,7 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 	},
 	saveBadge: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 12,
 		paddingVertical: 6,
 		borderRadius: 6,
@@ -534,8 +535,8 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 	},
 	checkboxChecked: {
-		backgroundColor: '#E63946',
-		borderColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
+		borderColor: CustomColors.lightBrown,
 	},
 	checkboxDisabled: {
 		backgroundColor: '#9CA3AF',
@@ -637,10 +638,10 @@ const styles = StyleSheet.create({
 	totalPrice: {
 		fontSize: 24,
 		fontWeight: 'bold',
-		color: '#E63946',
+		color: CustomColors.lightBrown,
 	},
 	addButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingVertical: 16,
 		borderRadius: 12,
 		alignItems: 'center',

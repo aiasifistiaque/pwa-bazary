@@ -39,7 +39,7 @@ export const favoritesSlice = createSlice({
 		},
 		toggleFavorite: (state, action: PayloadAction<FavoriteItem>) => {
 			const index = state.items.findIndex(
-				item => item.id === action.payload.id
+				item => item.id === action.payload.id,
 			);
 			if (index >= 0) {
 				state.items.splice(index, 1);

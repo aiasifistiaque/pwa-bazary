@@ -120,7 +120,9 @@ export default function DiscoverScreen() {
 					<FlatList
 						horizontal
 						data={Array.from({ length: 3 })}
-						renderItem={({ index }) => <RecipeCardSkeleton key={index} />}
+						renderItem={({ index }) => (
+							<RecipeCardSkeleton key={index} style={styles.recipeCard} />
+						)}
 						keyExtractor={(_, index) => `skeleton-${index}`}
 						showsHorizontalScrollIndicator={false}
 						contentContainerStyle={styles.recipeList}
@@ -194,8 +196,6 @@ const styles = StyleSheet.create({
 	},
 	recipeList: {
 		paddingHorizontal: 16,
-		flexDirection: 'row',
-		flexWrap: 'wrap',
 		gap: 12,
 	},
 	recipeCard: {

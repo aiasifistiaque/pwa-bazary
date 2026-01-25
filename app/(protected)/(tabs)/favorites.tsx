@@ -36,7 +36,7 @@ export default function FavoritesScreen() {
 					vat: 0,
 				},
 				qty: 1,
-			})
+			}),
 		);
 	};
 
