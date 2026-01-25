@@ -24,7 +24,7 @@ const fallbackImage = require('../../../assets/images/fallback-fruit.png');
 const recipesItem = {
 	id: 'recipes',
 	name: 'All Recipes',
-	icon: '�',
+	icon: '🍲',
 	color: '#9c6644',
 	route: '/recipes',
 };
@@ -66,15 +66,19 @@ export default function SearchScreen() {
 
 	// Combine dynamic collections with static recipes
 	const thisWeekItems = [
-		...(collectionsData?.doc || []).map((col: any, index: number) => ({
-			id: col.id,
-			name: col.name,
-			icon:
-				col.icon || COLLECTION_STYLES[index % COLLECTION_STYLES.length].icon,
-			color:
-				col.color || COLLECTION_STYLES[index % COLLECTION_STYLES.length].color,
-			route: `/collection/${col.id}`,
-		})),
+		...(collectionsData?.doc || []).map((col: any, index: number) => {
+			const colId = col._id || col.id;
+			return {
+				id: colId,
+				name: col.name,
+				icon:
+					col.icon || COLLECTION_STYLES[index % COLLECTION_STYLES.length].icon,
+				color:
+					col.color ||
+					COLLECTION_STYLES[index % COLLECTION_STYLES.length].color,
+				route: `/collection/${colId}`,
+			};
+		}),
 		recipesItem,
 	];
 
@@ -177,27 +181,29 @@ export default function SearchScreen() {
 						<View style={styles.section}>
 							<Text style={styles.sectionTitle}>This Week</Text>
 							<View style={styles.thisWeekGrid}>
-								{isCollectionsLoading && !collectionsData ? (
-									<View style={{ height: 180, justifyContent: 'center' }}>
-										<ActivityIndicator color={CustomColors.darkBrown} />
-									</View>
-								) : (
-									thisWeekItems.map(item => (
-										<TouchableOpacity
-											key={item.id}
-											style={[
-												styles.thisWeekCard,
-												{ backgroundColor: item.color },
-											]}
-											onPress={() => router.push(item.route as any)}
-											activeOpacity={0.7}
-										>
-											<Text style={styles.thisWeekIcon}>{item.icon}</Text>
-											<Text style={styles.thisWeekName}>{item.name}</Text>
-											<IconSymbol name='chevron.right' size={20} color='#333' />
-										</TouchableOpacity>
-									))
-								)}
+								{isCollectionsLoading && !collectionsData
+									? Array.from({ length: 3 }).map((_, index) => (
+											<SearchCategorySkeleton key={index} />
+										))
+									: thisWeekItems.map(item => (
+											<TouchableOpacity
+												key={item.id}
+												style={[
+													styles.thisWeekCard,
+													{ backgroundColor: item.color },
+												]}
+												onPress={() => router.push(item.route as any)}
+												activeOpacity={0.7}
+											>
+												<Text style={styles.thisWeekIcon}>{item.icon}</Text>
+												<Text style={styles.thisWeekName}>{item.name}</Text>
+												<IconSymbol
+													name='chevron.right'
+													size={20}
+													color='#333'
+												/>
+											</TouchableOpacity>
+										))}
 							</View>
 						</View>
 

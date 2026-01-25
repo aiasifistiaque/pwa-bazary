@@ -23,10 +23,13 @@ export default function CollectionScreen() {
 	const dispatch = useDispatch();
 	const { id } = useLocalSearchParams<{ id: string }>();
 
-	const { data: collection, isLoading: isCollectionLoading } = useGetByIdQuery({
-		path: 'collections',
-		id,
-	});
+	const { data: collection, isLoading: isCollectionLoading } = useGetByIdQuery(
+		{
+			path: 'collections',
+			id,
+		},
+		{ skip: !id || id === 'undefined' },
+	);
 
 	// Pagination state
 	const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -47,7 +50,7 @@ export default function CollectionScreen() {
 					isActive: true,
 				},
 			},
-			{ skip: !id },
+			{ skip: !id || id === 'undefined' },
 		);
 
 	useEffect(() => {
@@ -254,7 +257,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		flexWrap: 'wrap',
 		justifyContent: 'space-between',
-		padding: 16,
 	},
 	productCardWrapper: {
 		width: '48%',
