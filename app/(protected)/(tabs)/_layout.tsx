@@ -21,7 +21,7 @@ export default function TabLayout() {
 			<SafeAreaView style={styles.safeArea}>
 				<Tabs
 					screenOptions={{
-						tabBarActiveTintColor: CustomColors.darkGreen,
+						tabBarActiveTintColor: CustomColors.darkBrown,
 						tabBarInactiveTintColor: '#666666',
 						headerShown: false,
 						tabBarButton: HapticTab,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		top: -6,
 		right: -10,
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.darkBrown,
 		borderRadius: 10,
 		minWidth: 20,
 		height: 20,

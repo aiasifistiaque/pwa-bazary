@@ -12,6 +12,7 @@ export interface FavoriteItem {
 	image: string;
 	unit?: string;
 	unitPrice?: string;
+	weight?: string;
 }
 
 interface FavoritesState {
