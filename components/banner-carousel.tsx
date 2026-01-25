@@ -101,9 +101,10 @@ const styles = StyleSheet.create({
 	},
 	flatListContent: {
 		paddingHorizontal: SPACING,
+		gap: SPACING,
 	},
 	cardContainer: {
-		marginRight: SPACING,
+		display: 'flex',
 	},
 	pagination: {
 		flexDirection: 'row',

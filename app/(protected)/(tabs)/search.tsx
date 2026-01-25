@@ -3,6 +3,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
 import {
+	ActivityIndicator,
 	Image,
 	ScrollView,
 	StyleSheet,
@@ -19,29 +20,19 @@ import { ProductCard } from '@/components/product-card';
 import { Loader } from '@/components/Loader';
 import { CustomColors } from '@/constants/theme';
 const fallbackImage = require('../../../assets/images/fallback-fruit.png');
-// Featured categories for "This Week"
-const thisWeekCategories = [
-	{
-		id: 'offers',
-		name: 'All Offers',
-		icon: '🏷️',
-		color: CustomColors.darkBrown,
-		route: '/offers',
-	},
-	{
-		id: 'new',
-		name: 'New in App',
-		icon: '✨',
-		color: '#7f5539',
-		route: '/product-list?category=New%20in%20the%20App',
-	},
-	{
-		id: 'recipes',
-		name: 'All Recipes',
-		icon: '🍳',
-		color: '#9c6644',
-		route: '/recipes',
-	},
+// Static recipes item for 'This Week'
+const recipesItem = {
+	id: 'recipes',
+	name: 'All Recipes',
+	icon: '�',
+	color: '#9c6644',
+	route: '/recipes',
+};
+
+// Fallback collections icons/colors
+const COLLECTION_STYLES = [
+	{ icon: '🏷️', color: CustomColors.darkBrown },
+	{ icon: '✨', color: '#7f5539' },
 ];
 
 // Main categories
@@ -64,6 +55,28 @@ export default function SearchScreen() {
 		path: '/categorys',
 		filters: { displayInHomePage: true },
 	});
+
+	const { data: collectionsData, isLoading: isCollectionsLoading } =
+		useGetAllQuery({
+			path: '/collections',
+			sort: '-priority',
+			filters: { isFeatured: true },
+			limit: 2,
+		});
+
+	// Combine dynamic collections with static recipes
+	const thisWeekItems = [
+		...(collectionsData?.doc || []).map((col: any, index: number) => ({
+			id: col.id,
+			name: col.name,
+			icon:
+				col.icon || COLLECTION_STYLES[index % COLLECTION_STYLES.length].icon,
+			color:
+				col.color || COLLECTION_STYLES[index % COLLECTION_STYLES.length].color,
+			route: `/collection/${col.id}`,
+		})),
+		recipesItem,
+	];
 
 	const { data: searchResults, isLoading: isSearchLoading } = useGetAllQuery(
 		{
@@ -164,21 +177,27 @@ export default function SearchScreen() {
 						<View style={styles.section}>
 							<Text style={styles.sectionTitle}>This Week</Text>
 							<View style={styles.thisWeekGrid}>
-								{thisWeekCategories.map(item => (
-									<TouchableOpacity
-										key={item.id}
-										style={[
-											styles.thisWeekCard,
-											{ backgroundColor: item.color },
-										]}
-										onPress={() => router.push(item.route as any)}
-										activeOpacity={0.7}
-									>
-										<Text style={styles.thisWeekIcon}>{item.icon}</Text>
-										<Text style={styles.thisWeekName}>{item.name}</Text>
-										<IconSymbol name='chevron.right' size={20} color='#333' />
-									</TouchableOpacity>
-								))}
+								{isCollectionsLoading && !collectionsData ? (
+									<View style={{ height: 180, justifyContent: 'center' }}>
+										<ActivityIndicator color={CustomColors.darkBrown} />
+									</View>
+								) : (
+									thisWeekItems.map(item => (
+										<TouchableOpacity
+											key={item.id}
+											style={[
+												styles.thisWeekCard,
+												{ backgroundColor: item.color },
+											]}
+											onPress={() => router.push(item.route as any)}
+											activeOpacity={0.7}
+										>
+											<Text style={styles.thisWeekIcon}>{item.icon}</Text>
+											<Text style={styles.thisWeekName}>{item.name}</Text>
+											<IconSymbol name='chevron.right' size={20} color='#333' />
+										</TouchableOpacity>
+									))
+								)}
 							</View>
 						</View>
 

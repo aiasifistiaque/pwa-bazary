@@ -196,10 +196,10 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		flexDirection: 'row',
 		flexWrap: 'wrap',
+		gap: 12,
 	},
 	recipeCard: {
 		width: 280,
-		marginRight: 12,
 	},
 	sectionHeaderSkeleton: {
 		height: 24,
