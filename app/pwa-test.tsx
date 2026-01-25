@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function PWATestPage() {
 	const [checks, setChecks] = useState<any>({});
@@ -14,7 +14,8 @@ export default function PWATestPage() {
 			const results: any = {};
 
 			// Check 1: Is HTTPS?
-			results.https = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+			results.https =
+				window.location.protocol === 'https:' || window.location.hostname === 'localhost';
 
 			// Check 2: Service Worker support
 			results.swSupported = 'serviceWorker' in navigator;
@@ -83,21 +84,42 @@ export default function PWATestPage() {
 
 			<View style={styles.section}>
 				<Text style={styles.sectionTitle}>Environment</Text>
-				<CheckItem label="HTTPS or localhost" value={checks.https} />
-				<CheckItem label="iOS Device" value={checks.isIOS} />
-				<CheckItem label="Android Device" value={checks.isAndroid} />
+				<CheckItem
+					label='HTTPS or localhost'
+					value={checks.https}
+				/>
+				<CheckItem
+					label='iOS Device'
+					value={checks.isIOS}
+				/>
+				<CheckItem
+					label='Android Device'
+					value={checks.isAndroid}
+				/>
 			</View>
 
 			<View style={styles.section}>
 				<Text style={styles.sectionTitle}>Service Worker</Text>
-				<CheckItem label="Service Worker Supported" value={checks.swSupported} />
-				<CheckItem label="Service Worker Registered" value={checks.swRegistered} />
+				<CheckItem
+					label='Service Worker Supported'
+					value={checks.swSupported}
+				/>
+				<CheckItem
+					label='Service Worker Registered'
+					value={checks.swRegistered}
+				/>
 			</View>
 
 			<View style={styles.section}>
 				<Text style={styles.sectionTitle}>Manifest</Text>
-				<CheckItem label="Manifest Link Present" value={checks.manifestLink} />
-				<CheckItem label="Manifest Fetchable" value={checks.manifestFetch} />
+				<CheckItem
+					label='Manifest Link Present'
+					value={checks.manifestLink}
+				/>
+				<CheckItem
+					label='Manifest Fetchable'
+					value={checks.manifestFetch}
+				/>
 				{checks.manifestData && (
 					<View style={styles.detail}>
 						<Text style={styles.detailText}>Name: {checks.manifestData.name}</Text>
@@ -110,18 +132,27 @@ export default function PWATestPage() {
 
 			<View style={styles.section}>
 				<Text style={styles.sectionTitle}>iOS PWA Support</Text>
-				<CheckItem label="Apple Meta Tags Present" value={checks.appleMeta} />
-				<CheckItem label="Running in Standalone Mode" value={checks.standalone} />
+				<CheckItem
+					label='Apple Meta Tags Present'
+					value={checks.appleMeta}
+				/>
+				<CheckItem
+					label='Running in Standalone Mode'
+					value={checks.standalone}
+				/>
 			</View>
 
 			<View style={styles.section}>
 				<Text style={styles.sectionTitle}>Android PWA Support</Text>
-				<CheckItem label="Install Prompt Available" value={checks.installPrompt} />
+				<CheckItem
+					label='Install Prompt Available'
+					value={checks.installPrompt}
+				/>
 			</View>
 
 			<View style={styles.instructions}>
 				<Text style={styles.instructionsTitle}>Installation Instructions</Text>
-				
+
 				{checks.isIOS && (
 					<View style={styles.instructionBlock}>
 						<Text style={styles.instructionPlatform}>📱 iOS (Safari)</Text>

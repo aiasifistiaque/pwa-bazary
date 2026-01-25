@@ -1,4 +1,5 @@
 import { MobileOnlyGuard } from '@/components/MobileOnlyGuard';
+import PWAOnlyGuard from '@/components/PWAOnlyGuard';
 import { ToastProvider } from '@/contexts/ToastContext';
 import ReduxProvider from '@/store/provider/ReduxProvider';
 import { hydrateAuth, loadStoredToken } from '@/store/slices/authSlice';
@@ -54,9 +55,11 @@ export default function RootLayout() {
 				<PaperProvider>
 					<ToastProvider>
 						<MobileOnlyGuard>
-							<AuthHydrator>
-								<Slot />
-							</AuthHydrator>
+							<PWAOnlyGuard>
+								<AuthHydrator>
+									<Slot />
+								</AuthHydrator>
+							</PWAOnlyGuard>
 						</MobileOnlyGuard>
 					</ToastProvider>
 				</PaperProvider>
