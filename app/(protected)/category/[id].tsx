@@ -191,7 +191,7 @@ export default function CategoryScreen() {
 						<FlatList
 							ref={flatListRef}
 							data={allProducts}
-							keyExtractor={item => item.id}
+							keyExtractor={(item, index) => item._id || item.id || `product-${index}`}
 							contentContainerStyle={styles.listContainer}
 							renderItem={({ item }) => (
 								<HorizontalProductCard

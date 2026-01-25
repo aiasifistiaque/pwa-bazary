@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { CustomColors } from '@/constants/theme';
+import { useRegisterMutation } from '@/store/services/authApi';
+import { login } from '@/store/slices/authSlice';
+import { FontAwesome } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import {
-	View,
+	ActivityIndicator,
+	Keyboard,
+	Platform,
+	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
-	StyleSheet,
-	Alert,
 	TouchableWithoutFeedback,
-	Keyboard,
-	ActivityIndicator,
-	Platform,
+	View,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
-import { useRegisterMutation } from '@/store/services/authApi';
-import { login } from '@/store/slices/authSlice';
-import { useRouter } from 'expo-router';
 import { Button, Dialog, Paragraph, Portal } from 'react-native-paper';
-import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { FontAwesome } from '@expo/vector-icons';
-import { CustomColors } from '@/constants/theme';
+import { useDispatch } from 'react-redux';
 
 export default function RegisterScreen() {
 	const dispatch = useDispatch();
@@ -87,11 +85,7 @@ export default function RegisterScreen() {
 		} else if (registerResponse.isError) {
 			setDialogVisible(true);
 		}
-	}, [
-		registerResponse.isSuccess,
-		registerResponse.isError,
-		registerResponse.data,
-	]);
+	}, [registerResponse.isSuccess, registerResponse.isError, registerResponse.data]);
 
 	const dismissKeyboard = () => {
 		if (Platform.OS !== 'web') {
@@ -154,18 +148,23 @@ export default function RegisterScreen() {
 				/>
 				<TouchableOpacity
 					style={styles.eyeButton}
-					onPress={() => setShowPassword(prev => !prev)}
-				>
+					onPress={() => setShowPassword(prev => !prev)}>
 					{showPassword ? (
-						<FontAwesome name='eye' size={20} color='#000' />
+						<FontAwesome
+							name='eye'
+							size={20}
+							color='#000'
+						/>
 					) : (
-						<FontAwesome name='eye-slash' size={20} color='#000' />
+						<FontAwesome
+							name='eye-slash'
+							size={20}
+							color='#000'
+						/>
 					)}
 				</TouchableOpacity>
 			</View>
-			{errors.password && (
-				<Text style={styles.errorText}>{errors.password}</Text>
-			)}
+			{errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
 
 			<View style={styles.passwordContainer}>
 				<TextInput
@@ -181,28 +180,34 @@ export default function RegisterScreen() {
 				/>
 				<TouchableOpacity
 					style={styles.eyeButton}
-					onPress={() => setShowconfirm(prev => !prev)}
-				>
+					onPress={() => setShowconfirm(prev => !prev)}>
 					{showconfirm ? (
-						<FontAwesome name='eye' size={20} color='#000' />
+						<FontAwesome
+							name='eye'
+							size={20}
+							color='#000'
+						/>
 					) : (
-						<FontAwesome name='eye-slash' size={20} color='#000' />
+						<FontAwesome
+							name='eye-slash'
+							size={20}
+							color='#000'
+						/>
 					)}
 				</TouchableOpacity>
 			</View>
 			{errors.confirm && <Text style={styles.errorText}>{errors.confirm}</Text>}
 
 			<TouchableOpacity
-				style={[
-					styles.button,
-					registerResponse.isLoading && styles.buttonDisabled,
-				]}
+				style={[styles.button, registerResponse.isLoading && styles.buttonDisabled]}
 				onPress={handleRegister}
-				disabled={registerResponse.isLoading}
-			>
+				disabled={registerResponse.isLoading}>
 				<Text style={styles.buttonText}>
 					{registerResponse.isLoading ? (
-						<ActivityIndicator size={'small'} color={'#fff'} />
+						<ActivityIndicator
+							size={'small'}
+							color={'#fff'}
+						/>
 					) : (
 						'Register'
 					)}
@@ -211,7 +216,9 @@ export default function RegisterScreen() {
 
 			<Text style={styles.footerText}>
 				Already registered?{' '}
-				<Text style={styles.linkText} onPress={() => router.push('/login')}>
+				<Text
+					style={styles.linkText}
+					onPress={() => router.push('/login')}>
 					Login now!
 				</Text>
 			</Text>
@@ -220,27 +227,18 @@ export default function RegisterScreen() {
 			<Portal>
 				<Dialog
 					visible={isDialogVisible}
-					onDismiss={() => setDialogVisible(false)}
-				>
+					onDismiss={() => setDialogVisible(false)}>
 					<Dialog.Title>Oops!</Dialog.Title>
 					<Dialog.Content>
 						<Paragraph>
 							{(() => {
-								if (
-									registerResponse?.error &&
-									'data' in registerResponse.error
-								) {
+								if (registerResponse?.error && 'data' in registerResponse.error) {
 									const errorData = registerResponse.error.data as {
 										message?: string;
 									};
-									return (
-										errorData?.message || 'An error occurred. Please try again.'
-									);
+									return errorData?.message || 'An error occurred. Please try again.';
 								}
-								if (
-									registerResponse?.error &&
-									'message' in registerResponse.error
-								) {
+								if (registerResponse?.error && 'message' in registerResponse.error) {
 									return registerResponse.error.message;
 								}
 								return 'An error occurred. Please try again.';
@@ -260,11 +258,7 @@ export default function RegisterScreen() {
 		return content;
 	}
 
-	return (
-		<TouchableWithoutFeedback onPress={dismissKeyboard}>
-			{content}
-		</TouchableWithoutFeedback>
-	);
+	return <TouchableWithoutFeedback onPress={dismissKeyboard}>{content}</TouchableWithoutFeedback>;
 }
 
 const bodyColor = CustomColors.bodyColor;
@@ -290,8 +284,9 @@ const styles = StyleSheet.create({
 		height: 50,
 		borderWidth: 1,
 		borderColor: '#ccc',
-		borderRadius: 5,
+		borderRadius: 99,
 		padding: 10,
+		paddingHorizontal: 20,
 		backgroundColor: '#fff',
 	},
 	passwordContainer: {
@@ -315,10 +310,11 @@ const styles = StyleSheet.create({
 	button: {
 		width: '100%',
 		height: 50,
-		backgroundColor: buttonBgColor,
+		marginTop: 16,
+		backgroundColor: CustomColors.darkBrown,
 		justifyContent: 'center',
 		alignItems: 'center',
-		borderRadius: 5,
+		borderRadius: 99,
 	},
 	buttonDisabled: {
 		backgroundColor: '#A0A0A0',

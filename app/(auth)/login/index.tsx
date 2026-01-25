@@ -257,8 +257,9 @@ const styles = StyleSheet.create({
 		height: 50,
 		borderWidth: 1,
 		borderColor: '#ccc',
-		borderRadius: 5,
+		borderRadius: 99,
 		padding: 10,
+		paddingHorizontal: 20,
 		backgroundColor: '#fff',
 	},
 	errorText: {
@@ -284,7 +285,7 @@ const styles = StyleSheet.create({
 		backgroundColor: CustomColors.darkBrown,
 		justifyContent: 'center',
 		alignItems: 'center',
-		borderRadius: 5,
+		borderRadius: 99,
 	},
 	buttonDisabled: {
 		backgroundColor: '#A0A0A0',

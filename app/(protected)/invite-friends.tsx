@@ -1,23 +1,18 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Toast } from '@/components/ui/Toast';
 import { CustomColors } from '@/constants/theme';
+import { useGetSelfQuery } from '@/store/services/authApi';
 import * as Clipboard from 'expo-clipboard';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import {
-	Pressable,
-	ScrollView,
-	Share,
-	StyleSheet,
-	Text,
-	View,
-} from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function InviteFriendsScreen() {
 	const [toastVisible, setToastVisible] = useState(false);
 	const [toastMessage, setToastMessage] = useState('');
-	const referralCode = 'BAZAREY2026';
+	const { data: userData, isLoading } = useGetSelfQuery({});
+	const referralCode = userData?.refCode || 'LOADING';
 
 	const handleCopy = async () => {
 		await Clipboard.setStringAsync(referralCode);
@@ -38,8 +33,14 @@ export default function InviteFriendsScreen() {
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			<View style={styles.header}>
-				<Pressable onPress={() => router.back()} style={styles.backButton}>
-					<IconSymbol name='chevron.left' size={24} color='#000000' />
+				<Pressable
+					onPress={() => router.back()}
+					style={styles.backButton}>
+					<IconSymbol
+						name='chevron.left'
+						size={24}
+						color='#000000'
+					/>
 				</Pressable>
 				<Text style={styles.headerTitle}>Invite Friends</Text>
 				<View style={{ width: 40 }} />
@@ -56,13 +57,15 @@ export default function InviteFriendsScreen() {
 
 				<Text style={styles.title}>Refer a Friend, Earn Rewards!</Text>
 				<Text style={styles.description}>
-					Share your referral code with friends. When they place their first
-					order, you both get ৳100 off!
+					Share your referral code with friends. When they place their first order, you both get
+					৳100 off!
 				</Text>
 
 				<View style={styles.codeContainer}>
 					<Text style={styles.codeLabel}>Your Referral Code</Text>
-					<Pressable style={styles.codeBox} onPress={handleCopy}>
+					<Pressable
+						style={styles.codeBox}
+						onPress={handleCopy}>
 						<Text style={styles.codeText}>{referralCode}</Text>
 						<IconSymbol
 							name='doc.on.doc'
@@ -72,7 +75,9 @@ export default function InviteFriendsScreen() {
 					</Pressable>
 				</View>
 
-				<Pressable style={styles.shareButton} onPress={handleShare}>
+				<Pressable
+					style={styles.shareButton}
+					onPress={handleShare}>
 					<Text style={styles.shareButtonText}>Share Code</Text>
 				</Pressable>
 			</ScrollView>

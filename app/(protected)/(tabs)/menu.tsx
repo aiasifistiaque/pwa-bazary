@@ -138,6 +138,18 @@ export default function MenuScreen() {
 						<Text style={styles.viewProfile}>View profile</Text>
 					</Pressable>
 
+					{/* Customer Points Display */}
+					<View style={styles.pointsContainer}>
+						<IconSymbol
+							name='star.fill'
+							size={20}
+							color='#FFD700'
+						/>
+						<Text style={styles.pointsText}>
+							My Points: {isLoading ? '...' : userData?.points || 0}
+						</Text>
+					</View>
+
 					{/* Quick Action Cards */}
 					<View style={styles.cardsRow}>
 						<CardButton
@@ -300,6 +312,23 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		color: '#000000',
 		marginBottom: 20,
+	},
+	pointsContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+		backgroundColor: '#FFF9E6',
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		borderRadius: 12,
+		marginBottom: 20,
+		borderWidth: 1,
+		borderColor: '#FFE999',
+	},
+	pointsText: {
+		fontSize: 16,
+		fontWeight: '600',
+		color: '#B8860B',
 	},
 	cardsRow: {
 		flexDirection: 'row',
