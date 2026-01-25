@@ -46,6 +46,7 @@ export default function CollectionScreen() {
 	const [hasMore, setHasMore] = useState(true);
 	const scrollY = useRef(new Animated.Value(0)).current;
 	const flatListRef = useRef<FlatList>(null);
+	const cartAnim = useRef(new Animated.Value(1)).current;
 
 	const { data: productsData, isFetching: productsDataLoading } =
 		useGetAllQuery(
@@ -61,6 +62,25 @@ export default function CollectionScreen() {
 			},
 			{ skip: !id || id === 'undefined' },
 		);
+
+	useEffect(() => {
+		if (!productsDataLoading && allProducts.length === 0) {
+			Animated.loop(
+				Animated.sequence([
+					Animated.timing(cartAnim, {
+						toValue: 1.1,
+						duration: 1000,
+						useNativeDriver: true,
+					}),
+					Animated.timing(cartAnim, {
+						toValue: 1,
+						duration: 1000,
+						useNativeDriver: true,
+					}),
+				]),
+			).start();
+		}
+	}, [productsDataLoading, allProducts]);
 
 	useEffect(() => {
 		// Reset state when collection ID changes
@@ -176,7 +196,7 @@ export default function CollectionScreen() {
 								</View>
 							)}
 							ListEmptyComponent={() => (
-								<>
+								<View style={{ flex: 1, justifyContent: 'center' }}>
 									{productsDataLoading && page === 1 ? (
 										<View style={styles.productsGrid}>
 											{Array.from({ length: 6 }).map((_, index) => (
@@ -191,21 +211,33 @@ export default function CollectionScreen() {
 									) : (
 										!productsDataLoading && (
 											<View style={styles.emptyStateContainer}>
-												<IconSymbol
-													name='cart.fill'
-													size={64}
-													color='#8B4513'
-												/>
+												<Animated.View
+													style={{ transform: [{ scale: cartAnim }] }}
+												>
+													<IconSymbol
+														name='cart.fill'
+														size={64}
+														color={CustomColors.darkBrown}
+													/>
+												</Animated.View>
 												<Text style={styles.emptyStateText}>
 													No Products Found
 												</Text>
 												<Text style={styles.emptyStateSubtext}>
 													Check back later for new items
 												</Text>
+												<TouchableOpacity
+													style={styles.viewAllButton}
+													onPress={() => router.push('/all-categories')}
+												>
+													<Text style={styles.viewAllButtonText}>
+														View other products
+													</Text>
+												</TouchableOpacity>
 											</View>
 										)
 									)}
-								</>
+								</View>
 							)}
 							ListFooterComponent={() => (
 								<>
@@ -317,25 +349,38 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 	},
 	emptyStateContainer: {
-		width: '100%',
+		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
-		paddingVertical: 80,
 		gap: 12,
 	},
 	emptyStateText: {
 		fontSize: 20,
 		fontWeight: 'bold',
-		color: '#8B4513',
+		color: CustomColors.darkBrown,
 		marginTop: 8,
 	},
 	emptyStateSubtext: {
 		fontSize: 14,
-		color: '#A0826D',
+		color: CustomColors.darkBrown,
+		opacity: 0.8,
 		marginTop: 4,
+	},
+	viewAllButton: {
+		marginTop: 20,
+		paddingVertical: 12,
+		paddingHorizontal: 24,
+		backgroundColor: CustomColors.darkBrown,
+		borderRadius: 8,
+	},
+	viewAllButtonText: {
+		color: '#FFF',
+		fontSize: 16,
+		fontWeight: '600',
 	},
 	listContainer: {
 		padding: 16,
+		flexGrow: 1,
 	},
 	columnWrapper: {
 		justifyContent: 'space-between',

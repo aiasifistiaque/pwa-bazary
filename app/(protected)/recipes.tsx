@@ -1,4 +1,5 @@
 import { RecipeCard } from '@/components/recipe-card';
+import RecipeCardSkeleton from '@/components/skeleton/RecipeCardSkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
@@ -8,7 +9,9 @@ import {
 	Animated,
 	Dimensions,
 	FlatList,
+	Image,
 	Pressable,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -80,9 +83,15 @@ export default function RecipesScreen() {
 					<Text style={styles.headerTitle}>All Recipes</Text>
 					<View style={{ width: 40 }} />
 				</View>
-				<View style={styles.loadingContainer}>
-					<ActivityIndicator size='large' color='#000000' />
-				</View>
+				<ScrollView contentContainerStyle={styles.listContainer}>
+					<View style={styles.productsGrid}>
+						{Array.from({ length: 6 }).map((_, index) => (
+							<View key={index} style={styles.recipeCardWrapper}>
+								<RecipeCardSkeleton />
+							</View>
+						))}
+					</View>
+				</ScrollView>
 			</SafeAreaView>
 		);
 	}
@@ -186,6 +195,15 @@ const styles = StyleSheet.create({
 	},
 	recipeCard: {
 		width: COLUMN_WIDTH,
+	},
+	productsGrid: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		justifyContent: 'space-between',
+	},
+	recipeCardWrapper: {
+		width: '48%',
+		marginBottom: 16,
 	},
 	loadingContainer: {
 		flex: 1,
