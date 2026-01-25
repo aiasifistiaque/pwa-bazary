@@ -1,5 +1,7 @@
 import { ProductCard } from '@/components/product-card';
 import { ProductCardSkeleton } from '@/components/skeleton/ProductCardSkeleton';
+import { SubCategorySkeleton } from '@/components/skeleton/SubCategorySkeleton';
+import { SubCategoryCard } from '@/components/SubCategoryCard';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery, useGetByIdQuery } from '@/store/services/commonApi';
 import { addToCart } from '@/store/slices/cartSlice';
@@ -10,6 +12,8 @@ import {
 	ActivityIndicator,
 	Animated,
 	FlatList,
+	Image,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -18,6 +22,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { CustomColors } from '@/constants/theme';
+
+const fallback = require('../../../assets/images/splash-icon.png');
 
 export default function CollectionScreen() {
 	const dispatch = useDispatch();
@@ -30,6 +36,9 @@ export default function CollectionScreen() {
 		},
 		{ skip: !id || id === 'undefined' },
 	);
+
+	// Collections don't typically have dynamic subcategories in this UI, but we keep parity
+	const hasSubcategories = false;
 
 	// Pagination state
 	const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -129,93 +138,110 @@ export default function CollectionScreen() {
 					<View style={styles.headerSpacer} />
 				</View>
 
-				<View style={{ flex: 1 }}>
-					<FlatList
-						ref={flatListRef}
-						data={allProducts}
-						keyExtractor={item => item.id}
-						numColumns={2}
-						columnWrapperStyle={styles.columnWrapper}
-						contentContainerStyle={styles.listContainer}
-						renderItem={({ item }) => (
-							<View style={styles.productCardWrapper}>
-								<ProductCard
-									product={item}
-									id={item.id}
-									name={item.name}
-									price={item.price}
-									unit={item.unit}
-									unitPrice={item.unitPrice}
-									badge={item.badge}
-									badgeIcon={item.badgeIcon}
-									image={item.image}
-									onPress={() => handleProductPress(item.id)}
-									onAddPress={() => handleAddPress(item)}
-								/>
-							</View>
-						)}
-						ListEmptyComponent={() => (
-							<>
-								{productsDataLoading && page === 1 ? (
-									<View style={styles.productsGrid}>
-										{Array.from({ length: 6 }).map((_, index) => (
-											<View
-												key={`skeleton-${index}`}
-												style={styles.productCardWrapper}
-											>
-												<ProductCardSkeleton />
-											</View>
-										))}
-									</View>
-								) : (
-									!productsDataLoading && (
-										<View style={styles.emptyStateContainer}>
-											<IconSymbol name='cart.fill' size={64} color='#8B4513' />
-											<Text style={styles.emptyStateText}>
-												No Products Found
-											</Text>
-											<Text style={styles.emptyStateSubtext}>
-												Check back later for new items
-											</Text>
-										</View>
-									)
-								)}
-							</>
-						)}
-						ListFooterComponent={() => (
-							<>
-								{productsDataLoading && page > 1 && (
-									<View style={styles.footerLoader}>
-										<ActivityIndicator
-											size='small'
-											color={CustomColors.darkBrown}
-										/>
-									</View>
-								)}
-							</>
-						)}
-						onEndReached={handleLoadMore}
-						onEndReachedThreshold={0.5}
-						onScroll={Animated.event(
-							[{ nativeEvent: { contentOffset: { y: scrollY } } }],
-							{ useNativeDriver: false },
-						)}
-						scrollEventThrottle={16}
+				{hasSubcategories ? (
+					<ScrollView
+						style={styles.scrollView}
 						showsVerticalScrollIndicator={false}
-					/>
-
-					<Animated.View
-						style={[styles.backToTopButton, { opacity: buttonOpacity }]}
 					>
-						<TouchableOpacity
-							onPress={scrollToTop}
-							activeOpacity={0.8}
-							style={styles.backToTopInner}
+						<View style={styles.section}>
+							<View style={styles.categoriesGrid}>
+								{/* Placeholder for future expansion */}
+							</View>
+						</View>
+					</ScrollView>
+				) : (
+					<View style={{ flex: 1 }}>
+						<FlatList
+							ref={flatListRef}
+							data={allProducts}
+							keyExtractor={item => item.id}
+							numColumns={2}
+							columnWrapperStyle={styles.columnWrapper}
+							contentContainerStyle={styles.listContainer}
+							renderItem={({ item }) => (
+								<View style={styles.productCardWrapper}>
+									<ProductCard
+										product={item}
+										id={item.id}
+										name={item.name}
+										price={item.price}
+										unit={item.unit}
+										unitPrice={item.unitPrice}
+										badge={item.badge}
+										badgeIcon={item.badgeIcon}
+										image={item.image}
+										onPress={() => handleProductPress(item.id)}
+										onAddPress={() => handleAddPress(item)}
+									/>
+								</View>
+							)}
+							ListEmptyComponent={() => (
+								<>
+									{productsDataLoading && page === 1 ? (
+										<View style={styles.productsGrid}>
+											{Array.from({ length: 6 }).map((_, index) => (
+												<View
+													key={`skeleton-${index}`}
+													style={styles.productCardWrapper}
+												>
+													<ProductCardSkeleton />
+												</View>
+											))}
+										</View>
+									) : (
+										!productsDataLoading && (
+											<View style={styles.emptyStateContainer}>
+												<IconSymbol
+													name='cart.fill'
+													size={64}
+													color='#8B4513'
+												/>
+												<Text style={styles.emptyStateText}>
+													No Products Found
+												</Text>
+												<Text style={styles.emptyStateSubtext}>
+													Check back later for new items
+												</Text>
+											</View>
+										)
+									)}
+								</>
+							)}
+							ListFooterComponent={() => (
+								<>
+									{productsDataLoading && page > 1 && (
+										<View style={styles.footerLoader}>
+											<ActivityIndicator
+												size='small'
+												color={CustomColors.darkBrown}
+											/>
+										</View>
+									)}
+								</>
+							)}
+							onEndReached={handleLoadMore}
+							onEndReachedThreshold={0.5}
+							onScroll={Animated.event(
+								[{ nativeEvent: { contentOffset: { y: scrollY } } }],
+								{ useNativeDriver: false },
+							)}
+							scrollEventThrottle={16}
+							showsVerticalScrollIndicator={false}
+						/>
+
+						<Animated.View
+							style={[styles.backToTopButton, { opacity: buttonOpacity }]}
 						>
-							<IconSymbol name='chevron.up' size={24} color='#FFF' />
-						</TouchableOpacity>
-					</Animated.View>
-				</View>
+							<TouchableOpacity
+								onPress={scrollToTop}
+								activeOpacity={0.8}
+								style={styles.backToTopInner}
+							>
+								<IconSymbol name='chevron.up' size={24} color='#FFF' />
+							</TouchableOpacity>
+						</Animated.View>
+					</View>
+				)}
 			</View>
 		</SafeAreaView>
 	);
@@ -252,6 +278,34 @@ const styles = StyleSheet.create({
 	},
 	headerSpacer: {
 		width: 40,
+	},
+	scrollView: {
+		flex: 1,
+	},
+	section: {
+		padding: 16,
+	},
+	categoriesGrid: {
+		gap: 12,
+	},
+	subcategoryCard: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		backgroundColor: '#FAFAFA',
+		padding: 12,
+		borderRadius: 12,
+		gap: 12,
+	},
+	subcategoryImage: {
+		width: 60,
+		height: 60,
+		borderRadius: 8,
+	},
+	subcategoryName: {
+		flex: 1,
+		fontSize: 16,
+		fontWeight: '600',
+		color: '#333',
 	},
 	productsGrid: {
 		flexDirection: 'row',
