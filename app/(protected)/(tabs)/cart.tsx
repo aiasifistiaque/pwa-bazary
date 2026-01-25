@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	popularScroll: {
-		paddingLeft: 16,
+		paddingHorizontal: 16,
 		gap: 12,
 	},
 	popularCardContainer: {

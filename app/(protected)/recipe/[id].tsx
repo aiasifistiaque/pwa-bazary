@@ -8,7 +8,9 @@ import {
 	ActivityIndicator,
 	Image,
 	Pressable,
+	Platform,
 	ScrollView,
+	Share,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -16,6 +18,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
+import { CustomColors } from '@/constants/theme';
 
 const fallback = require('../../../assets/images/fallback-fruit.png');
 
@@ -40,7 +43,7 @@ const IngredientWithProduct = ({
 		},
 		{
 			skip: !item.product,
-		}
+		},
 	);
 
 	const productName = productData?.name || 'Loading...';
@@ -84,7 +87,7 @@ const IngredientWithProduct = ({
 			{/* Ingredient Image */}
 			{isLoading ? (
 				<View style={[styles.ingredientImage, styles.loadingImageContainer]}>
-					<ActivityIndicator size='small' color='#E63946' />
+					<ActivityIndicator size='small' color={CustomColors.lightBrown} />
 				</View>
 			) : (
 				<Image
@@ -133,13 +136,24 @@ export default function RecipeDetailScreen() {
 	// Store product names as they're loaded
 	const [productNames, setProductNames] = useState<Record<string, string>>({});
 
+	const handleShare = async () => {
+		try {
+			await Share.share({
+				message: `Check out this recipe: ${recipe?.name} on Bazarey! ${recipe?.shortDescription || ''}`,
+				url: `https://bazarey.com/recipe/${recipe?.id}`,
+			});
+		} catch (error) {
+			console.error(error);
+		}
+	};
+
 	useEffect(() => {
 		if (recipe && Array.isArray(recipe.items)) {
 			setSelectedIngredients(
 				recipe.items.reduce(
 					(acc: any, ing: any) => ({ ...acc, [ing.id]: true }),
-					{}
-				)
+					{},
+				),
 			);
 		}
 	}, [recipe]);
@@ -154,7 +168,7 @@ export default function RecipeDetailScreen() {
 
 	const toggleIngredient = (ingredientId: string) => {
 		const ingredient = recipe?.items?.find(
-			(item: any) => item.id === ingredientId
+			(item: any) => item.id === ingredientId,
 		);
 
 		if (ingredient && !ingredient.isRemovable) return;
@@ -186,7 +200,7 @@ export default function RecipeDetailScreen() {
 		if (!recipe || !recipe.items) return [];
 
 		return recipe.items.filter(
-			(item: any) => item.isRemovable && !selectedIngredients[item.id]
+			(item: any) => item.isRemovable && !selectedIngredients[item.id],
 		);
 	};
 
@@ -195,11 +209,11 @@ export default function RecipeDetailScreen() {
 		if (!recipe || !recipe.items) return '';
 
 		const removedIngredients = recipe.items.filter(
-			(item: any) => item.isRemovable && !selectedIngredients[item.id]
+			(item: any) => item.isRemovable && !selectedIngredients[item.id],
 		);
 
 		const includedIngredients = recipe.items.filter(
-			(item: any) => selectedIngredients[item.id]
+			(item: any) => selectedIngredients[item.id],
 		);
 
 		const parts: string[] = [];
@@ -208,7 +222,7 @@ export default function RecipeDetailScreen() {
 		if (includedIngredients.length > 0) {
 			const includedNames = includedIngredients
 				.map(
-					(item: any) => productNames[item.product] || `Item ${item.product}`
+					(item: any) => productNames[item.product] || `Item ${item.product}`,
 				)
 				.join(', ');
 			parts.push(`Includes: ${includedNames}`);
@@ -218,7 +232,7 @@ export default function RecipeDetailScreen() {
 		if (removedIngredients.length > 0) {
 			const removedNames = removedIngredients
 				.map(
-					(item: any) => productNames[item.product] || `Item ${item.product}`
+					(item: any) => productNames[item.product] || `Item ${item.product}`,
 				)
 				.join(', ');
 			parts.push(`Removed: ${removedNames}`);
@@ -257,7 +271,7 @@ export default function RecipeDetailScreen() {
 					...(note && { note: note }),
 				},
 				qty: 1,
-			})
+			}),
 		);
 
 		router.replace('/(protected)/(tabs)/cart');
@@ -270,7 +284,7 @@ export default function RecipeDetailScreen() {
 	if (!recipe || !recipe?.items) {
 		return (
 			<SafeAreaView style={styles.safeArea}>
-				<View style={styles.headerActions}>
+				<View style={{ padding: 16 }}>
 					<TouchableOpacity
 						onPress={() => router.back()}
 						style={styles.backButton}
@@ -298,14 +312,15 @@ export default function RecipeDetailScreen() {
 	const removedCount = removedIngredients.length;
 	const totalDeduction = removedIngredients.reduce(
 		(sum: number, item: any) => sum + (item.dedactablePrice || 0),
-		0
+		0,
 	);
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-				{/* Header Actions */}
-				<View style={styles.headerActions}>
+				{/* Recipe Image with Overlay Back Button */}
+				<View style={styles.imageContainer}>
+					<Image source={{ uri: recipe?.image }} style={styles.recipeImage} />
 					<TouchableOpacity
 						onPress={() => router.back()}
 						style={styles.backButton}
@@ -315,12 +330,14 @@ export default function RecipeDetailScreen() {
 					</TouchableOpacity>
 				</View>
 
-				{/* Recipe Image */}
-				<Image source={{ uri: recipe?.image }} style={styles.recipeImage} />
-
 				{/* Recipe Info */}
 				<View style={styles.recipeInfo}>
-					<Text style={styles.recipeTitle}>{recipe?.name}</Text>
+					<View style={styles.titleHeader}>
+						<Text style={styles.recipeTitle}>{recipe?.name}</Text>
+						<TouchableOpacity onPress={handleShare} style={styles.shareButton}>
+							<IconSymbol name='square.and.arrow.up' size={24} color='#666' />
+						</TouchableOpacity>
+					</View>
 					<Text style={styles.recipeDescription}>{recipe?.description}</Text>
 					{recipe?.saveAmount > 0 && (
 						<View style={styles.saveBadge}>
@@ -412,36 +429,49 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#FFFFFF',
 	},
-	headerActions: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		paddingHorizontal: 16,
-		paddingVertical: 12,
+	imageContainer: {
+		width: '100%',
+		height: 300,
+		backgroundColor: '#F5F5F5',
+		position: 'relative',
 	},
 	backButton: {
+		position: 'absolute',
+		top: 16,
+		left: 16,
 		width: 40,
 		height: 40,
 		borderRadius: 20,
 		backgroundColor: '#FFFFFF',
-		alignItems: 'center',
 		justifyContent: 'center',
+		alignItems: 'center',
 		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.15,
+		shadowRadius: 3,
 		elevation: 3,
+		zIndex: 10,
 	},
 	recipeImage: {
 		width: '100%',
-		height: 250,
-		resizeMode: 'cover',
+		height: 300,
+		objectFit: 'cover',
 	},
 	recipeInfo: {
 		padding: 20,
 		backgroundColor: '#FFFFFF',
 		borderBottomWidth: 1,
 		borderBottomColor: '#F0F0F0',
+	},
+	titleHeader: {
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		justifyContent: 'space-between',
+		gap: 12,
+		marginBottom: 8,
+	},
+	shareButton: {
+		padding: 4,
 	},
 	recipeTitle: {
 		fontSize: 24,
@@ -456,7 +486,7 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 	},
 	saveBadge: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 12,
 		paddingVertical: 6,
 		borderRadius: 6,
@@ -505,8 +535,8 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 	},
 	checkboxChecked: {
-		backgroundColor: '#E63946',
-		borderColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
+		borderColor: CustomColors.lightBrown,
 	},
 	checkboxDisabled: {
 		backgroundColor: '#9CA3AF',
@@ -608,10 +638,10 @@ const styles = StyleSheet.create({
 	totalPrice: {
 		fontSize: 24,
 		fontWeight: 'bold',
-		color: '#E63946',
+		color: CustomColors.lightBrown,
 	},
 	addButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingVertical: 16,
 		borderRadius: 12,
 		alignItems: 'center',

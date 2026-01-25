@@ -25,22 +25,20 @@ import { CustomColors } from '@/constants/theme';
 
 const fallback = require('../../../assets/images/splash-icon.png');
 
-export default function CategoryScreen() {
+export default function CollectionScreen() {
 	const dispatch = useDispatch();
 	const { id } = useLocalSearchParams<{ id: string }>();
 
-	const { data: catName, isLoading: isCatNameLoading } = useGetByIdQuery({
-		path: 'categorys',
-		id,
-	});
+	const { data: collection, isLoading: isCollectionLoading } = useGetByIdQuery(
+		{
+			path: 'collections',
+			id,
+		},
+		{ skip: !id || id === 'undefined' },
+	);
 
-	// get the categories based on if id
-	const { data: childCategories, isLoading: childCatLoading } = useGetAllQuery({
-		path: 'categorys',
-		filters: { parentCategory: id },
-	});
-
-	const hasSubcategories = childCategories?.doc?.length > 0 || childCatLoading;
+	// Collections don't typically have dynamic subcategories in this UI, but we keep parity
+	const hasSubcategories = false;
 
 	// Pagination state
 	const [allProducts, setAllProducts] = useState<any[]>([]);
@@ -58,11 +56,11 @@ export default function CategoryScreen() {
 				page: page,
 				limit: 10,
 				filters: {
-					category_in: id,
+					collection_in: id,
 					isActive: true,
 				},
 			},
-			{ skip: !id },
+			{ skip: !id || id === 'undefined' },
 		);
 
 	useEffect(() => {
@@ -85,7 +83,7 @@ export default function CategoryScreen() {
 	}, [productsDataLoading, allProducts]);
 
 	useEffect(() => {
-		// Reset state when category ID changes
+		// Reset state when collection ID changes
 		setAllProducts([]);
 		setPage(1);
 		setHasMore(true);
@@ -102,28 +100,8 @@ export default function CategoryScreen() {
 		}
 	}, [productsData]);
 
-	const handleLoadMore = () => {
-		if (hasMore && !productsDataLoading) {
-			setPage(prev => prev + 1);
-		}
-	};
-
-	const scrollToTop = () => {
-		flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
-	};
-
-	const buttonOpacity = scrollY.interpolate({
-		inputRange: [0, 100, 300],
-		outputRange: [0, 0, 1],
-		extrapolate: 'clamp',
-	});
-
 	const handleBack = () => {
 		router.back();
-	};
-
-	const handleSubcategoryPress = (subcategoryId: string) => {
-		router.push(`/category/${subcategoryId}`);
 	};
 
 	const handleProductPress = (productId: string) => {
@@ -146,7 +124,21 @@ export default function CategoryScreen() {
 		);
 	};
 
-	// Removed explicit return Loader here to show skeletons inline
+	const handleLoadMore = () => {
+		if (hasMore && !productsDataLoading) {
+			setPage(prev => prev + 1);
+		}
+	};
+
+	const scrollToTop = () => {
+		flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+	};
+
+	const buttonOpacity = scrollY.interpolate({
+		inputRange: [0, 100, 300],
+		outputRange: [0, 0, 1],
+		extrapolate: 'clamp',
+	});
 
 	return (
 		<SafeAreaView style={styles.safeArea}>
@@ -160,7 +152,9 @@ export default function CategoryScreen() {
 					>
 						<IconSymbol name='chevron.left' size={24} color='#000' />
 					</TouchableOpacity>
-					<Text style={styles.headerTitle}>{catName?.name}</Text>
+					<Text style={styles.headerTitle}>
+						{collection?.name || 'Collection'}
+					</Text>
 					<View style={styles.headerSpacer} />
 				</View>
 
@@ -171,19 +165,7 @@ export default function CategoryScreen() {
 					>
 						<View style={styles.section}>
 							<View style={styles.categoriesGrid}>
-								{childCatLoading
-									? Array.from({ length: 10 }).map((_, index) => (
-											<SubCategorySkeleton key={`sub-skeleton-${index}`} />
-										))
-									: childCategories?.doc?.map((subcategory: any) => (
-											<SubCategoryCard
-												key={subcategory.id}
-												id={subcategory.id}
-												name={subcategory.name}
-												image={subcategory.image}
-												onPress={() => handleSubcategoryPress(subcategory.id)}
-											/>
-										))}
+								{/* Placeholder for future expansion */}
 							</View>
 						</View>
 					</ScrollView>

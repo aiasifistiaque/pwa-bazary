@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CustomColors } from '@/constants/theme';
 
 export default function FavoritesScreen() {
 	const dispatch = useDispatch();
@@ -36,7 +37,7 @@ export default function FavoritesScreen() {
 					vat: 0,
 				},
 				qty: 1,
-			})
+			}),
 		);
 	};
 
@@ -48,7 +49,7 @@ export default function FavoritesScreen() {
 		<View style={styles.safeArea}>
 			{favorites.length === 0 ? (
 				<View style={styles.emptyContainer}>
-					<IconSymbol name='heart' size={64} color='#CCC' />
+					<IconSymbol name='heart' size={64} color={CustomColors.darkBrown} />
 					<Text style={styles.emptyText}>No favorites yet</Text>
 					<TouchableOpacity
 						style={styles.browseButton}
@@ -58,46 +59,48 @@ export default function FavoritesScreen() {
 					</TouchableOpacity>
 				</View>
 			) : (
-				<ScrollView style={styles.container}>
-					<View style={styles.header}>
-						<Text style={styles.headerTitle}>My Favorites</Text>
-						<Text style={styles.headerSubtitle}>
-							{favorites.length} {favorites.length === 1 ? 'item' : 'items'}
-						</Text>
-					</View>
-					<FlatList
-						horizontal
-						data={favorites}
-						renderItem={({ item }) => (
-							<View style={styles.itemContainer}>
-								<ProductCard
-									product={item}
-									id={item.id}
-									name={item.name}
-									price={item.price.toString()}
-									image={item.image}
-									unit={item.unit}
-									unitPrice={item.unitPrice}
-									onPress={() => handleProductPress(item.id)}
-									onAddPress={() => handleAddPress(item)}
+				<FlatList
+					data={favorites}
+					numColumns={2}
+					ListHeaderComponent={
+						<View style={styles.header}>
+							<Text style={styles.headerTitle}>My Favorites</Text>
+							<Text style={styles.headerSubtitle}>
+								{favorites.length} {favorites.length === 1 ? 'item' : 'items'}
+							</Text>
+						</View>
+					}
+					renderItem={({ item }) => (
+						<View style={styles.itemContainer}>
+							<ProductCard
+								product={item}
+								id={item.id}
+								name={item.name}
+								price={item.price.toString()}
+								image={item.image}
+								unit={item.unit}
+								unitPrice={item.unitPrice}
+								weight={item.weight}
+								onPress={() => handleProductPress(item.id)}
+								onAddPress={() => handleAddPress(item)}
+							/>
+							<TouchableOpacity
+								style={styles.removeButton}
+								onPress={() => handleRemovePress(item.id)}
+							>
+								<IconSymbol
+									name='xmark.circle.fill'
+									size={24}
+									color={CustomColors.darkBrown}
 								/>
-								<TouchableOpacity
-									style={styles.removeButton}
-									onPress={() => handleRemovePress(item.id)}
-								>
-									<IconSymbol
-										name='xmark.circle.fill'
-										size={24}
-										color='#E63946'
-									/>
-								</TouchableOpacity>
-							</View>
-						)}
-						keyExtractor={item => item.id}
-						showsHorizontalScrollIndicator={false}
-						contentContainerStyle={styles.listContent}
-					/>
-				</ScrollView>
+							</TouchableOpacity>
+						</View>
+					)}
+					keyExtractor={item => item.id}
+					columnWrapperStyle={styles.columnWrapper}
+					contentContainerStyle={styles.listContent}
+					showsVerticalScrollIndicator={false}
+				/>
 			)}
 		</View>
 	);
@@ -130,17 +133,23 @@ const styles = StyleSheet.create({
 	listContent: {
 		paddingHorizontal: 16,
 		paddingBottom: 16,
+		gap: 12,
+	},
+	columnWrapper: {
+		justifyContent: 'space-between',
+		paddingHorizontal: 2,
 	},
 	itemContainer: {
 		position: 'relative',
-		marginRight: 12,
+		width: '48%',
+		marginBottom: 12,
 	},
 	removeButton: {
 		position: 'absolute',
 		top: 8,
 		right: 8,
 		zIndex: 10,
-		backgroundColor: 'white',
+		backgroundColor: CustomColors.cardBgColor,
 		borderRadius: 12,
 	},
 	emptyContainer: {
@@ -156,13 +165,13 @@ const styles = StyleSheet.create({
 		marginBottom: 24,
 	},
 	browseButton: {
-		backgroundColor: '#E63946',
+		backgroundColor: CustomColors.lightBrown,
 		paddingHorizontal: 24,
 		paddingVertical: 12,
 		borderRadius: 8,
 	},
 	browseButtonText: {
-		color: '#FFF',
+		color: CustomColors.darkBrown,
 		fontSize: 16,
 		fontWeight: 'bold',
 	},

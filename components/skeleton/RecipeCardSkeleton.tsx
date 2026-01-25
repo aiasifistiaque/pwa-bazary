@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, StyleProp, ViewStyle } from 'react-native';
 
-const RecipeCardSkeleton = () => {
+const RecipeCardSkeleton = ({ style }: { style?: StyleProp<ViewStyle> }) => {
 	const shimmerAnim = useRef(new Animated.Value(0)).current;
 
 	useEffect(() => {
@@ -17,7 +17,7 @@ const RecipeCardSkeleton = () => {
 					duration: 1000,
 					useNativeDriver: true,
 				}),
-			])
+			]),
 		).start();
 	}, []);
 
@@ -27,7 +27,7 @@ const RecipeCardSkeleton = () => {
 	});
 
 	return (
-		<View style={styles.card}>
+		<View style={[styles.card, style]}>
 			<Animated.View style={[styles.imageSkeleton, { opacity }]} />
 			<View style={styles.info}>
 				<Animated.View style={[styles.titleSkeleton, { opacity }]} />
@@ -39,8 +39,7 @@ const RecipeCardSkeleton = () => {
 
 const styles = StyleSheet.create({
 	card: {
-		width: 280,
-		marginRight: 12,
+		width: '100%',
 		borderRadius: 12,
 		backgroundColor: '#FFFFFF',
 		borderWidth: 1,

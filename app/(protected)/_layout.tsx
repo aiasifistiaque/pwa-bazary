@@ -54,6 +54,7 @@ export default function RootLayout() {
 						<Stack.Screen name='(tabs)' options={{ headerShown: false }} />
 						<Stack.Screen name='product' options={{ headerShown: false }} />
 						<Stack.Screen name='category' options={{ headerShown: false }} />
+						<Stack.Screen name='collection' options={{ headerShown: false }} />
 						<Stack.Screen
 							name='all-categories'
 							options={{ headerShown: false }}
@@ -63,6 +64,7 @@ export default function RootLayout() {
 							options={{ headerShown: false }}
 						/>
 						<Stack.Screen name='recipe' options={{ headerShown: false }} />
+						<Stack.Screen name='recipes' options={{ headerShown: false }} />
 						<Stack.Screen name='checkout' options={{ headerShown: false }} />
 						<Stack.Screen name='profile' options={{ headerShown: false }} />
 						<Stack.Screen name='orders' options={{ headerShown: false }} />

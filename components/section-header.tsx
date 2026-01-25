@@ -15,13 +15,10 @@ export function SectionHeader({ title, onSeeAllPress }: SectionHeaderProps) {
 				<TouchableOpacity
 					style={styles.seeAllButton}
 					onPress={onSeeAllPress}
-					activeOpacity={0.7}>
-					<Text style={styles.seeAllText}>Show all</Text>
-					<IconSymbol
-						name='chevron.right'
-						size={14}
-						color='#666'
-					/>
+					activeOpacity={0.7}
+				>
+					<Text style={styles.seeAllText}>View all</Text>
+					<IconSymbol name='chevron.right' size={14} color='#666' />
 				</TouchableOpacity>
 			)}
 		</View>

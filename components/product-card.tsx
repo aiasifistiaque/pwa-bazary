@@ -49,6 +49,9 @@ export function ProductCard({
 	id,
 	name,
 	price,
+	unit,
+	unitPrice,
+	weight,
 	badge,
 	badgeIcon,
 	image,
@@ -80,11 +83,11 @@ export function ProductCard({
 					item: {
 						id,
 						_id: id,
-						name,
+						name: product?.name || name,
 						price:
 							typeof price === 'string'
 								? parseFloat(price.replace(/[^0-9.]/g, ''))
-								: price, // Ensure price is number
+								: product?.sellPrice || price, // Ensure price is number
 						image,
 						vat: 0,
 					},
@@ -155,12 +158,21 @@ export function ProductCard({
 			)}
 			<View style={styles.info}>
 				<Text style={styles.name} numberOfLines={2}>
-					{product?.name}
+					{product?.name || name}
 				</Text>
 				<Text style={styles.unitPrice}>
-					{`${product?.weight || '000'} ${product?.unit || 'unit'}`}
+					{`${product?.weight || product?.unitValue || weight || '000'} ${product?.unit || unit || 'unit'}`}
+					{product?.unitPrice || unitPrice
+						? ` · ${product?.unitPrice || unitPrice}`
+						: ''}
 				</Text>
-				<Text style={styles.price}>৳{product?.sellPrice}</Text>
+				<Text style={styles.price}>
+					৳
+					{product?.discountedPrice ||
+						product?.sellPrice ||
+						product?.price ||
+						price}
+				</Text>
 			</View>
 		</TouchableOpacity>
 	);
@@ -168,8 +180,8 @@ export function ProductCard({
 
 const styles = StyleSheet.create({
 	card: {
-		minWidth: 180,
-		maxWidth: 220,
+		minWidth: 160,
+		width: '100%',
 		backgroundColor: '#FFF',
 		borderRadius: 12,
 		overflow: 'hidden',

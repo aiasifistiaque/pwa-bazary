@@ -86,4 +86,5 @@ export const CustomColors = {
 	darkGreen: '#2c451a',
 	greySkeleton: '#E5E5E5',
 	lightRed: '#FF5252',
+	maroon: '#800000',
 };

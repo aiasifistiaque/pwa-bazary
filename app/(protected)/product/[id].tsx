@@ -95,6 +95,7 @@ export default function ProductDetailScreen() {
 				image: product.image,
 				unit: product.unit,
 				unitPrice: product.unitPrice,
+				weight: product.weight || product.unitValue,
 			}),
 		);
 		showToast(willBeFavorite ? 'Added to favorites' : 'Removed from favorites');
@@ -152,7 +153,7 @@ export default function ProductDetailScreen() {
 							<IconSymbol
 								name={isFavorite ? 'heart.fill' : 'heart'}
 								size={24}
-								color={isFavorite ? '#E63946' : '#000'}
+								color={isFavorite ? CustomColors.darkBrown : '#000'}
 							/>
 						</TouchableOpacity>
 					</View>

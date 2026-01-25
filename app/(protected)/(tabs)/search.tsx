@@ -3,6 +3,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useGetAllQuery } from '@/store/services/commonApi';
 import { router } from 'expo-router';
 import {
+	ActivityIndicator,
 	Image,
 	ScrollView,
 	StyleSheet,
@@ -17,27 +18,21 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import { ProductCard } from '@/components/product-card';
 import { Loader } from '@/components/Loader';
+import { CustomColors } from '@/constants/theme';
 const fallbackImage = require('../../../assets/images/fallback-fruit.png');
-// Featured categories for "This Week"
-const thisWeekCategories = [
-	{
-		id: 'offers',
-		name: 'All Offers',
-		icon: '🏷️',
-		color: '#FFF9C4',
-	},
-	{
-		id: 'new',
-		name: 'New in App',
-		icon: '✨',
-		color: '#F8BBD0',
-	},
-	{
-		id: 'recipes',
-		name: 'All Recipes',
-		icon: '🍳',
-		color: '#C8E6C9',
-	},
+// Static recipes item for 'This Week'
+const recipesItem = {
+	id: 'recipes',
+	name: 'All Recipes',
+	icon: '🍲',
+	color: '#9c6644',
+	route: '/recipes',
+};
+
+// Fallback collections icons/colors
+const COLLECTION_STYLES = [
+	{ icon: '🏷️', color: CustomColors.darkBrown },
+	{ icon: '✨', color: '#7f5539' },
 ];
 
 // Main categories
@@ -61,12 +56,38 @@ export default function SearchScreen() {
 		filters: { displayInHomePage: true },
 	});
 
+	const { data: collectionsData, isLoading: isCollectionsLoading } =
+		useGetAllQuery({
+			path: '/collections',
+			sort: '-priority',
+			filters: { isFeatured: true },
+			limit: 2,
+		});
+
+	// Combine dynamic collections with static recipes
+	const thisWeekItems = [
+		...(collectionsData?.doc || []).map((col: any, index: number) => {
+			const colId = col._id || col.id;
+			return {
+				id: colId,
+				name: col.name,
+				icon:
+					col.icon || COLLECTION_STYLES[index % COLLECTION_STYLES.length].icon,
+				color:
+					col.color ||
+					COLLECTION_STYLES[index % COLLECTION_STYLES.length].color,
+				route: `/collection/${colId}`,
+			};
+		}),
+		recipesItem,
+	];
+
 	const { data: searchResults, isLoading: isSearchLoading } = useGetAllQuery(
 		{
 			path: 'products',
 			search: debouncedQuery,
 		},
-		{ skip: !debouncedQuery }
+		{ skip: !debouncedQuery },
 	);
 
 	const handleCategoryPress = (categoryId: string) => {
@@ -89,7 +110,7 @@ export default function SearchScreen() {
 					vat: 0,
 				},
 				qty: 1,
-			})
+			}),
 		);
 	};
 
@@ -160,21 +181,29 @@ export default function SearchScreen() {
 						<View style={styles.section}>
 							<Text style={styles.sectionTitle}>This Week</Text>
 							<View style={styles.thisWeekGrid}>
-								{thisWeekCategories.map(category => (
-									<TouchableOpacity
-										key={category.id}
-										style={[
-											styles.thisWeekCard,
-											{ backgroundColor: category.color },
-										]}
-										onPress={() => handleCategoryPress(category.id)}
-										activeOpacity={0.7}
-									>
-										<Text style={styles.thisWeekIcon}>{category.icon}</Text>
-										<Text style={styles.thisWeekName}>{category.name}</Text>
-										<IconSymbol name='chevron.right' size={20} color='#333' />
-									</TouchableOpacity>
-								))}
+								{isCollectionsLoading && !collectionsData
+									? Array.from({ length: 3 }).map((_, index) => (
+											<SearchCategorySkeleton key={index} />
+										))
+									: thisWeekItems.map(item => (
+											<TouchableOpacity
+												key={item.id}
+												style={[
+													styles.thisWeekCard,
+													{ backgroundColor: item.color },
+												]}
+												onPress={() => router.push(item.route as any)}
+												activeOpacity={0.7}
+											>
+												<Text style={styles.thisWeekIcon}>{item.icon}</Text>
+												<Text style={styles.thisWeekName}>{item.name}</Text>
+												<IconSymbol
+													name='chevron.right'
+													size={20}
+													color='#333'
+												/>
+											</TouchableOpacity>
+										))}
 							</View>
 						</View>
 
@@ -272,7 +301,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		fontSize: 16,
 		fontWeight: '600',
-		color: '#333',
+		color: CustomColors.bodyColor,
 	},
 	categoriesGrid: {
 		gap: 12,

@@ -25,7 +25,8 @@ const styles = StyleSheet.create({
 		shadowRadius: 4,
 		elevation: 3,
 		marginBottom: 12,
-		width: '100%',
+		minWidth: 180,
+		maxWidth: 220,
 	},
 	imageContainer: {
 		width: '100%',
