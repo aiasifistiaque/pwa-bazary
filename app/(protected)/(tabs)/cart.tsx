@@ -1,5 +1,6 @@
 import PrimaryButton from '@/components/buttons/PrimaryButton';
 import { CompactProductCard } from '@/components/CompactProductCard';
+import SectionTitle from '@/components/header/SectionTitle';
 import { ProductCardSkeleton } from '@/components/skeleton/ProductCardSkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
@@ -17,7 +18,7 @@ export default function CartScreen() {
 
 	const { data: latestProducts, isLoading: latestProductsLoading } = useGetAllQuery({
 		path: '/products',
-		limit: 5,
+		limit: 10,
 		sort: '-createdAt',
 	}) as any;
 
@@ -203,10 +204,10 @@ export default function CartScreen() {
 				{/* Add More Items */}
 				<Pressable
 					style={styles.addMoreButton}
-					onPress={() => router.push('/(protected)/(tabs)/search')}>
+					onPress={() => router.push('/(protected)/all-products')}>
 					<IconSymbol
 						name='plus'
-						size={20}
+						size={16}
 						color='#000000'
 					/>
 					<Text style={styles.addMoreText}>
@@ -216,7 +217,10 @@ export default function CartScreen() {
 
 				{/* Popular with your order */}
 				<View style={styles.popularSection}>
-					<Text style={styles.popularTitle}>What's new on Bazarey</Text>
+					<View style={{ paddingHorizontal: 16 }}>
+						<SectionTitle>What's new on Bazarey</SectionTitle>
+					</View>
+
 					<ScrollView
 						horizontal
 						showsHorizontalScrollIndicator={false}
@@ -302,8 +306,9 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		paddingHorizontal: 16,
-		paddingVertical: 12,
-		gap: 12,
+		paddingVertical: 4,
+
+		gap: 8,
 	},
 	closeButton: {
 		width: 40,
@@ -315,8 +320,8 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	headerTitle: {
-		fontSize: 20,
-		fontWeight: 'bold',
+		fontSize: 18,
+		fontWeight: '400',
 		color: '#000000',
 		marginBottom: 2,
 	},
@@ -348,12 +353,12 @@ const styles = StyleSheet.create({
 	},
 	stepNumber: {
 		fontSize: 16,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: '#999999',
 	},
 	stepNumberActive: {
 		fontSize: 16,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: '#FFFFFF',
 	},
 	stepLabel: {
@@ -441,10 +446,11 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 	},
 	itemName: {
-		fontSize: 16,
-		fontWeight: '600',
+		fontSize: 14,
+		fontWeight: '400',
 		color: '#000000',
 		lineHeight: 20,
+		marginBottom: 4,
 	},
 	itemVariant: {
 		fontSize: 13,
@@ -461,9 +467,9 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		gap: 16,
 		backgroundColor: '#F8F8F8',
-		borderRadius: 8,
-		paddingHorizontal: 12,
-		paddingVertical: 8,
+		borderRadius: 999,
+		paddingHorizontal: 8,
+		paddingVertical: 6,
 	},
 	quantityButton: {
 		width: 32,
@@ -472,15 +478,15 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	quantityText: {
-		fontSize: 16,
-		fontWeight: '600',
+		fontSize: 15,
+		fontWeight: '500',
 		color: '#000000',
 		minWidth: 24,
 		textAlign: 'center',
 	},
 	itemPrice: {
-		fontSize: 16,
-		fontWeight: 'bold',
+		fontSize: 14,
+		fontWeight: '600',
 		color: '#000000',
 	},
 	addMoreButton: {
@@ -493,8 +499,8 @@ const styles = StyleSheet.create({
 		borderBottomColor: '#F0F0F0',
 	},
 	addMoreText: {
-		fontSize: 16,
-		fontWeight: '600',
+		fontSize: 14,
+		fontWeight: '500',
 		color: '#000000',
 	},
 	popularSection: {
@@ -502,11 +508,11 @@ const styles = StyleSheet.create({
 		paddingBottom: 16,
 	},
 	popularTitle: {
-		fontSize: 20,
-		fontWeight: 'bold',
+		fontSize: 18,
+		fontWeight: '500',
 		color: '#000000',
 		paddingHorizontal: 16,
-		marginBottom: 12,
+		marginBottom: 14,
 	},
 	popularSubtitle: {
 		fontSize: 14,
@@ -516,7 +522,7 @@ const styles = StyleSheet.create({
 	},
 	popularScroll: {
 		paddingHorizontal: 16,
-		gap: 12,
+		gap: 10,
 	},
 	popularCardContainer: {
 		marginRight: 4,

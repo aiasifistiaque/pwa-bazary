@@ -6,9 +6,11 @@ export type Address = {
 	name: string;
 	phone: string;
 	street: string;
+	appartment?: string;
 	area: string;
 	city: string;
 	postalCode: string;
+	instructions?: string;
 	isDefault: boolean;
 };
 

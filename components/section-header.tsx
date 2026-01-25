@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { IconSymbol } from './ui/icon-symbol';
 
 type SectionHeaderProps = {
 	title: string;
@@ -15,10 +14,13 @@ export function SectionHeader({ title, onSeeAllPress }: SectionHeaderProps) {
 				<TouchableOpacity
 					style={styles.seeAllButton}
 					onPress={onSeeAllPress}
-					activeOpacity={0.7}
-				>
+					activeOpacity={0.7}>
 					<Text style={styles.seeAllText}>View all</Text>
-					<IconSymbol name='chevron.right' size={14} color='#666' />
+					{/* <IconSymbol
+						name='chevron.right'
+						size={14}
+						color='#666'
+					/> */}
 				</TouchableOpacity>
 			)}
 		</View>
@@ -34,9 +36,9 @@ const styles = StyleSheet.create({
 		paddingVertical: 12,
 	},
 	title: {
-		fontSize: 18,
-		fontWeight: 'bold',
-		color: '#000',
+		fontSize: 20,
+		fontWeight: '500',
+		color: '#111',
 	},
 	seeAllButton: {
 		flexDirection: 'row',
@@ -46,6 +48,6 @@ const styles = StyleSheet.create({
 	seeAllText: {
 		fontSize: 14,
 		color: '#666',
-		fontWeight: '500',
+		fontWeight: '400',
 	},
 });

@@ -83,11 +83,10 @@ export default function DiscoverScreen() {
 
 			{/* Categories Section */}
 			<View style={styles.categoriesSection}>
-				{isLoading ? (
-					<View style={styles.sectionHeaderSkeleton} />
-				) : (
-					<SectionHeader title='Categories' />
-				)}
+				{
+					isLoading ? <View style={styles.sectionHeaderSkeleton} /> : null
+					// <SectionHeader title='Categories' />n
+				}
 				{isLoading ? (
 					<View style={styles.categoriesGrid}>
 						{Array.from({ length: 8 }).map((_, i) => (
@@ -112,7 +111,7 @@ export default function DiscoverScreen() {
 						style={styles.showMoreButton}
 						onPress={handleShowMoreCategories}
 						activeOpacity={0.7}>
-						<Text style={styles.showMoreText}>Show more categories</Text>
+						<Text style={styles.showMoreText}>View all categories</Text>
 					</TouchableOpacity>
 				)}
 			</View>
@@ -194,7 +193,8 @@ const styles = StyleSheet.create({
 		color: '#999',
 	},
 	categoriesSection: {
-		marginBottom: 16,
+		marginBottom: 12,
+		marginTop: 12,
 		paddingVertical: 8,
 	},
 	categoriesGrid: {
@@ -207,14 +207,14 @@ const styles = StyleSheet.create({
 		marginHorizontal: 16,
 		paddingVertical: 12,
 		backgroundColor: '#F8F8F8',
-		borderRadius: 8,
+		borderRadius: 12,
 		borderWidth: 1,
 		borderColor: '#E5E5E5',
 		alignItems: 'center',
 	},
 	showMoreText: {
 		fontSize: 14,
-		fontWeight: '600',
+		fontWeight: '500',
 		color: CustomColors.darkGreen,
 	},
 	section: {

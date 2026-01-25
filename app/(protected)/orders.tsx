@@ -1,10 +1,10 @@
+import CustomHeader from '@/components/header/CustomHeader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Toast } from '@/components/ui/Toast';
 import { CustomColors } from '@/constants/theme';
 import { useGetSelfQuery } from '@/store/services/authApi';
 import { useGetOrdersQuery } from '@/store/services/checkoutApi';
 import { addToCart } from '@/store/slices/cartSlice';
-import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
 	ActivityIndicator,
@@ -313,19 +313,7 @@ export default function OrdersScreen() {
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			{/* Header */}
-			<View style={styles.header}>
-				<Pressable
-					onPress={() => router.back()}
-					style={styles.backButton}>
-					<IconSymbol
-						name='chevron.left'
-						size={24}
-						color='#000000'
-					/>
-				</Pressable>
-				<Text style={styles.headerTitle}>My Orders</Text>
-				<View style={{ width: 40 }} />
-			</View>
+			<CustomHeader>My Orders</CustomHeader>
 
 			{/* Tabs */}
 			<View style={styles.tabContainer}>

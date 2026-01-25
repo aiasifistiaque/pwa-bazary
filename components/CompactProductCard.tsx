@@ -167,11 +167,19 @@ export function CompactProductCard({
 					numberOfLines={2}>
 					{product?.name || name}
 				</Text>
-				<Text style={styles.unitPrice}>
-					{`${product?.weight || product?.unitValue || weight || '000'} ${product?.unit || unit || 'unit'}`}
-				</Text>
+				{product?.unitValue && (
+					<Text style={styles.unitPrice}>
+						{`${product?.weight || product?.unitValue || weight} ${product?.unit || unit || 'unit'}`}
+					</Text>
+				)}
 				<Text style={styles.price}>
-					৳{product?.discountedPrice || product?.sellPrice || product?.price || price}
+					Tk{' '}
+					{(
+						product?.discountedPrice ||
+						product?.sellPrice ||
+						product?.price ||
+						price
+					).toLocaleString()}
 				</Text>
 			</View>
 		</TouchableOpacity>
@@ -193,12 +201,14 @@ const styles = StyleSheet.create({
 	imageContainer: {
 		width: '100%',
 		aspectRatio: 1,
-		backgroundColor: '#F5F5F5',
+
 		position: 'relative',
+		borderRadius: 12,
 	},
 	image: {
 		width: '100%',
 		height: '100%',
+		borderRadius: 12,
 	},
 	buttonContainer: {
 		position: 'absolute',
@@ -206,7 +216,7 @@ const styles = StyleSheet.create({
 		right: 6,
 		height: 28,
 		minWidth: 28,
-		borderRadius: 14,
+		borderRadius: 999,
 		backgroundColor: '#FFF',
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -255,15 +265,15 @@ const styles = StyleSheet.create({
 	},
 	name: {
 		fontSize: 13,
-		fontWeight: '600',
+		fontWeight: '400',
 		color: '#333',
 		lineHeight: 16,
 		minHeight: 32,
 	},
 	price: {
 		fontSize: 14,
-		fontWeight: 'bold',
-		color: CustomColors.darkBrown,
+		fontWeight: '600',
+		color: '#000',
 		marginTop: 2,
 	},
 	unitPrice: {

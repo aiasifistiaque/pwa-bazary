@@ -1,6 +1,7 @@
 import { CustomColors } from '@/constants/theme';
 import { useLoginMutation } from '@/store/services/authApi';
 import { login } from '@/store/slices/authSlice';
+import storage from '@/utils/storage';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -63,17 +64,22 @@ export default function LoginScreen() {
 		setPassword('');
 		setErrors({ email: '', password: '' });
 	};
-	console.log('login res', loginResponse);
+
 	useEffect(() => {
 		if (loginResponse.isSuccess && loginResponse.data) {
 			resetAll();
 
 			// Use setTimeout to ensure state updates complete before navigation
-			setTimeout(() => {
-				if (Platform.OS === 'web') {
-					router.replace('/');
+			setTimeout(async () => {
+				// Check if user has already selected an area
+				const hasSelectedArea = await storage.getItem('hasSelectedArea');
+
+				if (hasSelectedArea === 'true') {
+					// User has already selected area, go directly to home
+					router.replace('/(protected)/(tabs)');
 				} else {
-					router.replace('/');
+					// First time login, go to area selection
+					router.replace('/(protected)/select-area');
 				}
 			}, 100);
 		} else if (loginResponse.isError) {

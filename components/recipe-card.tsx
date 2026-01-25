@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-	Image,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-	ViewStyle,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 interface RecipeCardProps {
 	id: string;
@@ -29,14 +22,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({
 		<TouchableOpacity
 			style={[styles.recipeCard, style]}
 			onPress={() => onPress(id)}
-			activeOpacity={0.8}
-		>
-			<Image source={{ uri: image }} style={styles.recipeImage} />
+			activeOpacity={0.8}>
+			<Image
+				source={{ uri: image }}
+				style={styles.recipeImage}
+			/>
 			<View style={styles.recipeInfo}>
-				<Text style={styles.recipeName} numberOfLines={1}>
+				<Text
+					style={styles.recipeName}
+					numberOfLines={1}>
 					{name}
 				</Text>
-				<Text style={styles.recipeDescription} numberOfLines={2}>
+				<Text
+					style={styles.recipeDescription}
+					numberOfLines={2}>
 					{shortDescription}
 				</Text>
 			</View>
@@ -48,14 +47,14 @@ const styles = StyleSheet.create({
 	recipeCard: {
 		borderRadius: 12,
 		backgroundColor: '#FFFFFF',
-		borderWidth: 1,
-		borderColor: '#E5E5E5',
+		// borderWidth: 1,
+		// borderColor: '#E5E5E5',
 		overflow: 'hidden',
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 2,
+		// shadowColor: '#000',
+		// shadowOffset: { width: 0, height: 2 },
+		// shadowOpacity: 0.1,
+		// shadowRadius: 4,
+		// elevation: 2,
 	},
 	recipeImage: {
 		width: '100%',
@@ -63,11 +62,12 @@ const styles = StyleSheet.create({
 		resizeMode: 'cover',
 	},
 	recipeInfo: {
-		padding: 12,
+		paddingVertical: 12,
+		paddingHorizontal: 4,
 	},
 	recipeName: {
-		fontSize: 16,
-		fontWeight: 'bold',
+		fontSize: 14,
+		fontWeight: '500',
 		color: '#000000',
 		marginBottom: 4,
 	},

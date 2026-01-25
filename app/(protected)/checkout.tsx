@@ -1,10 +1,11 @@
 import PrimaryButton from '@/components/buttons/PrimaryButton';
+import CustomHeader from '@/components/header/CustomHeader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
 import type { RootState } from '@/store';
 import { useGetSelfQuery } from '@/store/services/authApi';
 import { useCreateOrderMutation } from '@/store/services/checkoutApi';
-import { useGetAllQuery } from '@/store/services/commonApi';
+import { useGetAllQuery, usePostMutation } from '@/store/services/commonApi';
 import { Address, selectCheckoutAddress } from '@/store/slices/addressSlice';
 import { resetCart } from '@/store/slices/cartSlice';
 import { Image } from 'expo-image';
@@ -19,6 +20,9 @@ type DeliveryTimeSlot = {
 	id: string;
 	day: string;
 	time: string;
+	date?: Date;
+	startTime?: Date;
+	endTime?: Date;
 };
 
 type IconName = React.ComponentProps<typeof IconSymbol>['name'];
@@ -29,13 +33,6 @@ type PaymentMethod = {
 	icon: IconName | 'online' | 'cod';
 	type: 'image' | 'icon';
 };
-
-const deliverySlots: DeliveryTimeSlot[] = [
-	{ id: '1', day: 'Today', time: '6:00 PM - 9:00 PM' },
-	{ id: '2', day: 'Tomorrow', time: '9:00 AM - 12:00 PM' },
-	{ id: '3', day: 'Tomorrow', time: '12:00 PM - 3:00 PM' },
-	{ id: '4', day: 'Tomorrow', time: '6:00 PM - 9:00 PM' },
-];
 
 const paymentMethods: PaymentMethod[] = [
 	{ id: 'online', name: 'Pay Online', icon: 'online', type: 'image' },
@@ -50,6 +47,7 @@ const paymentMethods: PaymentMethod[] = [
 export default function CheckoutScreen() {
 	const dispatch = useDispatch();
 	const [createOrder, { isLoading }] = useCreateOrderMutation();
+	const [verifyCoupon, { isLoading: verifyingCoupon }] = usePostMutation();
 	const [errorMsg, setErrorMsg] = useState<string>('');
 	const { total, subTotal, shipping, vat, discount, cartItems } = useSelector(
 		(state: RootState) => state.cart,
@@ -59,10 +57,13 @@ export default function CheckoutScreen() {
 		(state: RootState) => state.address.selectedCheckoutAddress,
 	);
 
-	const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
+	const [selectedTimeSlot, setSelectedTimeSlot] = useState<DeliveryTimeSlot | null>(null);
 	const [selectedPayment, setSelectedPayment] = useState<string>('');
 	const [couponCode, setCouponCode] = useState<string>('');
 	const [showSavedAddresses, setShowSavedAddresses] = useState<boolean>(false);
+	const [usePoints, setUsePoints] = useState<boolean>(false);
+	const [showCityDropdown, setShowCityDropdown] = useState(false);
+	const [showAreaDropdown, setShowAreaDropdown] = useState(false);
 
 	// Coupon state
 	const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
@@ -83,30 +84,43 @@ export default function CheckoutScreen() {
 	});
 	const savedAddresses = (addressesData?.doc as Address[]) || [];
 
-	// Fetch coupons
-	const { data: couponsData } = useGetAllQuery({
-		path: '/coupons',
+	// Fetch areas
+	const { data: areasData } = useGetAllQuery({
+		path: 'areas',
+		filters: { isActive: true },
+	});
+
+	// Fetch available delivery slots
+	const { data: slotsData, isLoading: slotsLoading } = useGetAllQuery({
+		path: '/get/slots/available',
+		invalidatesTags: ['Slots'],
 	});
 
 	const [address, setAddress] = useState({
+		label: '',
 		name: '',
 		phone: '',
 		street: '',
+		appartment: '',
 		area: '',
 		city: '',
 		postalCode: '',
+		instructions: '',
 	});
 
 	// Auto-populate if address was selected
 	useEffect(() => {
 		if (selectedCheckoutAddr) {
 			setAddress({
+				label: selectedCheckoutAddr.label || '',
 				name: selectedCheckoutAddr.name,
 				phone: selectedCheckoutAddr.phone,
 				street: selectedCheckoutAddr.street,
+				appartment: selectedCheckoutAddr.appartment || '',
 				area: selectedCheckoutAddr.area,
 				city: selectedCheckoutAddr.city,
 				postalCode: selectedCheckoutAddr.postalCode,
+				instructions: selectedCheckoutAddr.instructions || '',
 			});
 			setShowSavedAddresses(false);
 		}
@@ -118,6 +132,48 @@ export default function CheckoutScreen() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedTimeSlot, selectedPayment, address]);
 
+	// Format slots from API
+	const deliverySlots: DeliveryTimeSlot[] = (slotsData?.doc || []).map((slot: any) => {
+		const slotDate = new Date(slot.date);
+
+		// Helper function to convert 24-hour time string to 12-hour AM/PM format
+		const formatTime = (timeString: string): string => {
+			const [hours, minutes] = timeString.split(':').map(Number);
+			const period = hours >= 12 ? 'PM' : 'AM';
+			const displayHours = hours % 12 || 12; // Convert 0 to 12 for midnight
+			return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+		};
+
+		// Format date as "Tomorrow", "Day after tomorrow", or actual date
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const tomorrow = new Date(today);
+		tomorrow.setDate(tomorrow.getDate() + 1);
+		const dayAfterTomorrow = new Date(today);
+		dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+
+		let dayLabel = '';
+		if (slotDate.toDateString() === tomorrow.toDateString()) {
+			dayLabel = 'Tomorrow';
+		} else if (slotDate.toDateString() === dayAfterTomorrow.toDateString()) {
+			dayLabel = 'Day After Tomorrow';
+		} else {
+			dayLabel = slotDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+		}
+
+		// Format time range from 24-hour strings to 12-hour AM/PM
+		const timeRange = `${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`;
+
+		return {
+			id: slot._id,
+			day: dayLabel,
+			time: timeRange,
+			date: slotDate,
+			startTime: slot.startTime,
+			endTime: slot.endTime,
+		};
+	});
+
 	const handleSelectSavedAddress = (addr: Address) => {
 		dispatch(selectCheckoutAddress(addr));
 	};
@@ -126,7 +182,7 @@ export default function CheckoutScreen() {
 		router.back();
 	};
 
-	const handleApplyCoupon = () => {
+	const handleApplyCoupon = async () => {
 		// Clear previous messages
 		setCouponMessage(null);
 
@@ -135,70 +191,38 @@ export default function CheckoutScreen() {
 			return;
 		}
 
-		const coupons = couponsData?.doc || [];
+		try {
+			const result = await verifyCoupon({
+				path: '/get/coupons/verify',
+				body: {
+					code: couponCode.trim(),
+					orderValue: subTotal,
+					customerId: customerId,
+				},
+			}).unwrap();
 
-		// Find coupon by code (case-sensitive)
-		const coupon = coupons.find((c: any) => c.code === couponCode.trim());
-
-		if (!coupon) {
-			setCouponMessage({ type: 'error', text: 'Invalid coupon code' });
-			return;
-		}
-
-		// Validate coupon is active
-		if (!coupon.isActive) {
-			setCouponMessage({
-				type: 'error',
-				text: 'This coupon is no longer active',
-			});
-			return;
-		}
-
-		// Validate date range
-		const now = new Date();
-		const validFrom = new Date(coupon.validFrom);
-		const validTill = new Date(coupon.validTill);
-
-		if (now < validFrom) {
-			setCouponMessage({ type: 'error', text: 'This coupon is not yet valid' });
-			return;
-		}
-
-		if (now > validTill) {
-			setCouponMessage({ type: 'error', text: 'This coupon has expired' });
-			return;
-		}
-
-		// Validate minimum order value
-		if (subTotal < coupon.minOrderValue) {
-			setCouponMessage({
-				type: 'error',
-				text: `Minimum order value of ৳${coupon.minOrderValue} required`,
-			});
-			return;
-		}
-
-		// Calculate discount
-		let discountAmount = 0;
-		if (coupon.isFlat) {
-			// Flat discount
-			discountAmount = coupon.maxAmount;
-		} else {
-			// Percentage discount
-			discountAmount = (subTotal * coupon.percentage) / 100;
-			// Cap at maxAmount if specified
-			if (coupon.maxAmount > 0 && discountAmount > coupon.maxAmount) {
-				discountAmount = coupon.maxAmount;
+			if (!result.success) {
+				setCouponMessage({
+					type: 'error',
+					text: result.message || 'Failed to verify coupon',
+				});
+				return;
 			}
-		}
 
-		// Apply coupon
-		setAppliedCoupon(coupon);
-		setCouponDiscount(discountAmount);
-		setCouponMessage({
-			type: 'success',
-			text: `Coupon applied! You saved ৳${discountAmount}`,
-		});
+			// Apply coupon from verified response
+			setAppliedCoupon(result.data);
+			setCouponDiscount(result.data.discountAmount);
+			setCouponMessage({
+				type: 'success',
+				text: `Coupon applied! You saved ৳${result.data.discountAmount.toFixed(0)}`,
+			});
+		} catch (error: any) {
+			console.error('Coupon verification error:', error);
+			setCouponMessage({
+				type: 'error',
+				text: error?.data?.message || 'Failed to verify coupon. Please try again.',
+			});
+		}
 	};
 
 	const handleRemoveCoupon = () => {
@@ -215,7 +239,7 @@ export default function CheckoutScreen() {
 	const handlePlaceOrder = async () => {
 		// clear previous error first
 		setErrorMsg('');
-		if (!selectedTimeSlot) {
+		if (!selectedTimeSlot || !selectedTimeSlot.id) {
 			setError('Please select a delivery time slot.');
 			return;
 		}
@@ -229,9 +253,13 @@ export default function CheckoutScreen() {
 		}
 
 		try {
-			// Calculate final total with coupon discount
-			const finalTotal = total - couponDiscount;
-			const finalDiscount = discount + couponDiscount;
+			// Calculate points discount
+			const availablePoints = userData?.points || 0;
+			const pointsDiscount = usePoints ? Math.min(availablePoints, total - couponDiscount) : 0;
+
+			// Calculate final total with coupon and points discount
+			const finalTotal = total - couponDiscount - pointsDiscount;
+			const finalDiscount = discount + couponDiscount + pointsDiscount;
 
 			const payload = {
 				cart: {
@@ -265,6 +293,11 @@ export default function CheckoutScreen() {
 				discount: finalDiscount,
 				origin: 'app',
 				orderDate: new Date(),
+				// Delivery slot data
+				slot: `${selectedTimeSlot.day}, ${selectedTimeSlot.time}`,
+				deliverySlot: selectedTimeSlot.id,
+				// Points usage
+				...(usePoints && pointsDiscount > 0 && { pointsUsed: pointsDiscount }),
 			};
 
 			const res = await createOrder({
@@ -306,19 +339,7 @@ export default function CheckoutScreen() {
 	return (
 		<SafeAreaView style={styles.safeArea}>
 			{/* Header */}
-			<View style={styles.header}>
-				<Pressable
-					onPress={handleBack}
-					style={styles.backButton}>
-					<IconSymbol
-						name='chevron.left'
-						size={24}
-						color='#000000'
-					/>
-				</Pressable>
-				<Text style={styles.headerTitle}>Checkout</Text>
-				<View style={{ width: 40 }} />
-			</View>
+			<CustomHeader>Checkout</CustomHeader>
 
 			<ScrollView
 				style={styles.container}
@@ -333,20 +354,33 @@ export default function CheckoutScreen() {
 						/>
 						<Text style={styles.sectionTitle}>Choose Delivery Time</Text>
 					</View>
-					{deliverySlots.map(slot => (
-						<Pressable
-							key={slot.id}
-							style={[styles.optionCard, selectedTimeSlot === slot.id && styles.selectedOption]}
-							onPress={() => setSelectedTimeSlot(slot.id)}>
-							<View style={styles.radioCircle}>
-								{selectedTimeSlot === slot.id && <View style={styles.radioSelected} />}
-							</View>
-							<View style={styles.optionInfo}>
-								<Text style={styles.optionTitle}>{slot.day}</Text>
-								<Text style={styles.optionSubtitle}>{slot.time}</Text>
-							</View>
-						</Pressable>
-					))}
+					{slotsLoading ? (
+						<View style={styles.loadingContainer}>
+							<Text style={styles.loadingText}>Loading available slots...</Text>
+						</View>
+					) : deliverySlots.length === 0 ? (
+						<View style={styles.noSlotsContainer}>
+							<Text style={styles.noSlotsText}>No delivery slots available at the moment</Text>
+						</View>
+					) : (
+						deliverySlots.map(slot => (
+							<Pressable
+								key={slot.id}
+								style={[
+									styles.optionCard,
+									selectedTimeSlot?.id === slot.id && styles.selectedOption,
+								]}
+								onPress={() => setSelectedTimeSlot(slot)}>
+								<View style={styles.radioCircle}>
+									{selectedTimeSlot?.id === slot.id && <View style={styles.radioSelected} />}
+								</View>
+								<View style={styles.optionInfo}>
+									<Text style={styles.optionTitle}>{slot.day}</Text>
+									<Text style={styles.optionSubtitle}>{slot.time}</Text>
+								</View>
+							</Pressable>
+						))
+					)}
 				</View>
 
 				{/* Delivery Address Section */}
@@ -428,8 +462,28 @@ export default function CheckoutScreen() {
 					)}
 
 					{/* Manual Address Form */}
+					<View style={styles.formField}>
+						<Text style={styles.label}>Label</Text>
+						<View style={styles.labelOptions}>
+							{['Home', 'Office', 'Other'].map(label => (
+								<Pressable
+									key={label}
+									style={[styles.labelOption, address.label === label && styles.labelOptionActive]}
+									onPress={() => setAddress({ ...address, label })}>
+									<Text
+										style={[
+											styles.labelOptionText,
+											address.label === label && styles.labelOptionTextActive,
+										]}>
+										{label}
+									</Text>
+								</Pressable>
+							))}
+						</View>
+					</View>
+
 					<View style={styles.formGroup}>
-						<Text style={styles.label}>Full Name</Text>
+						<Text style={styles.label}>Full Name *</Text>
 						<TextInput
 							style={styles.input}
 							placeholder='Enter your full name'
@@ -438,42 +492,106 @@ export default function CheckoutScreen() {
 						/>
 					</View>
 					<View style={styles.formGroup}>
-						<Text style={styles.label}>Phone Number</Text>
+						<Text style={styles.label}>Phone Number *</Text>
 						<TextInput
 							style={styles.input}
-							placeholder='01XXXXXXXXX'
+							placeholder='+880 1XXXXXXXXX'
 							value={address.phone}
 							onChangeText={text => setAddress({ ...address, phone: text })}
 							keyboardType='phone-pad'
 						/>
 					</View>
 					<View style={styles.formGroup}>
-						<Text style={styles.label}>Street Address</Text>
+						<Text style={styles.label}>Street Address *</Text>
 						<TextInput
 							style={styles.input}
-							placeholder='House no, Street name'
+							placeholder='House/Flat no., Street'
 							value={address.street}
 							onChangeText={text => setAddress({ ...address, street: text })}
 						/>
 					</View>
 					<View style={styles.formGroup}>
-						<Text style={styles.label}>Area</Text>
+						<Text style={styles.label}>Apartment, Suite, etc. (Optional)</Text>
 						<TextInput
 							style={styles.input}
-							placeholder='Area/Locality'
-							value={address.area}
-							onChangeText={text => setAddress({ ...address, area: text })}
+							placeholder='Apt, Suite, Floor, etc.'
+							value={address.appartment}
+							onChangeText={text => setAddress({ ...address, appartment: text })}
 						/>
+					</View>
+					<View style={styles.formGroup}>
+						<Text style={styles.label}>Area *</Text>
+						<Pressable
+							style={styles.dropdownButton}
+							onPress={() => setShowAreaDropdown(!showAreaDropdown)}>
+							<Text style={[styles.dropdownText, !address.area && styles.placeholderText]}>
+								{address.area || 'Select area'}
+							</Text>
+							<IconSymbol
+								name={showAreaDropdown ? 'chevron.up' : 'chevron.down'}
+								size={16}
+								color='#666666'
+							/>
+						</Pressable>
+						{showAreaDropdown && (
+							<View style={styles.dropdownMenu}>
+								<ScrollView style={styles.dropdownScroll}>
+									{areasData?.doc?.map((area: any, index: number) => (
+										<Pressable
+											key={index}
+											style={styles.dropdownItem}
+											onPress={() => {
+												setAddress({ ...address, area: area.name });
+												setShowAreaDropdown(false);
+											}}>
+											<Text style={styles.dropdownItemText}>{area.name}</Text>
+											{address.area === area.name && (
+												<IconSymbol
+													name='checkmark'
+													size={16}
+													color={CustomColors.darkBrown}
+												/>
+											)}
+										</Pressable>
+									))}
+								</ScrollView>
+							</View>
+						)}
 					</View>
 					<View style={styles.formRow}>
 						<View style={[styles.formGroup, { flex: 1 }]}>
-							<Text style={styles.label}>City</Text>
-							<TextInput
-								style={styles.input}
-								placeholder='City'
-								value={address.city}
-								onChangeText={text => setAddress({ ...address, city: text })}
-							/>
+							<Text style={styles.label}>City *</Text>
+							<Pressable
+								style={styles.dropdownButton}
+								onPress={() => setShowCityDropdown(!showCityDropdown)}>
+								<Text style={[styles.dropdownText, !address.city && styles.placeholderText]}>
+									{address.city || 'Select city'}
+								</Text>
+								<IconSymbol
+									name={showCityDropdown ? 'chevron.up' : 'chevron.down'}
+									size={16}
+									color='#666666'
+								/>
+							</Pressable>
+							{showCityDropdown && (
+								<View style={styles.dropdownMenu}>
+									<Pressable
+										style={styles.dropdownItem}
+										onPress={() => {
+											setAddress({ ...address, city: 'Dhaka' });
+											setShowCityDropdown(false);
+										}}>
+										<Text style={styles.dropdownItemText}>Dhaka</Text>
+										{address.city === 'Dhaka' && (
+											<IconSymbol
+												name='checkmark'
+												size={16}
+												color={CustomColors.darkBrown}
+											/>
+										)}
+									</Pressable>
+								</View>
+							)}
 						</View>
 						<View style={[styles.formGroup, { flex: 1 }]}>
 							<Text style={styles.label}>Postal Code</Text>
@@ -485,6 +603,18 @@ export default function CheckoutScreen() {
 								keyboardType='number-pad'
 							/>
 						</View>
+					</View>
+					<View style={styles.formGroup}>
+						<Text style={styles.label}>Delivery Instructions (Optional)</Text>
+						<TextInput
+							style={[styles.input, styles.textarea]}
+							placeholder='E.g., Ring the bell, Call upon arrival, etc.'
+							value={address.instructions}
+							onChangeText={text => setAddress({ ...address, instructions: text })}
+							multiline
+							numberOfLines={3}
+							textAlignVertical='top'
+						/>
 					</View>
 				</View>
 
@@ -527,6 +657,50 @@ export default function CheckoutScreen() {
 					))}
 				</View>
 
+				{/* Use Points Section */}
+				{userData?.points > 0 && (
+					<View style={styles.section}>
+						<View style={styles.sectionHeader}>
+							<IconSymbol
+								name='star.fill'
+								size={24}
+								color={CustomColors.darkBrown}
+							/>
+							<Text style={styles.sectionTitle}>Use Loyalty Points</Text>
+						</View>
+						{appliedCoupon && (
+							<View style={styles.disabledMessage}>
+								<IconSymbol
+									name='info.circle.fill'
+									size={16}
+									color='#666666'
+								/>
+								<Text style={styles.disabledMessageText}>Remove coupon to use loyalty points</Text>
+							</View>
+						)}
+						<Pressable
+							style={[
+								styles.optionCard,
+								usePoints && styles.selectedOption,
+								appliedCoupon && styles.disabledOption,
+							]}
+							onPress={() => !appliedCoupon && setUsePoints(!usePoints)}
+							disabled={!!appliedCoupon}>
+							<View style={styles.radioCircle}>
+								{usePoints && <View style={styles.radioSelected} />}
+							</View>
+							<View style={styles.optionInfo}>
+								<Text style={[styles.optionTitle, appliedCoupon && styles.disabledText]}>
+									Use {Math.min(userData.points, total - couponDiscount).toLocaleString()} Points
+								</Text>
+								<Text style={[styles.optionSubtitle, appliedCoupon && styles.disabledText]}>
+									Available: {userData.points.toLocaleString()} points (1 point = ৳1)
+								</Text>
+							</View>
+						</Pressable>
+					</View>
+				)}
+
 				{/* Coupon Code Section */}
 				<View style={styles.section}>
 					<View style={styles.sectionHeader}>
@@ -537,19 +711,35 @@ export default function CheckoutScreen() {
 						/>
 						<Text style={styles.sectionTitle}>Coupon Code</Text>
 					</View>
+					{usePoints && (
+						<View style={styles.disabledMessage}>
+							<IconSymbol
+								name='circle.fill'
+								size={16}
+								color='#666666'
+							/>
+							<Text style={styles.disabledMessageText}>Disable loyalty points to use coupon</Text>
+						</View>
+					)}
 					<View style={styles.couponContainer}>
 						<TextInput
-							style={styles.couponInput}
+							style={[styles.couponInput, usePoints && styles.disabledInput]}
 							placeholder='Enter coupon code'
 							value={couponCode}
 							onChangeText={setCouponCode}
-							editable={!appliedCoupon}
+							editable={!appliedCoupon && !verifyingCoupon && !usePoints}
 						/>
 						{!appliedCoupon ? (
 							<Pressable
-								style={styles.applyCouponButton}
-								onPress={handleApplyCoupon}>
-								<Text style={styles.applyCouponText}>Apply</Text>
+								style={[
+									styles.applyCouponButton,
+									(verifyingCoupon || usePoints) && styles.applyCouponButtonDisabled,
+								]}
+								onPress={handleApplyCoupon}
+								disabled={verifyingCoupon || usePoints}>
+								<Text style={styles.applyCouponText}>
+									{verifyingCoupon ? 'Verifying...' : 'Apply'}
+								</Text>
 							</Pressable>
 						) : (
 							<Pressable
@@ -610,21 +800,21 @@ export default function CheckoutScreen() {
 					<Text style={styles.sectionTitle}>Order Summary</Text>
 					<View style={styles.summaryRow}>
 						<Text style={styles.summaryLabel}>Subtotal</Text>
-						<Text style={styles.summaryValue}>৳{subTotal.toLocaleString()}</Text>
+						<Text style={styles.summaryValue}>Tk {subTotal.toLocaleString()}</Text>
 					</View>
 					<View style={styles.summaryRow}>
 						<Text style={styles.summaryLabel}>Delivery Fee</Text>
-						<Text style={styles.summaryValue}>৳{shipping.toLocaleString()}</Text>
+						<Text style={styles.summaryValue}>Tk {shipping.toLocaleString()}</Text>
 					</View>
 					<View style={styles.summaryRow}>
 						<Text style={styles.summaryLabel}>VAT</Text>
-						<Text style={styles.summaryValue}>৳{vat.toLocaleString()}</Text>
+						<Text style={styles.summaryValue}>Tk {vat.toLocaleString()}</Text>
 					</View>
 					{discount > 0 && (
 						<View style={styles.summaryRow}>
 							<Text style={[styles.summaryLabel, { color: '#28A745' }]}>Discount</Text>
 							<Text style={[styles.summaryValue, { color: '#28A745' }]}>
-								-৳{discount.toLocaleString()}
+								-Tk {discount.toLocaleString()}
 							</Text>
 						</View>
 					)}
@@ -634,13 +824,28 @@ export default function CheckoutScreen() {
 								Coupon Discount ({appliedCoupon?.code})
 							</Text>
 							<Text style={[styles.summaryValue, { color: '#10B981' }]}>
-								-৳{couponDiscount.toLocaleString()}
+								-Tk {couponDiscount.toLocaleString()}
+							</Text>
+						</View>
+					)}
+					{usePoints && userData?.points > 0 && (
+						<View style={styles.summaryRow}>
+							<Text style={[styles.summaryLabel, { color: '#F59E0B' }]}>Points Discount</Text>
+							<Text style={[styles.summaryValue, { color: '#F59E0B' }]}>
+								-Tk {Math.min(userData.points, total - couponDiscount).toLocaleString()}
 							</Text>
 						</View>
 					)}
 					<View style={[styles.summaryRow, styles.totalRow]}>
 						<Text style={styles.totalLabel}>Total</Text>
-						<Text style={styles.totalValue}>৳{(total - couponDiscount).toLocaleString()}</Text>
+						<Text style={styles.totalValue}>
+							Tk{' '}
+							{(
+								total -
+								couponDiscount -
+								(usePoints ? Math.min(userData?.points || 0, total - couponDiscount) : 0)
+							).toLocaleString()}
+						</Text>
 					</View>
 				</View>
 
@@ -661,7 +866,7 @@ export default function CheckoutScreen() {
 			{/* Place Order Button */}
 			<View style={styles.bottomContainer}>
 				<PrimaryButton
-					title={`Place Order - ৳${(total - couponDiscount).toLocaleString()}`}
+					title={`Place Order - ৳${(total - couponDiscount - (usePoints ? Math.min(userData?.points || 0, total - couponDiscount) : 0)).toLocaleString()}`}
 					onPress={handlePlaceOrder}
 					loading={isLoading}
 					disabled={isLoading}
@@ -694,7 +899,7 @@ const styles = StyleSheet.create({
 	},
 	headerTitle: {
 		fontSize: 18,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: '#000000',
 	},
 	container: {
@@ -717,7 +922,7 @@ const styles = StyleSheet.create({
 	},
 	sectionTitle: {
 		fontSize: 18,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: '#000000',
 	},
 	optionCard: {
@@ -766,7 +971,7 @@ const styles = StyleSheet.create({
 	paymentMethodName: {
 		fontSize: 16,
 		color: '#000000',
-		fontWeight: '500',
+		fontWeight: '400',
 		flex: 1,
 	},
 	formGroup: {
@@ -831,6 +1036,9 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
+	applyCouponButtonDisabled: {
+		opacity: 0.5,
+	},
 	applyCouponText: {
 		fontSize: 16,
 		fontWeight: '600',
@@ -859,19 +1067,19 @@ const styles = StyleSheet.create({
 	},
 	totalLabel: {
 		fontSize: 18,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: '#000000',
 	},
 	totalValue: {
 		fontSize: 20,
-		fontWeight: 'bold',
-		color: CustomColors.darkBrown,
+		fontWeight: '500',
+		color: '#000',
 	},
 	bottomContainer: {
 		backgroundColor: '#FFFFFF',
 		paddingHorizontal: 16,
 		paddingTop: 10,
-		paddingBottom: 16,
+		paddingBottom: 0,
 		borderTopWidth: 1,
 		borderTopColor: '#E5E5E5',
 	},
@@ -887,12 +1095,12 @@ const styles = StyleSheet.create({
 	placeOrderText: {
 		fontSize: 18,
 		color: '#FFFFFF',
-		fontWeight: 'bold',
+		fontWeight: '500',
 	},
 	placeOrderPrice: {
 		fontSize: 18,
 		color: '#FFFFFF',
-		fontWeight: 'bold',
+		fontWeight: '500',
 	},
 	savedAddressesButton: {
 		flexDirection: 'row',
@@ -943,7 +1151,7 @@ const styles = StyleSheet.create({
 	},
 	savedAddressLabel: {
 		fontSize: 15,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: '#000000',
 	},
 	miniDefaultBadge: {
@@ -1032,5 +1240,133 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		color: CustomColors.lightGreen,
 		fontWeight: '500',
+	},
+	loadingContainer: {
+		paddingVertical: 20,
+		alignItems: 'center',
+	},
+	loadingText: {
+		fontSize: 14,
+		color: '#666666',
+	},
+	noSlotsContainer: {
+		paddingVertical: 20,
+		alignItems: 'center',
+		backgroundColor: '#FFF3CD',
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: '#FFD700',
+	},
+	noSlotsText: {
+		fontSize: 14,
+		color: '#856404',
+		fontWeight: '500',
+	},
+	labelOptions: {
+		flexDirection: 'row',
+		gap: 8,
+	},
+	labelOption: {
+		flex: 1,
+		paddingVertical: 10,
+		paddingHorizontal: 16,
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: '#E5E5E5',
+		alignItems: 'center',
+		backgroundColor: '#FFFFFF',
+	},
+	labelOptionActive: {
+		borderColor: CustomColors.darkBrown,
+		backgroundColor: CustomColors.lightBrown,
+	},
+	labelOptionText: {
+		fontSize: 14,
+		color: '#666666',
+		fontWeight: '500',
+	},
+	labelOptionTextActive: {
+		color: CustomColors.darkBrown,
+		fontWeight: '600',
+	},
+	formField: {
+		marginBottom: 16,
+	},
+	dropdownButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		borderWidth: 1,
+		borderColor: '#E5E5E5',
+		borderRadius: 8,
+		padding: 12,
+		backgroundColor: '#FFFFFF',
+	},
+	dropdownText: {
+		fontSize: 16,
+		color: '#000000',
+	},
+	placeholderText: {
+		color: '#999999',
+	},
+	dropdownMenu: {
+		position: 'absolute',
+		top: 50,
+		left: 0,
+		right: 0,
+		backgroundColor: '#FFFFFF',
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: '#E5E5E5',
+		maxHeight: 200,
+		zIndex: 1000,
+		elevation: 5,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+	},
+	dropdownScroll: {
+		maxHeight: 200,
+	},
+	dropdownItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		padding: 12,
+		borderBottomWidth: 1,
+		borderBottomColor: '#F0F0F0',
+	},
+	dropdownItemText: {
+		fontSize: 15,
+		color: '#333333',
+	},
+	textarea: {
+		height: 80,
+		paddingTop: 12,
+	},
+	disabledOption: {
+		opacity: 0.5,
+		backgroundColor: '#F5F5F5',
+	},
+	disabledText: {
+		color: '#999999',
+	},
+	disabledInput: {
+		backgroundColor: '#F5F5F5',
+	},
+	disabledMessage: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 6,
+		padding: 10,
+		backgroundColor: '#F0F0F0',
+		borderRadius: 6,
+		marginBottom: 12,
+	},
+	disabledMessageText: {
+		fontSize: 13,
+		color: '#666666',
+		fontStyle: 'italic',
 	},
 });

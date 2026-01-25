@@ -57,13 +57,12 @@ export const FeaturedCategorySection = ({ category }: { category: any }) => {
 
 const styles = StyleSheet.create({
 	section: {
-		marginBottom: 16,
-		backgroundColor: '#FFFFFF',
+		marginBottom: 0,
 		paddingVertical: 8,
 	},
 	productList: {
 		paddingHorizontal: 16,
-		gap: 12,
+		gap: 10,
 		paddingVertical: 8,
 	},
 });

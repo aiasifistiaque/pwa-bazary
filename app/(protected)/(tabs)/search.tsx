@@ -1,9 +1,13 @@
+import { HorizontalProductCard } from '@/components/HorizontalProductCard';
+import { Loader } from '@/components/Loader';
 import SearchCategorySkeleton from '@/components/skeleton/SearchCategorySkeleton';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { CustomColors } from '@/constants/theme';
 import { useGetAllQuery } from '@/store/services/commonApi';
+import { addToCart } from '@/store/slices/cartSlice';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
-	ActivityIndicator,
 	Image,
 	ScrollView,
 	StyleSheet,
@@ -12,13 +16,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { addToCart } from '@/store/slices/cartSlice';
-import { ProductCard } from '@/components/product-card';
-import { Loader } from '@/components/Loader';
-import { CustomColors } from '@/constants/theme';
 const fallbackImage = require('../../../assets/images/fallback-fruit.png');
 // Static recipes item for 'This Week'
 const recipesItem = {
@@ -56,13 +54,12 @@ export default function SearchScreen() {
 		filters: { displayInHomePage: true },
 	});
 
-	const { data: collectionsData, isLoading: isCollectionsLoading } =
-		useGetAllQuery({
-			path: '/collections',
-			sort: '-priority',
-			filters: { isFeatured: true },
-			limit: 2,
-		});
+	const { data: collectionsData, isLoading: isCollectionsLoading } = useGetAllQuery({
+		path: '/collections',
+		sort: '-priority',
+		filters: { isFeatured: true },
+		limit: 2,
+	});
 
 	// Combine dynamic collections with static recipes
 	const thisWeekItems = [
@@ -71,11 +68,8 @@ export default function SearchScreen() {
 			return {
 				id: colId,
 				name: col.name,
-				icon:
-					col.icon || COLLECTION_STYLES[index % COLLECTION_STYLES.length].icon,
-				color:
-					col.color ||
-					COLLECTION_STYLES[index % COLLECTION_STYLES.length].color,
+				icon: col.icon || COLLECTION_STYLES[index % COLLECTION_STYLES.length].icon,
+				color: col.color || COLLECTION_STYLES[index % COLLECTION_STYLES.length].color,
 				route: `/collection/${colId}`,
 			};
 		}),
@@ -84,8 +78,9 @@ export default function SearchScreen() {
 
 	const { data: searchResults, isLoading: isSearchLoading } = useGetAllQuery(
 		{
-			path: 'products',
+			path: 'products?fields=id,name,price,sellPrice,oldPrice,unit,unitPrice,badge,badgeIcon,image,unitValue',
 			search: debouncedQuery,
+			limit: 50,
 		},
 		{ skip: !debouncedQuery },
 	);
@@ -116,10 +111,16 @@ export default function SearchScreen() {
 
 	return (
 		<View style={styles.safeArea}>
-			<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+			<ScrollView
+				style={styles.container}
+				showsVerticalScrollIndicator={false}>
 				{/* Search Bar */}
 				<View style={styles.searchContainer}>
-					<IconSymbol name='magnifyingglass' size={20} color='#666' />
+					<IconSymbol
+						name='magnifyingglass'
+						size={20}
+						color='#666'
+					/>
 					<TextInput
 						style={styles.searchInput}
 						placeholder='Search for products or recipes'
@@ -129,7 +130,11 @@ export default function SearchScreen() {
 					/>
 					{searchQuery.length > 0 && (
 						<TouchableOpacity onPress={() => setSearchQuery('')}>
-							<IconSymbol name='xmark.circle.fill' size={20} color='#999' />
+							<IconSymbol
+								name='xmark.circle.fill'
+								size={20}
+								color='#999'
+							/>
 						</TouchableOpacity>
 					)}
 				</View>
@@ -137,38 +142,40 @@ export default function SearchScreen() {
 				{debouncedQuery ? (
 					// Search Results View
 					<View style={styles.section}>
-						<Text style={styles.sectionTitle}>
-							Search Results for "{debouncedQuery}"
-						</Text>
+						<Text style={styles.sectionTitle}>Search Results for "{debouncedQuery}"</Text>
 						{isSearchLoading ? (
 							<Loader />
 						) : (
 							<View style={styles.productsGrid}>
 								{searchResults?.doc?.length > 0 ? (
 									searchResults.doc.map((product: any) => (
-										<View key={product.id} style={styles.productCardWrapper}>
-											<ProductCard
+										<View
+											key={product.id}
+											style={styles.productCardWrapper}>
+											<HorizontalProductCard
 												product={product}
 												id={product.id}
 												name={product.name}
 												price={product.price}
 												unit={product.unit}
-												unitPrice={product.unitPrice}
+												unitPrice={product.unitValue}
 												badge={product.badge}
 												badgeIcon={product.badgeIcon}
 												image={product.image}
 												onPress={() => handleProductPress(product.id)}
-												onAddPress={() => handleAddPress(product)}
+												// onAddPress={() => handleAddPress(product)}
 											/>
 										</View>
 									))
 								) : (
 									<View style={styles.emptyStateContainer}>
-										<IconSymbol name='magnifyingglass' size={64} color='#ccc' />
+										<IconSymbol
+											name='magnifyingglass'
+											size={64}
+											color='#ccc'
+										/>
 										<Text style={styles.emptyStateText}>No products found</Text>
-										<Text style={styles.emptyStateSubtext}>
-											Try searching for something else
-										</Text>
+										<Text style={styles.emptyStateSubtext}>Try searching for something else</Text>
 									</View>
 								)}
 							</View>
@@ -188,13 +195,9 @@ export default function SearchScreen() {
 									: thisWeekItems.map(item => (
 											<TouchableOpacity
 												key={item.id}
-												style={[
-													styles.thisWeekCard,
-													{ backgroundColor: item.color },
-												]}
+												style={[styles.thisWeekCard, { backgroundColor: item.color }]}
 												onPress={() => router.push(item.route as any)}
-												activeOpacity={0.7}
-											>
+												activeOpacity={0.7}>
 												<Text style={styles.thisWeekIcon}>{item.icon}</Text>
 												<Text style={styles.thisWeekName}>{item.name}</Text>
 												<IconSymbol
@@ -223,8 +226,7 @@ export default function SearchScreen() {
 											key={category.id}
 											style={styles.categoryCard}
 											onPress={() => handleCategoryPress(category.id)}
-											activeOpacity={0.7}
-										>
+											activeOpacity={0.7}>
 											{category.image ? (
 												<Image
 													source={{ uri: category.image }}
@@ -237,7 +239,11 @@ export default function SearchScreen() {
 												/>
 											)}
 											<Text style={styles.categoryName}>{category.name}</Text>
-											<IconSymbol name='chevron.right' size={20} color='#333' />
+											<IconSymbol
+												name='chevron.right'
+												size={20}
+												color='#333'
+											/>
 										</TouchableOpacity>
 									))}
 								</View>
@@ -331,7 +337,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 	},
 	productCardWrapper: {
-		width: '48%',
+		width: '100%',
 		marginBottom: 12,
 	},
 	emptyStateContainer: {

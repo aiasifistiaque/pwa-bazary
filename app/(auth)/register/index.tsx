@@ -80,7 +80,7 @@ export default function RegisterScreen() {
 
 			// Use setTimeout to ensure state updates complete before navigation
 			setTimeout(() => {
-				router.replace('/');
+				router.replace('/(protected)/select-area');
 			}, 100);
 		} else if (registerResponse.isError) {
 			setDialogVisible(true);

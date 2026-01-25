@@ -11,7 +11,7 @@ export const checkoutAPi = mainApi.injectEndpoints({
 				method: 'POST',
 				body: body,
 			}),
-			invalidatesTags: ['order'],
+			invalidatesTags: ['order', 'self', 'Slots'],
 		}),
 
 		verifyCoupon: builder.mutation({

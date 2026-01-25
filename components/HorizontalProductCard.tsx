@@ -99,15 +99,12 @@ export function HorizontalProductCard({
 						numberOfLines={2}>
 						{name}
 					</Text>
-					{unit && (
-						<Text style={styles.unit}>
-							{unit} {unitPrice && `• ৳${unitPrice}`}
-						</Text>
+					{unit && unitPrice && (
+						<Text style={styles.unit}>{unitPrice && `${unitPrice} • ${unit}`}</Text>
 					)}
 				</View>
-
 				<View style={styles.bottomRow}>
-					<Text style={styles.price}>৳{price}</Text>
+					<Text style={styles.price}>Tk {price?.toLocaleString()}</Text>
 
 					{quantity > 0 ? (
 						<View style={styles.quantityControls}>
@@ -190,15 +187,15 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	name: {
-		fontSize: 15,
-		fontWeight: '600',
-		color: '#333',
-		marginBottom: 4,
+		fontSize: 14,
+		fontWeight: '400',
+		color: '#111',
+		marginBottom: 2,
 	},
 	unit: {
 		fontSize: 12,
 		color: '#666',
-		marginBottom: 4,
+		marginBottom: 0,
 	},
 	bottomRow: {
 		flexDirection: 'row',
@@ -206,14 +203,14 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 	},
 	price: {
-		fontSize: 18,
-		fontWeight: 'bold',
-		color: CustomColors.darkBrown,
+		fontSize: 16,
+		fontWeight: '500',
+		color: '#000',
 	},
 	addButton: {
-		width: 36,
-		height: 36,
-		borderRadius: 18,
+		width: 30,
+		height: 30,
+		borderRadius: 99,
 		backgroundColor: CustomColors.darkBrown,
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -224,12 +221,12 @@ const styles = StyleSheet.create({
 		gap: 8,
 		backgroundColor: CustomColors.darkBrown,
 		borderRadius: 18,
-		paddingHorizontal: 8,
-		paddingVertical: 6,
+		paddingHorizontal: 6,
+		paddingVertical: 4,
 	},
 	quantityButton: {
-		width: 24,
-		height: 24,
+		width: 22,
+		height: 22,
 		borderRadius: 12,
 		backgroundColor: 'rgba(255, 255, 255, 0.2)',
 		justifyContent: 'center',

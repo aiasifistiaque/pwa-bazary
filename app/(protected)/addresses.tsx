@@ -1,6 +1,7 @@
 import { Loader } from '@/components/Loader';
 import PrimaryButton from '@/components/buttons/PrimaryButton';
 import AddressCard from '@/components/cards/AddressCard';
+import CustomHeader from '@/components/header/CustomHeader';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { CustomColors } from '@/constants/theme';
 import { useGetSelfQuery } from '@/store/services/authApi';
@@ -12,7 +13,6 @@ import {
 } from '@/store/services/commonApi';
 import { Address } from '@/store/slices/addressSlice';
 import * as ExpoLocation from 'expo-location';
-import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
 	Alert,
@@ -37,6 +37,10 @@ export default function AddressesScreen() {
 	});
 	const addresses = (addressesData?.doc as Address[]) || [];
 
+	const { data: areaData, isLoading: isAreaLoading } = useGetAllQuery({
+		path: 'areas',
+	});
+
 	const [addAddress] = usePostMutation();
 	const [updateAddress] = useUpdateMutation();
 	const [deleteAddress] = useDeleteMutation();
@@ -45,14 +49,18 @@ export default function AddressesScreen() {
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState(false);
 	const [settingDefaultId, setSettingDefaultId] = useState<string | null>(null);
+	const [showCityDropdown, setShowCityDropdown] = useState(false);
+	const [showAreaDropdown, setShowAreaDropdown] = useState(false);
 	const [formData, setFormData] = useState<Omit<Address, 'id' | 'isDefault'>>({
 		label: '',
 		name: '',
 		phone: '',
 		street: '',
+		appartment: '',
 		area: '',
 		city: '',
 		postalCode: '',
+		instructions: '',
 	});
 
 	const handleGetCurrentLocation = async () => {
@@ -136,9 +144,11 @@ export default function AddressesScreen() {
 				name: '',
 				phone: '',
 				street: '',
+				appartment: '',
 				area: '',
 				city: '',
 				postalCode: '',
+				instructions: '',
 			});
 			setShowAddForm(false);
 		} catch (error) {
@@ -155,9 +165,11 @@ export default function AddressesScreen() {
 			name: address.name,
 			phone: address.phone,
 			street: address.street,
+			appartment: (address as any).appartment || '',
 			area: address.area,
 			city: address.city,
 			postalCode: address.postalCode,
+			instructions: (address as any).instructions || '',
 		});
 		setEditingId(address.id || (address as any)._id);
 		setShowAddForm(true);
@@ -215,19 +227,7 @@ export default function AddressesScreen() {
 				style={{ flex: 1 }}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
 				{/* Header */}
-				<View style={styles.header}>
-					<Pressable
-						onPress={() => router.back()}
-						style={styles.backButton}>
-						<IconSymbol
-							name='chevron.left'
-							size={24}
-							color='#000000'
-						/>
-					</Pressable>
-					<Text style={styles.headerTitle}>My Addresses</Text>
-					<View style={{ width: 40 }} />
-				</View>
+				<CustomHeader>My Addresses</CustomHeader>
 
 				{isLoading ? (
 					<Loader />
@@ -279,9 +279,11 @@ export default function AddressesScreen() {
 												name: '',
 												phone: '',
 												street: '',
+												appartment: '',
 												area: '',
 												city: '',
 												postalCode: '',
+												instructions: '',
 											});
 										}}>
 										<IconSymbol
@@ -293,12 +295,28 @@ export default function AddressesScreen() {
 								</View>
 
 								{/* Location Button */}
-								<PrimaryButton
-									icon='location.fill'
-									title='Use Current Location'
-									onPress={handleGetCurrentLocation}
-									style={{ marginBottom: 20 }}
-								/>
+								<Pressable
+									style={styles.locationButton}
+									onPress={handleGetCurrentLocation}>
+									<IconSymbol
+										name='location.fill'
+										size={18}
+										color='#666666'
+									/>
+									<Text style={styles.locationButtonText}>Use Current Location</Text>
+								</Pressable>
+								{/* Delivery Area Note */}
+								<View style={styles.deliveryNote}>
+									<IconSymbol
+										name='info.circle'
+										size={16}
+										color='#F59E0B'
+									/>
+									<Text style={styles.deliveryNoteText}>
+										Currently we are only delivering to specific locations. We shall be in your
+										location soon.
+									</Text>
+								</View>
 
 								{/* Form Fields */}
 								<View style={styles.formField}>
@@ -356,24 +374,91 @@ export default function AddressesScreen() {
 								</View>
 
 								<View style={styles.formField}>
-									<Text style={styles.label}>Area *</Text>
+									{' '}
+									<Text style={styles.label}>appartment, Suite, etc. (Optional)</Text>
 									<TextInput
 										style={styles.input}
-										placeholder='Area/Locality'
-										value={formData.area}
-										onChangeText={text => setFormData(prev => ({ ...prev, area: text }))}
+										placeholder='Apt, Suite, Floor, etc.'
+										value={formData.appartment}
+										onChangeText={text => setFormData(prev => ({ ...prev, appartment: text }))}
 									/>
+								</View>
+
+								<View style={styles.formField}>
+									{' '}
+									<Text style={styles.label}>Area *</Text>
+									<Pressable
+										style={styles.dropdownButton}
+										onPress={() => setShowAreaDropdown(!showAreaDropdown)}>
+										<Text style={[styles.dropdownText, !formData.area && styles.placeholderText]}>
+											{formData.area || 'Select area'}
+										</Text>
+										<IconSymbol
+											name={showAreaDropdown ? 'chevron.up' : 'chevron.down'}
+											size={16}
+											color='#666666'
+										/>
+									</Pressable>
+									{showAreaDropdown && (
+										<View style={styles.dropdownMenu}>
+											<ScrollView style={styles.dropdownScroll}>
+												{areaData?.doc?.map((area: any, index: number) => (
+													<Pressable
+														key={index}
+														style={styles.dropdownItem}
+														onPress={() => {
+															setFormData(prev => ({ ...prev, area: area.name }));
+															setShowAreaDropdown(false);
+														}}>
+														<Text style={styles.dropdownItemText}>{area.name}</Text>
+														{formData.area === area.name && (
+															<IconSymbol
+																name='checkmark'
+																size={16}
+																color={CustomColors.darkBrown}
+															/>
+														)}
+													</Pressable>
+												))}
+											</ScrollView>
+										</View>
+									)}
 								</View>
 
 								<View style={styles.formRow}>
 									<View style={[styles.formField, { flex: 1 }]}>
 										<Text style={styles.label}>City *</Text>
-										<TextInput
-											style={styles.input}
-											placeholder='City'
-											value={formData.city}
-											onChangeText={text => setFormData(prev => ({ ...prev, city: text }))}
-										/>
+										<Pressable
+											style={styles.dropdownButton}
+											onPress={() => setShowCityDropdown(!showCityDropdown)}>
+											<Text style={[styles.dropdownText, !formData.city && styles.placeholderText]}>
+												{formData.city || 'Select city'}
+											</Text>
+											<IconSymbol
+												name={showCityDropdown ? 'chevron.up' : 'chevron.down'}
+												size={16}
+												color='#666666'
+											/>
+										</Pressable>
+										{showCityDropdown && (
+											<View style={styles.dropdownMenu}>
+												<Pressable
+													style={styles.dropdownItem}
+													onPress={() => {
+														setFormData(prev => ({ ...prev, city: 'Dhaka' }));
+														setShowCityDropdown(false);
+													}}>
+													<Text style={styles.dropdownItemText}>Dhaka</Text>
+													{formData.city === 'Dhaka' && (
+														<IconSymbol
+															name='checkmark'
+															size={16}
+															color={CustomColors.darkBrown}
+														/>
+													)}
+												</Pressable>
+											</View>
+										)}
 									</View>
 
 									<View style={[styles.formField, { flex: 1 }]}>
@@ -387,7 +472,18 @@ export default function AddressesScreen() {
 										/>
 									</View>
 								</View>
-
+								<View style={styles.formField}>
+									<Text style={styles.label}>Delivery Instructions (Optional)</Text>
+									<TextInput
+										style={[styles.input, styles.textarea]}
+										placeholder='E.g., Ring the bell, Call upon arrival, etc.'
+										value={formData.instructions}
+										onChangeText={text => setFormData(prev => ({ ...prev, instructions: text }))}
+										multiline
+										numberOfLines={3}
+										textAlignVertical='top'
+									/>
+								</View>
 								<PrimaryButton
 									icon={editingId ? 'pencil' : 'checkmark'}
 									title={editingId ? 'Update Address' : 'Save Address'}
@@ -422,28 +518,36 @@ export default function AddressesScreen() {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F5F5F5',
+		backgroundColor: 'white',
 	},
 	header: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'space-between',
+		gap: 12,
 		paddingHorizontal: 16,
-		paddingVertical: 12,
+		paddingVertical: 16,
 		backgroundColor: '#FFFFFF',
 		borderBottomWidth: 1,
-		borderBottomColor: '#F0F0F0',
+		borderBottomColor: '#E5E5E5',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.05,
+		shadowRadius: 3,
+		elevation: 2,
+		zIndex: 10,
 	},
 	backButton: {
-		width: 40,
-		height: 40,
+		width: 32,
+		height: 32,
 		alignItems: 'center',
 		justifyContent: 'center',
+		marginLeft: -4,
 	},
 	headerTitle: {
-		fontSize: 18,
+		fontSize: 20,
 		fontWeight: 'bold',
 		color: '#000000',
+		flex: 1,
 	},
 	scrollView: {
 		flex: 1,
@@ -581,6 +685,41 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		color: '#000000',
 	},
+	deliveryNote: {
+		flexDirection: 'row',
+		alignItems: 'flex-start',
+		gap: 8,
+		backgroundColor: '#FEF3C7',
+		padding: 12,
+		borderRadius: 8,
+		marginBottom: 20,
+		borderWidth: 1,
+		borderColor: '#FCD34D',
+	},
+	deliveryNoteText: {
+		flex: 1,
+		fontSize: 13,
+		color: '#92400E',
+		lineHeight: 18,
+	},
+	locationButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: 8,
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		borderRadius: 8,
+		backgroundColor: '#F5F5F5',
+		borderWidth: 1,
+		borderColor: '#E5E5E5',
+		marginBottom: 12,
+	},
+	locationButtonText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: '#666666',
+	},
 	formField: {
 		marginBottom: 16,
 	},
@@ -603,14 +742,12 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		paddingHorizontal: 16,
 		borderRadius: 8,
-		// borderWidth: 1,
 		borderColor: '#E5E5E5',
 		backgroundColor: '#F5F5F5',
 		alignItems: 'center',
 	},
 	labelOptionActive: {
 		backgroundColor: CustomColors.lightBrown,
-		// borderColor: CustomColors.darkBrown,
 	},
 	labelOptionText: {
 		fontSize: 14,
@@ -629,6 +766,61 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		color: '#000000',
 		backgroundColor: '#F5F5F5',
+	},
+	textarea: {
+		minHeight: 80,
+		paddingTop: 12,
+		textAlignVertical: 'top',
+	},
+	dropdownButton: {
+		borderWidth: 1,
+		borderColor: '#E5E5E5',
+		borderRadius: 8,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		fontSize: 15,
+		backgroundColor: '#F5F5F5',
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+	dropdownText: {
+		fontSize: 15,
+		color: '#000000',
+	},
+	placeholderText: {
+		color: '#999999',
+	},
+	dropdownMenu: {
+		position: 'absolute',
+		top: 70,
+		left: 0,
+		right: 0,
+		backgroundColor: '#FFFFFF',
+		borderRadius: 8,
+		borderWidth: 1,
+		borderColor: '#E5E5E5',
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.1,
+		shadowRadius: 4,
+		elevation: 3,
+		zIndex: 1000,
+		maxHeight: 200,
+	},
+	dropdownScroll: {
+		maxHeight: 200,
+	},
+	dropdownItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+	},
+	dropdownItemText: {
+		fontSize: 15,
+		color: '#000000',
 	},
 	bottomContainer: {
 		position: 'absolute',

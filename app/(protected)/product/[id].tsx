@@ -1,4 +1,5 @@
 import { Loader } from '@/components/Loader';
+import { RelatedProducts } from '@/components/RelatedProducts';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { RootState } from '@/store';
 import { useGetByIdQuery } from '@/store/services/commonApi';
@@ -145,7 +146,11 @@ export default function ProductDetailScreen() {
 		return <Loader />;
 	}
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<View style={{ flex: 1 }}>
+			<SafeAreaView
+				style={styles.safeAreaTop}
+				edges={['top']}
+			/>
 			<View style={styles.container}>
 				{/* Fixed Header Buttons */}
 				<TouchableOpacity
@@ -216,7 +221,7 @@ export default function ProductDetailScreen() {
 							<Text style={styles.unit}>
 								{product.weight || product.unitValue || '000'} {product.unit || 'unit'}
 							</Text>
-							{product.stock !== undefined && (
+							{/* {product.stock !== undefined && (
 								<View
 									style={[
 										styles.stockBadge,
@@ -230,14 +235,17 @@ export default function ProductDetailScreen() {
 										{product.stock > 0 ? `${product.stock} items left` : 'Sold Out'}
 									</Text>
 								</View>
-							)}
+							)} */}
 						</View>
 
 						<View style={[styles.priceContainer, { flexWrap: 'wrap' }]}>
 							<Text style={styles.price}>
-								{`৳${product.isDiscount ? product.discountedPrice : product.sellPrice}`}
+								{`Tk ${product.isDiscount ? product.discountedPrice.toLocaleString() : product.sellPrice.toLocaleString()}`}
 							</Text>
-							{product.oldPrice && <Text style={styles.originalPrice}>৳{product.oldPrice}</Text>}
+							{product.oldPrice && (
+								<Text
+									style={styles.originalPrice}>{`Tk ${product.oldPrice.toLocaleString()}`}</Text>
+							)}
 							{product.isDiscount && product.discount > 0 && (
 								<View style={styles.saveBadge}>
 									<Text style={styles.saveBadgeText}>Save ৳{product.discount}</Text>
@@ -370,6 +378,14 @@ export default function ProductDetailScreen() {
 						</View>
 					</Modal>
 
+					{/* Related Products */}
+					{product.category && (
+						<RelatedProducts
+							categoryId={product.category._id || product.category.id}
+							currentProductId={product._id || product.id}
+						/>
+					)}
+
 					{/* Spacer for bottom bar */}
 					<View style={{ height: 100 }} />
 				</ScrollView>
@@ -422,17 +438,23 @@ export default function ProductDetailScreen() {
 								size={20}
 								color={CustomColors.darkBrown}
 							/>
-							<Text style={styles.addToCartText}>Add ৳{totalPrice}</Text>
+							<Text style={styles.addToCartText}>Add to Cart</Text>
 						</TouchableOpacity>
 					)}
 				</View>
 			</View>
-		</SafeAreaView>
+			<SafeAreaView
+				style={styles.safeAreaBottom}
+				edges={['bottom']}
+			/>
+		</View>
 	);
 }
 const styles = StyleSheet.create({
-	safeArea: {
-		flex: 1,
+	safeAreaTop: {
+		backgroundColor: '#e0d9ce',
+	},
+	safeAreaBottom: {
 		backgroundColor: '#FFFFFF',
 	},
 	container: {
@@ -515,8 +537,8 @@ const styles = StyleSheet.create({
 		marginBottom: 4,
 	},
 	productName: {
-		fontSize: 24,
-		fontWeight: 'bold',
+		fontSize: 22,
+		fontWeight: '400',
 		color: '#000',
 		marginBottom: 8,
 	},
@@ -531,9 +553,9 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 	},
 	price: {
-		fontSize: 28,
-		fontWeight: 'bold',
-		color: CustomColors.darkBrown,
+		fontSize: 22,
+		fontWeight: '500',
+		color: '#000',
 	},
 	originalPrice: {
 		fontSize: 18,
@@ -558,7 +580,7 @@ const styles = StyleSheet.create({
 	},
 	sectionTitle: {
 		fontSize: 18,
-		fontWeight: 'bold',
+		fontWeight: '500',
 		color: '#000',
 		marginBottom: 12,
 	},

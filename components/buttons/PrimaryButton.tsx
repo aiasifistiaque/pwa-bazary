@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
 		opacity: 0.6,
 	},
 	text: {
-		fontSize: 16,
+		fontSize: 14,
 		fontWeight: '500',
 		color: CustomColors.darkBrown,
 	},

@@ -11,25 +11,29 @@ type SubCategoryCardProps = {
 	onPress?: () => void;
 };
 
-export function SubCategoryCard({
-	id,
-	name,
-	image,
-	onPress,
-}: SubCategoryCardProps) {
+export function SubCategoryCard({ id, name, image, onPress }: SubCategoryCardProps) {
 	return (
 		<TouchableOpacity
 			style={styles.subcategoryCard}
 			onPress={onPress}
-			activeOpacity={0.7}
-		>
+			activeOpacity={0.7}>
 			{image ? (
-				<Image source={{ uri: image }} style={styles.subcategoryImage} />
+				<Image
+					source={{ uri: image }}
+					style={styles.subcategoryImage}
+				/>
 			) : (
-				<Image source={fallback} style={styles.subcategoryImage} />
+				<Image
+					source={fallback}
+					style={styles.subcategoryImage}
+				/>
 			)}
 			<Text style={styles.subcategoryName}>{name}</Text>
-			<IconSymbol name='chevron.right' size={20} color='#333' />
+			<IconSymbol
+				name='chevron.right'
+				size={20}
+				color='#333'
+			/>
 		</TouchableOpacity>
 	);
 }
@@ -38,9 +42,9 @@ const styles = StyleSheet.create({
 	subcategoryCard: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		backgroundColor: '#FAFAFA',
-		padding: 12,
-		borderRadius: 12,
+		// backgroundColor: '#FAFAFA',
+		padding: 0,
+		borderRadius: 0,
 		gap: 12,
 	},
 	subcategoryImage: {
@@ -51,7 +55,7 @@ const styles = StyleSheet.create({
 	subcategoryName: {
 		flex: 1,
 		fontSize: 16,
-		fontWeight: '600',
-		color: '#333',
+		fontWeight: '500',
+		color: '#111',
 	},
 });
